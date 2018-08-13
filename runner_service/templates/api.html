@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>ansible-runner-service API</title>
+    <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
+    <script type="text/javascript" src="{{ url_for('static', filename='utils.js') }}"></script>
+  </head>
+  <body>
+      <img src="{{ url_for('static', filename='Ansible_logo.svg')}}" class="logo" />
+      <h2>ansible-runner-service API Documentation</h2>
+      <p>The table below shows the available API endpoints with their associated
+          methods.</p>
+
+     <!-- table-layout:fixed is key to maintaining the table column sizes
+          when the details div is shown/hidden. Without it the table cell sizes
+          resize
+      -->
+      <table id="endpoints" style="table-layout:fixed;">
+        <tr>
+            <th style="width:30%;">Route</th>
+            <th style="width:10%;">Methods</th>
+            <th style="width:60%;">Descripton</th>
+        </tr>
+
+    {% for route in routes %}
+        <tr onclick="showme.call(this);" >
+          <td class="api_text">{{ route['route'] }}</td>
+          <td >
+          {% for method in route['methods'] %}
+            <span class="{{method.lower()}}">{{ method }}</span>
+          {% endfor %}
+          </td>
+          <td >
+                <div>{% autoescape False %}
+                  {{ route['description'] | replace('\n', '<br>') }}
+                  {% endautoescape %}
+              </div>
+                <div style='display:none;'>
+                    <!-- mimic a ninja 2.10+ namespace -->
+                    {% set ns = { 'console_mode': True } %}
+                    {% for detail in route['details'] %}
+                      {% if detail == "```" %}
+                        {% if ns.console_mode %}
+                          {{ "<span class='codeblock'>" | safe }}
+                          {% if ns.update({"console_mode": False}) %}{% endif %}
+                        {% else %}
+                          {{ "</span>" | safe }}
+                          {% if ns.update({"console_mode": True}) %}{% endif %}
+                        {% endif %}
+                      {% else %}
+                        {{ detail | safe }}
+                        {{ "<br>" | safe }}
+                      {% endif %}
+                    {% endfor %}
+                </div>
+
+          </td>
+
+        </tr>
+    {% endfor %}
+      </table>
+  </body>
+</html>

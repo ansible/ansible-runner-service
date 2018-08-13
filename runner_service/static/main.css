@@ -1,0 +1,99 @@
+body {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.get {
+    background-color: purple;
+    display: inline-block;
+    color: white;
+    padding: 5px;
+    font-weight: bold;
+    border-radius: 5px;
+}
+.put {
+    background-color: darkcyan;
+    display: inline-block;
+    color: white;
+    padding: 5px;
+    font-weight: bold;
+    border-radius: 5px;
+}
+.delete {
+    background-color: darkorange;
+    display: inline-block;
+    color: white;
+    padding: 5px;
+    font-weight: bold;
+    border-radius: 5px;
+}
+.post {
+    background-color: blue;
+    display: inline-block;
+    color: white;
+    padding: 5px;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+#endpoints {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+#endpoints tr:nth-child(even){background-color: #f2f2f2;}
+#endpoints th {
+    cursor: auto;
+}
+#endpoints tr:hover {
+    background-color: #ddd;
+    cursor: pointer;
+}
+
+#endpoints td {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 5px;
+    vertical-align: top;
+}
+
+#endpoints th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left:5px;
+    text-align: left;
+    background-color: steelblue;
+    color: white;
+}
+
+.logo {
+    position: absolute;
+    left:90%;
+    top:1%;
+    width: 100px;
+    height: 82px;
+
+}
+
+.codeblock {
+    background-color: darkslategray;
+    display: block;
+    color: snow;
+    padding-top:10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius:5px;
+    font-size: .9em;
+    width:95%;
+    font-family: "Lucida Console", Monaco, monospace;
+}
+
+.codeblock:hover {
+    box-shadow: 0 0 8px darkslategray;
+}
+
+.api_text {
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: .8em;
+}
