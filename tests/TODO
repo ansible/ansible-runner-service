@@ -1,0 +1,10 @@
+
+test start up call prod + dev ok, anything else fails
+
+check pre-reqs are in place
+
+is API reachable
+
+Drive each API method
+
+confirm multiple playbooks can run concurrently
