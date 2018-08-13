@@ -1,0 +1,25 @@
+[Unit]
+Description=Ansible Runner based light-weight RESTful web service
+
+Requires=network-online.target
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+LimitNOFILE=1048576
+LimitNPROC=1048576
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/bin/ansible-runner-service
+ExecReload=/usr/bin/kill -HUP $MAINPID
+PrivateDevices=yes
+ProtectHome=true
+ProtectSystem=full
+PrivateTmp=true
+Restart=on-failure
+StartLimitInterval=30min
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
