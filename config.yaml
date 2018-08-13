@@ -1,0 +1,17 @@
+---
+version: 1
+
+# playbooks_root_dir
+# location of the playbooks that the service will start
+# playbooks_root_dir: './samples'
+
+# port
+# tcp port for the service to listen to 
+# port: 5001
+#
+# ip_address
+# Specific IP address to bind to
+# ip_address: '0.0.0.0'
+
+# passwords :
+    # {"admin": "admin"}
