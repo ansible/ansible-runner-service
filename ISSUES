@@ -1,0 +1,11 @@
+1. Ansible runner redefines the logging level of the root logger, that propogates
+to this projects module loggers. As such once you run a playbook, all module logging
+disappears. Is this a bug problem when embedding ansible_runner in other solutions?
+
+WORKAROUND: Redefine the root logger's level again after the call to ansible_runner
+
+2. Security. Current the request methods are wrapped by an auth method that doesn't
+do anything. Need to decide the best approach to provide security: basic httpauth,
+httpauth + token, or all the way to oauth...maybe others?
+
+3.

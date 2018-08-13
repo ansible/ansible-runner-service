@@ -1,0 +1,26 @@
+
+Validation on content Type
+validation of uuid format
+validate playbook name format
+validate event name format
+
+Security on the Api
+- should we hold a small db (sqlite3) containing users/password/tokens/expiry date
+- cache the credentials to prevent repeated i/o to sqlite db
+- have a login api endpoint, that returns a token
+- all normal requests must use the tokens - fail basicauth
+- could support multiple users with a db, and token architecture
+- with expiring tokens the "exploit window" is reduced
+- use https as the api endpoint
+
+What to do about Hosts? (integrate with paramiko)
+- post - hostname and root password in the payload, use paramiko to establish
+                   passwordless ssh - return 200 if login successful
+- put request update a host to belong to a given groups
+
+Should all POSTs optionally expect a host= parameter to restrict the runner
+- check that the host given in in /etc/ansible/hosts first :)
+
+
+What about DoS?
+- should we record the frequency of the calls, and if too much just abort the request?
