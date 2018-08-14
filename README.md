@@ -13,8 +13,8 @@ python ansible-runner-service.py
 This is 'dev' mode - all files and paths are relative to the path that you've
 unzipped the project into.
 
-For 'prod' mode, a setup.py is provided. Once the package is installed, and
-called from /usr/bin the script will expect config and output files to be
+For 'prod' mode, a setup.py is provided. Once the package is installed and
+called from /usr/bin, the script will expect config and output files to be
 found in all normal locations (see proposed file layout below)  
 ```
 sudo python setup.py install --record installed_files --single-version-externally-managed
@@ -24,7 +24,7 @@ Once this is installed, you may start the service with
 ```
 ansible-runner-service
 ```
-Word of warning though - 'prod' mode is less tested!
+Word of warning though ... 'prod' mode is less tested!
 
 ## API Endpoints
 
@@ -37,16 +37,16 @@ You may click on any row to expand the description of the API route and show the
 **Note**: *It is not the intent of this API to validate the parameters passed to it. It is assumed that parameter selection and validation happen prior to the API call.*  
 
 ## Testing
-The only testing to date is purely functional, using a test playbook (test.yml). I fully expect to changes to support 'real' playbooks.  
+The only testing to date is purely functional, using a test playbook (test.yml). Changes will be needed to support 'real' playbooks!  
 
 ### Manual Testing
-The archive contains a simple playbook that just uses the bash sleep command, so the API can be quickly checked.  
+The archive, downloaded from github, contains a simple playbook that just uses the bash sleep command - enabling you to quickly experiment with the API.
 
 Use the steps below (dev mode), to quickly exercise the API  
 1. Get the list of available playbooks (should just be test.yml)  
 ```curl -i http://localhost:5001/api/v1/playbooks  -X GET```
 2. Run the test.yml playbook, passing the time_delay parameter (30 secs should be enough).  
-```curl -i http://localhost:5001/api/v1/playbooks/test.yml -d "time_delay=30" -X POST``  
+```curl -i http://localhost:5001/api/v1/playbooks/test.yml -d "time_delay=30" -X POST```  
 3. The previous command will return the playbooks UUID. Use this identifier to query the state or progress of the run.  
 ```curl -i http://localhost:5001/api/v1/playbooks/f39069aa-9f3d-11e8-852f-c85b7671906d -X GET```
 4. Get a list of all the events in a playbook. The return list consists of all the job event ID's
