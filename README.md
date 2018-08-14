@@ -5,6 +5,10 @@ The incentive for this is two-fold;
 - provide Ansible integration to non-python projects
 - provide a means of programmatically running playbooks where the ansible engine is running on a separate host or in a separate container
 
+## Prerequisites
+So far I've just been testing against Fedora28 - other distros may use older
+versions of packages like flask that may not work correctly.  
+
 ## Installation
 Try before you buy...simply unzip the archive and run :)
 ```
