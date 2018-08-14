@@ -1,4 +1,4 @@
-import os
+# import os
 # import logging
 from flask import Flask
 from flask_restful import Api
@@ -17,9 +17,7 @@ logger = logging.getLogger(__name__)
 
 def create_app():
 
-    cwd = os.path.dirname(__file__)
-    app = Flask("ansible_runner_service",
-                root_path=cwd)
+    app = Flask("runner_service")
 
     api = Api(app)
 
