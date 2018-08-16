@@ -68,11 +68,10 @@ body {
 
 .logo {
     position: absolute;
-    left:90%;
+    right:20px;
     top:1%;
-    width: 100px;
-    height: 82px;
-
+    width: 69px;
+    height: 85px;
 }
 
 .codeblock {

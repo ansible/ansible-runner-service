@@ -1,0 +1,30 @@
+[Unit]
+Description=Ansible Runner Rest API Service
+After=docker.service
+
+# todo
+# - add ansible hosts to the bind mounts
+# - add .ssh keys to the bind mounts
+# - selinux
+# - assumes the image is in the local image repo already
+
+[Service]
+EnvironmentFile=-/etc/environment
+ExecStartPre=-/usr/bin/docker stop runner-service
+ExecStartPre=-/usr/bin/docker rm runner-service
+ExecStart=/usr/bin/docker run --rm --net=host \
+  --memory=2g \
+  --cpu-quota=200000 \
+  -p 5001:5001/tcp \
+  -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service \
+  -v /etc/ansible-runner-service:/etc/ansible-runner-service \
+  --name=runner-service \
+  runner-service:latest
+ExecStopPost=-/usr/bin/docker stop runner-service
+Restart=always
+RestartSec=10s
+TimeoutStartSec=120
+TimeoutStopSec=15
+
+[Install]
+WantedBy=multi-user.target
