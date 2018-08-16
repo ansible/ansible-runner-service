@@ -21,8 +21,4 @@ RUN tar xvzf ansible-runner-service.tar.gz && \
     python setup.py install --record installed_files \
            --single-version-externally-managed
 
-ADD ./entrypoint.sh /entrypoint.sh
-RUN chmod u+x /entrypoint.sh
-WORKDIR /
-CMD /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/ansible-runner-service"]
