@@ -44,7 +44,7 @@ class HostMgmt(Resource):
     @log_request(logger)
     def delete(self):
         """
-        POST {host_name}
+        DELETE {host_name}
         Remove a host from ansible control
         """
         return {"message": "NOT Implemented"}, 501
