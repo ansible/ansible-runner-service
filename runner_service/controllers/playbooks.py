@@ -20,7 +20,7 @@ class ListPlaybooks(Resource):
         Example
 
         ```
-        [paul@rh460p ~]$ curl -i http://localhost:5001/api/v1/playbooks -X GET
+        [paul@rh460p ~]$ curl -k -i https://localhost:5001/api/v1/playbooks -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 48
@@ -55,7 +55,7 @@ class PlaybookState(Resource):
         Example
 
         ```
-        [paul@rh460p ~]$ curl -i http://localhost:5001/api/v1/playbooks/f39069aa-9f3d-11e8-852f-c85b7671906d -X GET
+        [paul@rh460p ~]$ curl -k -i https://localhost:5001/api/v1/playbooks/f39069aa-9f3d-11e8-852f-c85b7671906d -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 134
@@ -94,7 +94,7 @@ class StartPlaybook(Resource):
         Example
 
         ```
-        [paul@rh460p ~]$ curl -i http://localhost:5001/api/v1/playbooks/test.yml -d "time_delay=10" -X POST
+        [paul@rh460p ~]$ curl -k -i https://localhost:5001/api/v1/playbooks/test.yml -d "time_delay=10" -X POST
         HTTP/1.0 202 ACCEPTED
         Content-Type: application/json
         Content-Length: 86
