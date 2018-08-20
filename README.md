@@ -7,7 +7,10 @@ The incentive for this is two-fold;
 
 ## Prerequisites
 So far I've just been testing against Fedora28 - other distros may use older
-versions of packages like flask that may not work correctly.  
+versions of packages like flask that may not work correctly.
+
+### Package Dependencies
+- pyOpenSSL  (python2-pyOpenSSL, python3-pyOpenSSL on Fedora, CentOS pyOpenSSL)
 
 ## Installation
 Try before you buy...simply unzip the archive and run :)
@@ -32,11 +35,11 @@ Word of warning though ... 'prod' mode is less tested!
 
 ## API Endpoints
 
-Once the service is running, you can point your browser at  ```http://localhost:5001/api``` to show which endpoints are available. Each endpoint is described along with a curl example showing invocation and output.  
+Once the service is running, you can point your browser at  ```https://localhost:5001/api``` to show which endpoints are available. Each endpoint is described along with a curl example showing invocation and output.  
 
 ![API endpoints](./screenshots/ansible-runner-service-API.png)
 
-You may click on any row to expand the description of the API route and show the curl example.  
+You may click on any row to expand the description of the API route and show the curl example. The app uses a self-signed certificate, so all examples use the -k parameter (insecure mode).  
 
 **Note**: *It is not the intent of this API to validate the parameters passed to it. It is assumed that parameter selection and validation happen prior to the API call.*  
 
@@ -48,15 +51,15 @@ The archive, downloaded from github, contains a simple playbook that just uses t
 
 Use the steps below (dev mode), to quickly exercise the API  
 1. Get the list of available playbooks (should just be test.yml)  
-```curl -i http://localhost:5001/api/v1/playbooks  -X GET```
+```curl -k -i https://localhost:5001/api/v1/playbooks  -X GET```
 2. Run the test.yml playbook, passing the time_delay parameter (30 secs should be enough).  
-```curl -i http://localhost:5001/api/v1/playbooks/test.yml -d "time_delay=30" -X POST```  
+```curl -k -i https://localhost:5001/api/v1/playbooks/test.yml -d "time_delay=30" -X POST```  
 3. The previous command will return the playbooks UUID. Use this identifier to query the state or progress of the run.  
-```curl -i http://localhost:5001/api/v1/playbooks/f39069aa-9f3d-11e8-852f-c85b7671906d -X GET```
-4. Get a list of all the events in a playbook. The return list consists of all the job event ID's
-```curl -i http://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events  -X GET```
+```curl -k -i https://localhost:5001/api/v1/playbooks/f39069aa-9f3d-11e8-852f-c85b7671906d -X GET```
+4. Get a list of all the events in a playbook. The return list consists of all the job event ID's  
+```curl -k -i https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events  -X GET```
 5. To get specific output from a job event, you can query the job event  
-```curl -i http://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events/13-c85b7671-906d-e52d-d421-000000000008  -X GET```  
+```curl -k -i https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events/13-c85b7671-906d-e52d-d421-000000000008  -X GET```  
 
 Obviously you'll need to change the play and job uuids for your run :)
 
@@ -65,26 +68,28 @@ TODO
 
 ## File Layout (Proposed)
 
-/etc/ansible-runner-service  
-    logging.yaml  
-    config.yaml
+/etc/ansible-runner-service
+- logging.yaml  
+- config.yaml  
+- ansible-runner-service.crt  
+- ansible-runner-service.key  
 
 /usr/share/ansible-runner-service  
-    artifacts  
-    inventory  
-    env  
-    project  
-        test.yaml  
-    roles
+- artifacts  
+- inventory  
+- env  
+- project  
+    -  test.yaml  
+- roles
 
 /var/log/ansible-runner-service.log  
 
 /usr/share/doc/ansible-runner-service  
-    README.md  
-    LICENSE.md  
+- README.md  
+- LICENSE.md  
 
 /etc/systemd/system  
-    ansible-runner-service.service  
+- ansible-runner-service.service  
 
 /usr/bin/  
-    ansible-runner-service  
+- ansible-runner-service  
