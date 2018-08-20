@@ -36,7 +36,7 @@ class Config(object):
         self.logging_conf = Config.MODES[mode].get('logging_conf', None)
         self.log_path = Config.MODES[mode].get('log_path', None)
         self.config_file = Config.MODES[mode].get('config_file', None)
-
+        self.config_dir = os.path.dirname(self.config_file)
         self.passwords = {"admin": "admin"}
 
         self.port = 5001
