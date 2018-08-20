@@ -23,7 +23,7 @@ class ListEvents(Resource):
         Example
 
         ```
-        [paul@rh460p ~]$ curl -i http://localhost:5001/api/v1/jobs/da069894-99d7-11e8-9ffc-c85b7671906d/events  -X GET
+        [paul@rh460p ~]$ curl -k -i https://localhost:5001/api/v1/jobs/da069894-99d7-11e8-9ffc-c85b7671906d/events  -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 448
@@ -76,7 +76,7 @@ class GetEvent(Resource):
         Example
 
         ```
-        [paul@rh460p ~]$ curl -i http://localhost:5001/api/v1/jobs/da069894-99d7-11e8-9ffc-c85b7671906d/events/14-ea7d6fef-9e5a-497a-9f22-2fba98b30304  -X GET
+        [paul@rh460p ~]$ curl -k -i https://localhost:5001/api/v1/jobs/da069894-99d7-11e8-9ffc-c85b7671906d/events/14-ea7d6fef-9e5a-497a-9f22-2fba98b30304  -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 2710

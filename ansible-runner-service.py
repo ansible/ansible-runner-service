@@ -10,7 +10,7 @@ import logging
 import logging.config
 
 import runner_service.configuration as configuration
-from runner_service.utils import fread
+from runner_service.utils import fread, create_self_signed_cert
 from runner_service.app import create_app
 
 
@@ -20,6 +20,16 @@ def signal_stop(*args):
     '''
     print("Shutting ansible-runner-service down - service stopped by admin")
     sys.exit(0)
+
+
+def get_ssl():
+    """
+    Ensure the SSL files exist, so flask can run under https
+    """
+    cert_filename_pfx = os.path.splitext(os.path.basename(__file__))[0]
+
+    return create_self_signed_cert(cert_dir=configuration.settings.config_dir,
+                                   cert_pfx=cert_filename_pfx)
 
 
 def setup_logging():
@@ -66,13 +76,15 @@ def main():
 
     logging.info("Run mode is: {}".format(configuration.settings.mode))
 
+    ssl_context = get_ssl()
+
     app = create_app()
 
     # Start the API server
     app.run(host=configuration.settings.ip_address,
             port=configuration.settings.port,
             threaded=True,
-            # ssl_context=context,
+            ssl_context=ssl_context,
             debug=True,
             use_reloader=False)
 
