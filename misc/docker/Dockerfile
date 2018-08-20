@@ -4,7 +4,7 @@ FROM centos:7
 RUN yum -y install epel-release  && \
     yum -y install bash wget unzip ansible python-psutil python-wheel \
            pexpect python-daemon python2-psutil python-pip bubblewrap \
-           bzip2 python-crypto openssh openssh-clients \
+           bzip2 python-crypto pyOpenSSL openssh openssh-clients \
            python2-flask-restful PyYAML python-flask && \
     localedef -c -i en_US -f UTF-8 en_US.UTF-8 && \
     pip install --no-cache-dir ansible-runner && \
