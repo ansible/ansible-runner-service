@@ -19,46 +19,46 @@
       <table id="endpoints" style="table-layout:fixed;">
         <tr>
             <th style="width:30%;">Route</th>
-            <th style="width:10%;">Methods</th>
-            <th style="width:60%;">Descripton</th>
+            <th style="width:70%;">Descripton</th>
         </tr>
 
     {% for route in routes %}
         <tr onclick="showme.call(this);" >
           <td class="api_text">{{ route['route'] }}</td>
           <td >
-          {% for method in route['methods'] %}
-            <span class="{{method.lower()}}">{{ method }}</span>
-          {% endfor %}
-          </td>
-          <td >
-                <div>{% autoescape False %}
-                  {{ route['description'] | replace('\n', '<br>') }}
-                  {% endautoescape %}
+              <div>{% autoescape False %}
+                {{ route['description'] | replace('\n', '<br>') }}
+                {% endautoescape %}
               </div>
-                <div style='display:none;'>
-                    <!-- mimic a ninja 2.10+ namespace -->
-                    {% set ns = { 'console_mode': True } %}
-                    {% for detail in route['details'] %}
-                      {% if detail == "```" %}
-                        {% if ns.console_mode %}
-                          {{ "<span class='codeblock'>" | safe }}
-                          {% if ns.update({"console_mode": False}) %}{% endif %}
-                        {% else %}
-                          {{ "</span>" | safe }}
-                          {% if ns.update({"console_mode": True}) %}{% endif %}
-                        {% endif %}
-                      {% else %}
-                        {{ detail | safe }}
-                        {{ "<br>" | safe }}
-                      {% endif %}
-                    {% endfor %}
-                </div>
-
+              <br>
+              <div style="display:none;">
+                  {% for method in route['methods'] %}
+                      <div style="width:100px;"><span class="{{method.lower()}}" >
+                          {{ method }}</span>
+                      </div>
+                      <div style="position:relative; left:100px; top:-40px; display:inline-block">
+                          <!-- mimic a ninja 2.10+ namespace -->
+                          {% set ns = { 'console_mode': True } %}
+                          {% for detail in route['details'][method] %}
+                            {% if detail == "```" %}
+                              {% if ns.console_mode %}
+                                {{ "<span class='codeblock'>" | safe }}
+                                {% if ns.update({"console_mode": False}) %}{% endif %}
+                              {% else %}
+                                {{ "</span>" | safe }}
+                                {% if ns.update({"console_mode": True}) %}{% endif %}
+                              {% endif %}
+                            {% else %}
+                              {{ detail | safe }}
+                              {{ "<br>" | safe }}
+                            {% endif %}
+                          {% endfor %}
+                      </div>
+                  {% endfor %}
+              </div>
           </td>
-
         </tr>
-    {% endfor %}
+        {% endfor %}
       </table>
   </body>
 </html>
