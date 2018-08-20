@@ -54,7 +54,7 @@ def create_self_signed_cert(cert_dir, cert_pfx):
         cert.gmtime_adj_notAfter(3 * 365 * 24 * 60 * 60)    # 3 years
         cert.set_issuer(cert.get_subject())
         cert.set_pubkey(k)
-        cert.sign(k, 'sha1')
+        cert.sign(k, 'sha512')
 
         logger.debug("Writing crt file to {}".format(cert_filename))
         with open(os.path.join(cert_dir, cert_filename), "wt") as cert_fd:
