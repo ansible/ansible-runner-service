@@ -61,3 +61,12 @@ class HostUpdate(Resource):
         Update the groups a given host belongs to
         """
         return {"message": "NOT Implemented"}, 501
+
+    @requires_auth
+    @log_request(logger)
+    def delete(self):
+        """
+        DELETE {host_name, group_name}
+        Remove a host from a specific group
+        """
+        return {"message": "NOT Implemented"}, 501
