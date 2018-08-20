@@ -76,7 +76,7 @@ body {
 
 .codeblock {
     background-color: darkslategray;
-    display: block;
+    display: inline-block;
     color: snow;
     padding-top:10px;
     padding-bottom: 10px;

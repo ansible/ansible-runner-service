@@ -31,7 +31,7 @@
                 {% endautoescape %}
               </div>
               <br>
-              <div style="display:none;">
+              <div style="display:none;overflow:hidden;">
                   {% for method in route['methods'] %}
                       <div style="width:100px;"><span class="{{method.lower()}}" >
                           {{ method }}</span>
