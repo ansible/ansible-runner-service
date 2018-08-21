@@ -116,5 +116,7 @@ def watcher(pb_thread, pb_runner):
     """
 
     pb_thread.join()
-    logger.info("Play {} finished, status={}".format(pb_runner.config.ident,
-                                                     pb_runner.status))
+    logger.info("Playbook {}, UUID={} ended, "
+                "status={}".format(pb_runner.config.playbook,
+                                   pb_runner.config.ident,
+                                   pb_runner.status))
