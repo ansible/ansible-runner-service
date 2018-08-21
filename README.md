@@ -53,8 +53,7 @@ Use the steps below (dev mode), to quickly exercise the API
 1. Get the list of available playbooks (should just be test.yml)  
 ```curl -k -i https://localhost:5001/api/v1/playbooks  -X GET```
 2. Run the test.yml playbook, passing the time_delay parameter (30 secs should be enough).  
-```curl -k -i -H "Content-Type: application/json" --data '{"time_delay": 10}'
-https://localhost:5001/api/v1/playbooks/test.yml -X POST```  
+```curl -k -i -H "Content-Type: application/json" --data '{"time_delay": 30}' https://localhost:5001/api/v1/playbooks/test.yml -X POST```  
 3. The previous command will return the playbooks UUID. Use this identifier to query the state or progress of the run.  
 ```curl -k -i https://localhost:5001/api/v1/playbooks/f39069aa-9f3d-11e8-852f-c85b7671906d -X GET```
 4. Get a list of all the events in a playbook. The return list consists of all the job event ID's  
