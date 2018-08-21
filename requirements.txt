@@ -1,6 +1,6 @@
 flask_restful
 flask
-functools
 ansible_runner
 uuid
-yaml
+pyyaml
+pyopenssl
