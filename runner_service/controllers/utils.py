@@ -35,10 +35,15 @@ def log_request(logger):
         def wrapper(*args, **kwargs):
             """ Look at the request, and log the details """
             # logger.info("{}".format(request.url))
-            logger.info("{} - {} {}, parms={}".format(request.remote_addr,
-                                                      request.method,
-                                                      request.path,
-                                                      request.values.to_dict()))
+            logger.debug("request received, type :{}".format(request.content_type))
+            if request.content_type == 'application/json':
+                sfx = ", parms={}".format(request.get_json())
+            else:
+                sfx = ''
+            logger.info("{} - {} {}{}".format(request.remote_addr,
+                                              request.method,
+                                              request.path,
+                                              sfx))
             return f(*args, **kwargs)
         return wrapper
 

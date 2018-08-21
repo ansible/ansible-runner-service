@@ -90,11 +90,13 @@ class StartPlaybook(Resource):
     def post(self, playbook_name):
         """
         POST {playbook, var1, var2...}
-        Start a given playbook, passing a set of variables to use for the run
+        Start a given playbook, passing a set of variables as json to use for
+        the run
         Example
 
         ```
-        [paul@rh460p ~]$ curl -k -i https://localhost:5001/api/v1/playbooks/test.yml -d "time_delay=10" -X POST
+        [paul@rh460p ~]$ curl -k -i -H "Content-Type: application/json" --data '{"time_delay": 10}' \
+        https://localhost:5001/api/v1/playbooks/test.yml -X POST
         HTTP/1.0 202 ACCEPTED
         Content-Type: application/json
         Content-Length: 86
@@ -108,9 +110,12 @@ class StartPlaybook(Resource):
         ```
         """
 
-        vars = request.form.to_dict()
+        if request.content_type != 'application/json':
+            return {"message": "Bad request, endpoint expects a json request/data"}, 400
 
-        logger.info("Playbook request for {}, from {}, "
+        vars = request.get_json()
+
+        logger.info("Playbook run request for {}, from {}, "
                     "parameters: {}".format(playbook_name,
                                             request.remote_addr,
                                             vars))
@@ -120,6 +125,17 @@ class StartPlaybook(Resource):
             return {"message": "playbook file not found"}, 404
 
         play_uuid, status = start_playbook(playbook_name, vars)
+
+        msg = ("Playbook {}, UUID={} initiated :"
+               " status={}".format(playbook_name,
+                                   play_uuid,
+                                   status))
+
+        if status in ['started', 'starting', 'running', 'successful']:
+            logger.info(msg)
+        else:
+            logger.error(msg)
+
         if play_uuid:
             return {"play_uuid": play_uuid,
                     "status": status}, 202
