@@ -35,7 +35,7 @@ def log_request(logger):
         def wrapper(*args, **kwargs):
             """ Look at the request, and log the details """
             # logger.info("{}".format(request.url))
-            logger.debug("request received, type :{}".format(request.content_type))
+            logger.debug("Request received, content-type :{}".format(request.content_type))
             if request.content_type == 'application/json':
                 sfx = ", parms={}".format(request.get_json())
             else:

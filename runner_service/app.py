@@ -6,6 +6,7 @@ from flask_restful import Api
 from .controllers import (ListPlaybooks,
                           PlaybookState,
                           StartPlaybook,
+                          StartTaggedPlaybook,
                           API,
                           ListEvents,
                           GetEvent,
@@ -25,6 +26,7 @@ def create_app():
 
     api.add_resource(ListPlaybooks, "/api/v1/playbooks")
     api.add_resource(StartPlaybook, "/api/v1/playbooks/<playbook_name>")
+    api.add_resource(StartTaggedPlaybook, "/api/v1/playbooks/<playbook_name>/tags/<tags>")
     api.add_resource(PlaybookState, "/api/v1/playbooks/<play_uuid>")
 
     api.add_resource(ListEvents, "/api/v1/jobs/<play_uuid>/events")

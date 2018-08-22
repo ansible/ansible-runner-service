@@ -1,4 +1,6 @@
 import os
+import time
+import threading
 
 from socket import gethostname
 from OpenSSL import crypto
@@ -65,3 +67,34 @@ def create_self_signed_cert(cert_dir, cert_pfx):
             key_fd.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
 
         return (cert_filename, key_filename)
+
+
+class TimeOutLock(object):
+
+    cond = threading.Condition(threading.Lock())
+
+    def __init__(self, lock_object):
+        self.mutex = lock_object
+
+    def wait(self, timeout_secs):
+        with TimeOutLock.cond:
+            current_time = start_time = time.time()
+            while current_time < start_time + timeout_secs:
+                # try and acquire the lock, but don't block
+                if self.mutex.acquire(False):
+                    # got it!
+                    return True
+                else:
+                    TimeOutLock.cond.wait(timeout_secs - current_time + start_time)
+                    current_time = time.time()
+
+        # timeout hit, couldn't acquire the lock in time
+        return False
+
+    def reset(self):
+        self.mutex.release()
+        try:
+            TimeOutLock.cond.notify()
+        except RuntimeError:
+            # cond is not held by anyone
+            pass
