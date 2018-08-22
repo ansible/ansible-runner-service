@@ -1,6 +1,6 @@
 import os
 # from flask import request
-from flask_restful import Resource
+from flask_restful import Resource, request
 # import logging
 from .utils import requires_auth, log_request
 
@@ -18,8 +18,9 @@ class ListEvents(Resource):
     @log_request(logger)
     def get(self, play_uuid=None):
         """
-        GET {play_uuid}
-        Return a list of the event uuid's for the given job(play_uuid)
+        GET {play_uuid}/events
+        Return a list of the event uuid's for the given job(play_uuid). Filtering is also supported, using the
+        ?varname=value&varname=value syntax
         Example
 
         ```
@@ -46,6 +47,8 @@ class ListEvents(Resource):
 
         ```
         """
+        # TODO could the to_dict throw an exception?
+        filter = request.args.to_dict()
 
         if not play_uuid:
             return {"message": "playbook uuid missing"}, 400
@@ -55,13 +58,15 @@ class ListEvents(Resource):
         if not os.path.exists(pb_path):
             return {"message": "playbook uuid given does not exist"}, 404
 
-        response = get_events(pb_path)
+        response = get_events(pb_path, filter)
 
         if response:
             return {"play_uuid": play_uuid,
+                    "total_events": len(response),
                     "job_events": response}, 200
         else:
-            return {"message": "Unable to gather tasks for {}".format(play_uuid)}, 500
+            return {"message": "Unable to find matching events for "
+                    "{}".format(play_uuid)}, 404
 
 
 class GetEvent(Resource):
