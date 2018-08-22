@@ -11,3 +11,5 @@
       command: sleep {{ time_delay }}
     - name: Step 2
       command: sleep {{ time_delay }}
+      tags:
+        - onlyme
