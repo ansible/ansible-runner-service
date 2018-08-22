@@ -1,11 +1,19 @@
 
 from flask_restful import Resource, request     # reqparse
+import threading
+import logging
+import os
+import re
+
 from .utils import requires_auth, log_request
 from ..services.playbook import list_playbooks
 from ..services.playbook import get_status, start_playbook
 from ..services.utils import playbook_exists
-import logging
+from runner_service import configuration
+from runner_service.utils import TimeOutLock
+
 logger = logging.getLogger(__name__)
+file_mutex = threading.Lock()
 
 
 class ListPlaybooks(Resource):
@@ -82,6 +90,70 @@ class PlaybookState(Resource):
                                " not found".format(play_uuid)}, 404
 
 
+def _run_playbook(playbook_name, tags=None):
+    """
+    Run the given playbook
+    """
+
+    if request.content_type != 'application/json':
+        return {"message": "Bad request, endpoint expects a json request/data"}, 400
+
+    vars = request.get_json()
+
+    logger.info("Playbook run request for {}, from {}, "
+                "parameters: {}".format(playbook_name,
+                                        request.remote_addr,
+                                        vars))
+
+    # does the playbook exist?
+    if not playbook_exists(playbook_name):
+        return {"message": "playbook file not found"}, 404
+
+    if tags:
+        # overwrite the env/cmdline file with the required tags
+        # Using a threading.Condition based lock to provide a timeout. If the
+        # timeout is reached, we can request the caller tries again later
+        f_lock = TimeOutLock(file_mutex)
+        ready = f_lock.wait(2)
+        if ready:
+            cmd_file = os.path.join(configuration.settings.playbooks_root_dir,
+                                    "env", "cmdline")
+            logger.debug("Attempting to update {}".format(cmd_file))
+
+            try:
+                with open(cmd_file, 'w') as cmdline:
+                    cmdline.write(" --tags {}".format(tags))
+            except IOError:
+                logger.error("TAGS requested for {}, but unable to create"
+                             " env/cmdline file".format(playbook_name))
+            else:
+                logger.debug("Update of {} successful".format(cmd_file))
+        else:
+            # timeout hit acquiring the file mutex
+            return {"message": "timed out ({}secs) waiting to update "
+                               "env/cmdline, try again later"}, 503
+
+    play_uuid, status = start_playbook(playbook_name, vars)
+    if tags:
+        f_lock.reset()
+
+    msg = ("Playbook {}, UUID={} initiated :"
+           " status={}".format(playbook_name,
+                               play_uuid,
+                               status))
+
+    if status in ['started', 'starting', 'running', 'successful']:
+        logger.info(msg)
+    else:
+        logger.error(msg)
+
+    if play_uuid:
+        return {"play_uuid": play_uuid,
+                "status": status}, 202
+    else:
+        return {"message": "Runner thread failed to start"}, 500
+
+
 class StartPlaybook(Resource):
     """ Start a playbook by name, returning the play's uuid """
 
@@ -110,34 +182,49 @@ class StartPlaybook(Resource):
         ```
         """
 
-        if request.content_type != 'application/json':
-            return {"message": "Bad request, endpoint expects a json request/data"}, 400
+        response, status_code = _run_playbook(playbook_name)
 
-        vars = request.get_json()
+        return response, status_code
 
-        logger.info("Playbook run request for {}, from {}, "
-                    "parameters: {}".format(playbook_name,
-                                            request.remote_addr,
-                                            vars))
 
-        # does the playbook exist?
-        if not playbook_exists(playbook_name):
-            return {"message": "playbook file not found"}, 404
+class StartTaggedPlaybook(Resource):
+    """ Start a playbook using tags to control which tasks run """
 
-        play_uuid, status = start_playbook(playbook_name, vars)
+    @requires_auth
+    @log_request(logger)
+    def post(self, playbook_name, tags):
+        """
+        POST {playbook_name}/tags/{tags}
+        Start a given playbook using tags to control execution.
+        The call is expected to be in json format and may contain json 'payload' to define the variables
+        required by the playbook
 
-        msg = ("Playbook {}, UUID={} initiated :"
-               " status={}".format(playbook_name,
-                                   play_uuid,
-                                   status))
+        Example.
 
-        if status in ['started', 'starting', 'running', 'successful']:
-            logger.info(msg)
-        else:
-            logger.error(msg)
+        ```
+        [paul@rh460p ~] curl -k -i -H "Content-Type: application/json" --data '{"time_delay": 20}' https://localhost:5001/api/v1/playbooks/test.yml/tags/onlyme -X POST
+        HTTP/1.0 202 ACCEPTED
+        Content-Type: application/json
+        Content-Length: 86
+        Server: Werkzeug/0.12.2 Python/2.7.15
+        Date: Wed, 22 Aug 2018 00:04:35 GMT
 
-        if play_uuid:
-            return {"play_uuid": play_uuid,
-                    "status": status}, 202
-        else:
-            return {"message": "Runner thread failed to start"}, 500
+        {
+            "play_uuid": "f405051e-a59e-11e8-b1be-c85b7671906d",
+            "status": "running"
+        }
+        ```
+
+        """
+
+        if not tags:
+            return {"message": "tag based run requested, but tags are missing?"}, 400
+
+        pattern = re.compile(r'[a-z0-9]+$')
+        if not pattern.match(tags) or tags[-1] == ',':
+            return {"message": "Invalid tag syntax"}, 400
+
+        response, status_code = _run_playbook(playbook_name=playbook_name,
+                                              tags=tags)
+
+        return response, status_code
