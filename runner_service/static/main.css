@@ -3,50 +3,46 @@ body {
     padding-left: 10px;
     padding-right: 10px;
 }
+
+.button {
+    display: inline-block;
+    color: white;
+    padding: 5px;
+    margin-left:10px;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
 .get {
     background-color: purple;
-    display: inline-block;
-    color: white;
-    padding: 5px;
-    font-weight: bold;
-    border-radius: 5px;
 }
+
 .put {
     background-color: darkcyan;
-    display: inline-block;
-    color: white;
-    padding: 5px;
-    font-weight: bold;
-    border-radius: 5px;
 }
+
 .delete {
     background-color: darkorange;
-    display: inline-block;
-    color: white;
-    padding: 5px;
-    font-weight: bold;
-    border-radius: 5px;
 }
+
 .post {
     background-color: blue;
-    display: inline-block;
-    color: white;
-    padding: 5px;
-    font-weight: bold;
-    border-radius: 5px;
 }
 
 #endpoints {
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     border-collapse: collapse;
-    width: 100%;
 }
-#endpoints tr:nth-child(even){background-color: #f2f2f2;}
+
+#endpoints tr:nth-child(even){
+    background-color: #f2f2f2;
+}
+
 #endpoints th {
     cursor: auto;
 }
 #endpoints tr:hover {
-    background-color: #ddd;
+    background-color: gainsboro;
     cursor: pointer;
 }
 
@@ -76,7 +72,7 @@ body {
 
 .codeblock {
     background-color: darkslategray;
-    display: inline-block;
+    display: block;
     color: snow;
     padding-top:10px;
     padding-bottom: 10px;
@@ -84,7 +80,6 @@ body {
     padding-right: 10px;
     border-radius:5px;
     font-size: .9em;
-    width:85%;
     font-family: "Lucida Console", Monaco, monospace;
 }
 
@@ -92,7 +87,28 @@ body {
     box-shadow: 0 0 8px darkslategray;
 }
 
-.api_text {
+.api-text {
     font-family: "Lucida Console", Monaco, monospace;
     font-size: .8em;
+}
+.api-table {
+    width:98%;
+    padding-left:10px;
+}
+.api-row-container {
+    width:100%;
+    margin-right:10px;
+    height:auto;
+}
+
+.info {
+    position:relative;
+    left:10%;
+    top:-45px;
+    display:inline-block;
+    width:auto;
+}
+.method-info {
+    width:100%;
+    border-bottom: 1px solid silver;
 }
