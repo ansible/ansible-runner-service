@@ -10,8 +10,8 @@ function showme() {
         return;
     }
 
-    var td = this.getElementsByTagName("td")[1];
-    details = td.getElementsByTagName("div")[1];
+    var td = this.getElementsByTagName("td")[0];
+    details = td.getElementsByTagName("div")[0];
     details.style.display = details.style.display === 'none' ? 'inline-block' : 'none';
 
 }

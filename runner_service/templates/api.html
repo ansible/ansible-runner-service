@@ -1,51 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <title>ansible-runner-service API</title>
     <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
     <script type="text/javascript" src="{{ url_for('static', filename='utils.js') }}"></script>
-  </head>
-  <body>
-      <img src="{{ url_for('static', filename='Ansible_logo.png')}}" class="logo" />
-      <h2>ansible-runner-service API Documentation</h2>
-      <p>The table below shows the available API endpoints with their associated
-          methods.</p>
+</head>
+<body>
+    <img src="{{ url_for('static', filename='Ansible_logo.png')}}" class="logo" />
+    <h2>ansible-runner-service API Documentation</h2>
+    <br>
+    <p>The table below shows the available API endpoints with their associated
+    methods. Clicking on an endpoint row, expands the row to show related methods,
+    parameters and, where appropriate, provide examples.</p>
 
-     <!-- table-layout:fixed is key to maintaining the table column sizes
-          when the details div is shown/hidden. Without it the table cell sizes
-          resize
-      -->
-      <table id="endpoints" style="table-layout:fixed;">
-        <tr>
-            <th style="width:30%;">Route</th>
-            <th style="width:70%;">Descripton</th>
+    <table id="endpoints" class="api-table">
+        <tr style="width:100%;">
+              <th style="width:30%;text-align:left;">API Route</th>
+              <th style="width:auto;text-align:left;">Description</th>
         </tr>
 
-    {% for route in routes %}
+        {% for route in routes %}
         <tr onclick="showme.call(this);" >
-          <td class="api_text">{{ route['route'] }}</td>
-          <td >
-              <div>{% autoescape False %}
-                {{ route['description'] | replace('\n', '<br>') }}
-                {% endautoescape %}
-              </div>
-              <br>
-              <div style="display:none;overflow:hidden;width:100%;">
+          <td colspan="2" style="padding-right:10px;">
+              <span  class="api-text" style="width:30%;display:inline-block;">{{ route['route'] }}</span>
+              <span style="width:auto;display:inline-block;">
+                  {% autoescape False %}
+                  {{ route['description'] | replace('\n', '<br>') }}
+                  {% endautoescape %}
+              </span>
+              <div class="api-row-container" style="display:none;">
                   {% for method in route['methods'] %}
-                      <div style="width:100px;"><span class="{{method.lower()}}" >
-                          {{ method }}</span>
+                  <div class="method-info">
+                      <div style="position:relative; width:10%;display:inline-block;">
+                          <br>
+                          <span class="button {{method.lower()}}">{{ method }}</span>
                       </div>
-                      <div style="position:relative; left:100px; top:-40px; display:inline-block">
+                      <div class="info" style="width:90%; ">
                           <!-- mimic a ninja 2.10+ namespace -->
                           {% set ns = { 'console_mode': True } %}
                           {% for detail in route['details'][method] %}
                             {% if detail == "```" %}
                               {% if ns.console_mode %}
-                                {{ "<span class='codeblock'>" | safe }}
+                                {{ "<div class='codeblock'>" | safe }}
                                 {% if ns.update({"console_mode": False}) %}{% endif %}
                               {% else %}
-                                {{ "</span>" | safe }}
+                                {{ "</div>" | safe }}
                                 {% if ns.update({"console_mode": True}) %}{% endif %}
                               {% endif %}
                             {% else %}
@@ -54,11 +54,12 @@
                             {% endif %}
                           {% endfor %}
                       </div>
+                  </div>
                   {% endfor %}
               </div>
           </td>
         </tr>
         {% endfor %}
-      </table>
-  </body>
+    </table>
+</body>
 </html>
