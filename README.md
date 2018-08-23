@@ -37,7 +37,7 @@ Word of warning though ... 'prod' mode is less tested!
 
 Once the service is running, you can point your browser at  ```https://localhost:5001/api``` to show which endpoints are available. Each endpoint is described along with a curl example showing invocation and output.  
 
-![API endpoints](./screenshots/ansible-runner-service-API.png)
+![API endpoints](./screenshots/runner-service-api.gif)
 
 You may click on any row to expand the description of the API route and show the curl example. The app uses a self-signed certificate, so all examples use the -k parameter (insecure mode).  
 
