@@ -3,7 +3,6 @@ import os
 import glob
 import json
 import uuid
-import threading
 import time
 
 from ansible_runner import run_async
@@ -57,6 +56,21 @@ def stop_playbook(play_uuid):
     return
 
 
+def playbook_finished(runner):
+    """ Report on playbook end state
+
+    This function is called at the end of the invoked playbook to perform
+    any tidy or or reporting tasks
+
+    :param runner:  instance of ansible_runner.Runner for the playbook that has
+                    just completed
+    """
+    logger.info("Playbook {}, UUID={} ended, "
+                "status={}".format(runner.config.playbook,
+                                   runner.config.ident,
+                                   runner.status))
+
+
 def start_playbook(playbook_name, vars):
     """ Initiate a playbook run """
 
@@ -69,6 +83,7 @@ def start_playbook(playbook_name, vars):
     if vars:
         _thread, _runner = run_async(private_data_dir=configuration.settings.playbooks_root_dir,
                                      settings=settings,
+                                     finished_callback=playbook_finished,
                                      # envvars=envvars,
                                      quiet=False,
                                      ident=play_uuid,
@@ -78,6 +93,7 @@ def start_playbook(playbook_name, vars):
     else:
         _thread, _runner = run_async(private_data_dir=configuration.settings.playbooks_root_dir,
                                      settings=settings,
+                                     finished_callback=playbook_finished,
                                      # envvars=envvars,
                                      quiet=False,
                                      ident=play_uuid,
@@ -99,24 +115,4 @@ def start_playbook(playbook_name, vars):
         if ctr > timeout:
             return play_uuid, "timeout"
 
-    # Start a watcher, so the termination of the playbook can be recorded in
-    # the log file
-    _t = threading.Thread(target=watcher, args=(_thread, _runner))
-    _t.daemon = True
-    _t.name = "watcher"
-    _t.start()
-
     return play_uuid, _runner.status
-
-
-def watcher(pb_thread, pb_runner):
-    """
-    Use a watcher thread to wait for a given playbook execution thread to
-    terminate
-    """
-
-    pb_thread.join()
-    logger.info("Playbook {}, UUID={} ended, "
-                "status={}".format(pb_runner.config.playbook,
-                                   pb_runner.config.ident,
-                                   pb_runner.status))
