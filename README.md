@@ -11,6 +11,7 @@ versions of packages like flask that may not work correctly.
 
 ### Package Dependencies
 - pyOpenSSL  (python2-pyOpenSSL, python3-pyOpenSSL on Fedora, CentOS pyOpenSSL)
+- ansible_runner 1.0.5 or above
 
 ## Installation
 Try before you buy...simply unzip the archive and run :)
