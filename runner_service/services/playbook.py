@@ -87,10 +87,10 @@ def start_playbook(playbook_name, vars):
         # envvars=envvars,
         "quiet": False,
         "ident": play_uuid,
-        "extravars": vars,
         # inventory='localhost',
         "playbook": playbook_name
     }
+
     if vars:
         parms['extravars'] = vars
 
