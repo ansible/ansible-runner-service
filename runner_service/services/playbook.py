@@ -80,25 +80,21 @@ def start_playbook(playbook_name, vars):
 
     # this should just be run_async, using 'run' hangs the root logger output
     # even when backgrounded
+    parms = {
+        "private_data_dir": configuration.settings.playbooks_root_dir,
+        "settings": settings,
+        "finished_callback": playbook_finished,
+        # envvars=envvars,
+        "quiet": False,
+        "ident": play_uuid,
+        "extravars": vars,
+        # inventory='localhost',
+        "playbook": playbook_name
+    }
     if vars:
-        _thread, _runner = run_async(private_data_dir=configuration.settings.playbooks_root_dir,
-                                     settings=settings,
-                                     finished_callback=playbook_finished,
-                                     # envvars=envvars,
-                                     quiet=False,
-                                     ident=play_uuid,
-                                     extravars=vars,
-                                     # inventory='localhost',
-                                     playbook=playbook_name)
-    else:
-        _thread, _runner = run_async(private_data_dir=configuration.settings.playbooks_root_dir,
-                                     settings=settings,
-                                     finished_callback=playbook_finished,
-                                     # envvars=envvars,
-                                     quiet=False,
-                                     ident=play_uuid,
-                                     # inventory='localhost',
-                                     playbook=playbook_name)
+        parms['extravars'] = vars
+
+    _thread, _runner = run_async(**parms)
 
     # Workaround for ansible_runner logging, resetting the rootlogger level
     root_logger = logging.getLogger()
@@ -114,5 +110,8 @@ def start_playbook(playbook_name, vars):
         ctr += 1
         if ctr > timeout:
             return play_uuid, "timeout"
+
+    logger.debug("Playbook {} started in {}s".format(play_uuid,
+                                                     ctr * delay))
 
     return play_uuid, _runner.status
