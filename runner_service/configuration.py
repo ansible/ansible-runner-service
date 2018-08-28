@@ -39,6 +39,9 @@ class Config(object):
         self.config_dir = os.path.dirname(self.config_file)
         self.passwords = {"admin": "admin"}
 
+        # event_threads controls how many event files are scanned concurrently
+        self.event_threads = 10
+        
         self.port = 5001
         self.ip_address = '0.0.0.0'
         self.loglevel = logging.DEBUG
