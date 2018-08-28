@@ -1,5 +1,6 @@
 import os
 import time
+import shutil
 import threading
 
 from socket import gethostname
@@ -98,3 +99,12 @@ class TimeOutLock(object):
         except RuntimeError:
             # cond is not held by anyone
             pass
+
+
+def rm_r(path):
+    if not os.path.exists(path):
+        return
+    if os.path.isfile(path) or os.path.islink(path):
+        os.unlink(path)
+    else:
+        shutil.rmtree(path)
