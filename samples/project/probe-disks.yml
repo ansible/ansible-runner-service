@@ -1,0 +1,69 @@
+---
+#
+# Playbook to scan a set of hosts and return a dict indexed by host containing
+# a list of disks that are unused. Each disk is represented by a dict with the
+# following fields;
+#
+# size_txt (str) e.g 10.0GB
+# size_bytes (int) e.g. 21474836480
+# sectorsize (int) e.g. 512
+# sectors (int) e.g 41943040
+#
+# example output;
+# ok: [con-1 -> 127.0.0.1] => {
+#    "free_disks": {
+#        "con-1": {
+#            "vdd": {
+#                "rotational": true,
+#                "sectors": 41943040,
+#                "sectorsize": 512,
+#                "size_bytes": 21474836480,
+#                "size_txt": "20.00 GB"
+#            }
+#        },
+
+- name: probe hosts for free disks
+  hosts:
+    - osds
+  vars:
+    free_disks: |
+      {%- set disk_table = dict() %}
+      {%- for host in play_hosts %}
+        {%- set _x = disk_table.__setitem__(host, {}) %}
+        {%- set _devdata = dict() %}
+        {%- for disk in hostvars[host].host_disk %}
+            {%- set _meta = hostvars[host]['ansible_devices'][disk] %}
+            {%- set _x = _devdata.__setitem__(disk, dict(size_txt=_meta['size'],
+                                                         rotational=_meta['rotational']|bool,
+                                                         sectors=_meta['sectors']|int,
+                                                         sectorsize=_meta['sectorsize']|int,
+                                                         size_bytes=_meta['sectors']|int * _meta['sectorsize']|int)) %}
+        {%- endfor %}
+        {%- set _x = disk_table.__setitem__(host, _devdata) %}
+      {%- endfor %}
+      {{ disk_table }}
+
+  gather_facts: true
+  tasks:
+    - name: setup
+      set_fact:
+          host_disk: []
+    - name: Get a list of block devices (excludes loop and child devices)
+      command: lsblk -n --o NAME --nodeps --exclude 7
+      register: lsblk_out
+    - name: check if disk is free
+      command: pvcreate --test /dev/{{ item }}
+      ignore_errors: true
+      register: pv_status
+      with_items: "{{lsblk_out.stdout_lines}}"
+    - name: Update hosts freedisk list
+      set_fact:
+        host_disk: "{{host_disk + [item.item]}}"
+      ignore_errors: true
+      when: item.rc == 0
+      with_items: "{{ pv_status.results}}"
+    - name: RESULTS
+      debug:
+        var: free_disks
+      delegate_to: 127.0.0.1
+      run_once: True
