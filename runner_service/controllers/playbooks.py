@@ -95,10 +95,14 @@ def _run_playbook(playbook_name, tags=None):
     Run the given playbook
     """
 
+    # TODO We should use a list like this to restrict the query we support
+    valid_filter = ['limit']
+
     if request.content_type != 'application/json':
         return {"message": "Bad request, endpoint expects a json request/data"}, 400
 
     vars = request.get_json()
+    filter = request.args.to_dict()
 
     logger.info("Playbook run request for {}, from {}, "
                 "parameters: {}".format(playbook_name,
@@ -133,7 +137,7 @@ def _run_playbook(playbook_name, tags=None):
             return {"message": "timed out ({}secs) waiting to update "
                                "env/cmdline, try again later"}, 503
 
-    play_uuid, status = start_playbook(playbook_name, vars)
+    play_uuid, status = start_playbook(playbook_name, vars, filter)
     if tags:
         f_lock.reset()
 
