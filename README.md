@@ -10,7 +10,8 @@ So far I've just been testing against Fedora28 - other distros may use older
 versions of packages like flask that may not work correctly.
 
 ### Package Dependencies
-- pyOpenSSL  (python2-pyOpenSSL, python3-pyOpenSSL on Fedora, CentOS pyOpenSSL)
+- Python 3.5 or above
+- pyOpenSSL  (python3-pyOpenSSL on Fedora, CentOS pyOpenSSL)
 - ansible_runner 1.0.5 or above
 
 ## Installation
