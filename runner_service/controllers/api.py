@@ -34,13 +34,6 @@ class API(Resource):
                                        for _d in func.__doc__.split('\n')]
                         details[func.__name__.upper()] = doc_as_list
 
-                    if func.func_closure:
-                        # this indicates the function is wrapped
-                        # could be used to indicate auth?
-                        pass
-
-                # details = [_d.lstrip() for _d in details_str.split('\n')]
-
                 routes.append(
                     {"route": rule.rule,
                      "description": doc_string,
