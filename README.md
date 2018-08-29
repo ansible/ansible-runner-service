@@ -17,7 +17,7 @@ versions of packages like flask that may not work correctly.
 ## Installation
 Try before you buy...simply unzip the archive and run :)
 ```
-python ansible-runner-service.py
+python3 ansible-runner-service.py
 ```
 This is 'dev' mode - all files and paths are relative to the path that you've
 unzipped the project into.
@@ -26,7 +26,7 @@ For 'prod' mode, a setup.py is provided. Once the package is installed and
 called from /usr/bin, the script will expect config and output files to be
 found in all normal locations (see proposed file layout below)  
 ```
-sudo python setup.py install --record installed_files --single-version-externally-managed
+sudo python3 setup.py install --record installed_files --single-version-externally-managed
 ```
 
 Once this is installed, you may start the service with
