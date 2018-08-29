@@ -6,6 +6,8 @@ import threading
 from socket import gethostname
 from OpenSSL import crypto
 
+from runner_service import configuration
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -38,7 +40,8 @@ def create_self_signed_cert(cert_dir, cert_pfx):
         return (cert_filename, key_filename)
     else:
         logger.info("Existing SSL files not found in {}".format(cert_dir))
-        logger.info("Self-signed cert will be created")
+        logger.info("Self-signed cert will be created - expiring in {} "
+                    "years".format(configuration.settings.cert_expiration))
 
         # create a key pair
         k = crypto.PKey()
@@ -54,18 +57,21 @@ def create_self_signed_cert(cert_dir, cert_pfx):
         cert.get_subject().CN = gethostname()
         cert.set_serial_number(1000)
         cert.gmtime_adj_notBefore(0)
-        cert.gmtime_adj_notAfter(3 * 365 * 24 * 60 * 60)    # 3 years
+
+        # define cert expiration period(years)
+        cert.gmtime_adj_notAfter(configuration.settings.cert_expiration * 365 * 24 * 60 * 60)
+
         cert.set_issuer(cert.get_subject())
         cert.set_pubkey(k)
         cert.sign(k, 'sha512')
 
         logger.debug("Writing crt file to {}".format(cert_filename))
         with open(os.path.join(cert_dir, cert_filename), "wt") as cert_fd:
-            cert_fd.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+            cert_fd.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode('utf-8'))
 
         logger.debug("Writing key file to {}".format(key_filename))
         with open(os.path.join(cert_dir, key_filename), "wt") as key_fd:
-            key_fd.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
+            key_fd.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode('utf-8'))
 
         return (cert_filename, key_filename)
 
