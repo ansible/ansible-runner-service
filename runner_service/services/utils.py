@@ -1,5 +1,7 @@
 import os
+import glob
 import runner_service.configuration as configuration
+from runner_service.utils import rm_r
 
 
 def fread(file_path):
@@ -19,3 +21,8 @@ def build_pb_path(play_uuid):
     return os.path.join(configuration.settings.playbooks_root_dir,
                         "artifacts",
                         play_uuid)
+
+
+def cleanup_dir(dir_name):
+    for _path_name in glob.glob("{}/*".format(dir_name)):
+        rm_r(_path_name)

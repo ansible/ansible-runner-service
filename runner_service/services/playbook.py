@@ -7,7 +7,9 @@ import time
 
 from ansible_runner import run_async
 from runner_service import configuration
-from .utils import fread
+from .utils import fread, cleanup_dir
+
+from .jobs import event_cache
 
 import logging
 logger = logging.getLogger(__name__)
@@ -56,7 +58,7 @@ def stop_playbook(play_uuid):
     return
 
 
-def playbook_finished(runner):
+def cb_playbook_finished(runner):
     """ Report on playbook end state
 
     This function is called at the end of the invoked playbook to perform
@@ -69,30 +71,52 @@ def playbook_finished(runner):
                 "status={}".format(runner.config.playbook,
                                    runner.config.ident,
                                    runner.status))
+    logger.info("Playbook {} Stats: {}".format(runner.config.playbook,
+                                               runner.stats))
 
 
-def start_playbook(playbook_name, vars):
+# Placeholder for populating the event_cache
+def cb_event_handler(event_data):
+    return True
+
+
+def start_playbook(playbook_name, vars=None, filter=None):
     """ Initiate a playbook run """
 
     play_uuid = str(uuid.uuid1())
 
     settings = {"suppress_ansible_output": True}
+    local_modules = os.path.join(configuration.settings.playbooks_root_dir,
+                                 "library")
 
     # this should just be run_async, using 'run' hangs the root logger output
     # even when backgrounded
     parms = {
         "private_data_dir": configuration.settings.playbooks_root_dir,
         "settings": settings,
-        "finished_callback": playbook_finished,
-        # envvars=envvars,
+        "finished_callback": cb_playbook_finished,
+        "event_handler": cb_event_handler,
         "quiet": False,
         "ident": play_uuid,
         # inventory='localhost',
         "playbook": playbook_name
     }
 
+    if os.path.exists(local_modules):
+        parms["envvars"] = {
+            "ANSIBLE_LIBRARY": local_modules
+        }
+
     if vars:
         parms['extravars'] = vars
+
+    limit_hosts = filter.get('limit', None)
+    if limit_hosts:
+        parms['limit'] = limit_hosts
+
+    logger.debug("clearing up old env directory")
+    cleanup_dir(os.path.join(configuration.settings.playbooks_root_dir,
+                             "env"))
 
     _thread, _runner = run_async(**parms)
 
