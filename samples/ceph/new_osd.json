@@ -1,0 +1,19 @@
+{
+    "cluster": "ceph",
+    "ceph_origin": "repository",
+    "ceph_repository": "community",
+    "ceph_stable_release": "luminous",
+    "fetch_directory": "/home/paul/git/ansible-runner-service/samples/project/app-data",
+    "containerized_deployment": true,
+    "ceph_docker_version": "12.2",
+    "monitor_interface": "eth0",
+    "public_network": "10.90.90.0/24",
+    "cluster_network": "10.90.90.0/24",
+    "cephx": true,
+    "osd_objectstore": "filestore",
+    "devices": [
+        "/dev/vdd"
+    ],
+    "dmcrypt": false,
+    "osd_scenario": "collocated"
+}
