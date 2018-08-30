@@ -90,8 +90,11 @@ def event_summary(event_info, summary_keys=['host', 'task', 'event']):
         event_data = {k: event_info['event_data'][k] for k in summary_keys
                       if k in event_info.get('event_data')}
 
-        # python3 idiom
-        return {**base, **event_data}
+        # python3.5 an above idiom
+        # return {**base, **event_data}
+        merged = base.copy()
+        merged.update(event_data)
+        return merged
     else:
         return event_info
 
