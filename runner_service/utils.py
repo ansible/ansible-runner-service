@@ -2,10 +2,15 @@ import os
 import yaml
 import time
 import shutil
+import socket
 import threading
 
-from socket import gethostname
 from OpenSSL import crypto
+from paramiko.rsakey import RSAKey
+from paramiko import SSHClient, AutoAddPolicy
+from paramiko.ssh_exception import (AuthenticationException,
+                                    NoValidConnectionsError,
+                                    SSHException)
 
 from runner_service import configuration
 
@@ -66,7 +71,7 @@ def create_self_signed_cert(cert_dir, cert_pfx):
         cert.get_subject().L = "Raliegh"
         cert.get_subject().O = "Red Hat"
         cert.get_subject().OU = "Ansible"
-        cert.get_subject().CN = gethostname()
+        cert.get_subject().CN = socket.gethostname()
         cert.set_serial_number(1000)
         cert.gmtime_adj_notBefore(0)
 
@@ -274,3 +279,79 @@ class AnsibleInventory(object):
             logger.debug("Host removal attempted against the empty "
                          "group '{}'".format(group))
             raise InventoryGroupEmpty("Group is empty")
+
+
+def ssh_create_key(ssh_dir):
+
+    key = RSAKey.generate(4096)
+    pub_file = os.path.join(ssh_dir, 'ssh_key_pub')
+    prv_file = os.path.join(ssh_dir, 'ssh_key')
+    comment_str = '{}@ansible-runner-service'.format(os.getlogin())
+
+    # Setup the public key file
+    try:
+        with open(pub_file, "w", 0) as pub:
+            pub.write("ssh-rsa {} {}\n".format(key.get_base64(),
+                                               comment_str))
+    except IOError:
+        print("Unable to write to {}".format(pub_file))
+        return
+    except SSHException:
+        print("generated key is invalid")
+        return
+    else:
+        os.chmod(pub_file, 600)
+
+    # setup the private key file
+    try:
+        with open(prv_file, "w", 0) as prv:
+            key.write_private_key(prv)
+    except IOError:
+        print("Unable to write to {}".format(prv_file))
+        return
+    except SSHException:
+        print("generated key is invalid")
+        return
+    else:
+        os.chmod(prv_file, 600)
+
+
+def ssh_connect_ok(host, user=None):
+    client = SSHClient()
+    client.set_missing_host_key_policy(AutoAddPolicy())
+
+    if not user:
+        user = os.getlogin()
+
+    priv_key = os.path.join(configuration.settings.playbooks_root_dir,
+                            "env/ssh_key")
+
+    conn_args = {
+        "hostname": host,
+        "username": user,
+        "timeout": configuration.settings.ssh_timeout,
+        "key_filename": [priv_key]
+    }
+
+    try:
+        client.connect(**conn_args)
+
+    except socket.timeout:
+        logger.error("SSH timeout waiting for response")
+        return False
+
+    except (AuthenticationException, SSHException):
+        logger.error("SSH auth error - passwordless ssh not configured")
+        return False
+
+    except NoValidConnectionsError:
+        logger.error("SSH target uncontactable, host offline, port 22 blocked?")
+        return False
+
+    except socket.gaierror:
+        logger.error("SSH error: hostname not found, not in DNS or /etc/hosts?")
+        return False
+
+    else:
+        logger.info("SSH connection check to {} successful".format(host))
+        return True
