@@ -10,7 +10,10 @@ import logging
 import logging.config
 
 import runner_service.configuration as configuration
-from runner_service.utils import fread, create_self_signed_cert
+from runner_service.utils import (fread,
+                                  create_self_signed_cert,
+                                  ssh_create_key,
+                                  RunnerServiceError)
 from runner_service.app import create_app
 
 
@@ -70,11 +73,41 @@ def get_mode():
         return 'dev'
 
 
+def setup_ssh():
+
+    env_dir = os.path.join(configuration.settings.playbooks_root_dir,
+                           "env")
+    ssh_files = [os.path.join(env_dir, 'ssh_key'),
+                 os.path.join(env_dir, 'ssh_key_pub')
+                 ]
+    ssh_states = [os.path.exists(_f) for _f in ssh_files]
+
+    if all([not state for state in ssh_states]):
+        logging.debug("No SSH keys present in {}".format(env_dir))
+        logging.info("Creating SSH keys")
+        # no keys are setup, so create them
+        try:
+            ssh_create_key(env_dir)
+        except RunnerServiceError:
+            logging.critical("Unable to create SSH Keys - service aborted")
+            sys.exit(12)
+        else:
+            return
+
+    elif any(ssh_states):
+        # one of the files exists without the other - admin intervention req'd
+        logging.critical("The existing pub/priv key pair is incomplete (one"
+                         " exists without the other. Service aborting")
+        sys.exit(12)
+
+
 def main():
 
     setup_logging()
 
     logging.info("Run mode is: {}".format(configuration.settings.mode))
+
+    setup_ssh()
 
     ssl_context = get_ssl()
 
