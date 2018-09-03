@@ -290,30 +290,35 @@ def ssh_create_key(ssh_dir):
 
     # Setup the public key file
     try:
-        with open(pub_file, "w", 0) as pub:
+        with open(pub_file, "w") as pub:
             pub.write("ssh-rsa {} {}\n".format(key.get_base64(),
                                                comment_str))
     except IOError:
-        print("Unable to write to {}".format(pub_file))
-        return
+        logger.error("SSH setup unable to write to '{}'".format(pub_file))
+        raise RunnerServiceError("Unable to create SSH public key")
     except SSHException:
-        print("generated key is invalid")
-        return
+        logger.critical("SSH key generation failed")
+        raise RunnerServiceError("SSH 'pub' key generation failed")
     else:
-        os.chmod(pub_file, 600)
+        # python3 syntax
+        os.chmod(pub_file, 0o600)
+        logger.debug("Created SSH public key @ '{}'".format(pub_file))
 
     # setup the private key file
     try:
-        with open(prv_file, "w", 0) as prv:
+        with open(prv_file, "w") as prv:
             key.write_private_key(prv)
     except IOError:
-        print("Unable to write to {}".format(prv_file))
-        return
+        logger.error("SSH unable to write to '{}'".format(prv_file))
+        raise RunnerServiceError("Unable to create SSH private key file")
     except SSHException:
-        print("generated key is invalid")
+        logger.critical("SSH key generation failed")
+        raise RunnerServiceError("SSH 'priv' key generation failed")
         return
     else:
-        os.chmod(prv_file, 600)
+        # python3 syntax
+        os.chmod(prv_file, 0o600)
+        logger.debug("Created SSH private key @ '{}'".format(prv_file))
 
 
 def ssh_connect_ok(host, user=None):
