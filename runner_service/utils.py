@@ -156,7 +156,7 @@ class InventoryWriteError(Exception):
 def no_group(func):
     def func_wrapper(*args):
         obj, group = args
-        if group in obj.sections:
+        if group in obj.groups:
             logger.debug("Group add request for '{}' failed - it already "
                          "exists".format(group))
             raise InventoryGroupExists("Group {} already exists".format(group))
@@ -168,7 +168,7 @@ def no_group(func):
 def group_exists(func):
     def func_wrapper(*args):
         obj, group, *rest = args
-        if group not in obj.sections:
+        if group not in obj.groups:
             logger.debug("Group request for '{}' failed - it's not in "
                          "the inventory".format(group))
             raise InventoryGroupMissing("{} not found in the Inventory".format(group))
@@ -214,7 +214,7 @@ class AnsibleInventory(object):
     def _dump(self):
         return yaml.dump(self.inventory, default_flow_style=False)
 
-    def write(self):
+    def save(self):
         with open(self.filename, 'w') as fd:
             fd.write(self._dump())
 
@@ -222,7 +222,18 @@ class AnsibleInventory(object):
         return self._dump()
 
     @property
-    def sections(self):
+    def hosts(self):
+        _host_list = list()
+        for group_name in self.groups:
+            try:
+                _host_list.extend(list(self.inventory['all']['children'][group_name]['hosts']))
+            except (AttributeError, TypeError):
+                # group is empty
+                pass
+        return _host_list
+
+    @property
+    def groups(self):
         try:
             return list(self.inventory['all']['children'].keys())
         except (AttributeError, TypeError):
@@ -279,6 +290,14 @@ class AnsibleInventory(object):
             logger.debug("Host removal attempted against the empty "
                          "group '{}'".format(group))
             raise InventoryGroupEmpty("Group is empty")
+
+    def host_show(self, host):
+        host_groups = list()
+        for group in self.groups:
+            if host in self.group_show(group):
+                host_groups.append(group)
+
+        return host_groups
 
 
 def ssh_create_key(ssh_dir):
