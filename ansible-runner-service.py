@@ -82,7 +82,10 @@ def setup_ssh():
                  ]
     ssh_states = [os.path.exists(_f) for _f in ssh_files]
 
-    if all([not state for state in ssh_states]):
+    if all(ssh_states):
+        logging.info("SSH keys present in {}".format(env_dir))
+
+    elif all([not state for state in ssh_states]):
         logging.debug("No SSH keys present in {}".format(env_dir))
         logging.info("Creating SSH keys")
         # no keys are setup, so create them
@@ -97,7 +100,7 @@ def setup_ssh():
     elif any(ssh_states):
         # one of the files exists without the other - admin intervention req'd
         logging.critical("The existing pub/priv key pair is incomplete (one"
-                         " exists without the other. Service aborting")
+                         " exists without the other). Service aborting")
         sys.exit(12)
 
 
