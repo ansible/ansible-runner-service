@@ -78,7 +78,7 @@ def setup_ssh():
     env_dir = os.path.join(configuration.settings.playbooks_root_dir,
                            "env")
     ssh_files = [os.path.join(env_dir, 'ssh_key'),
-                 os.path.join(env_dir, 'ssh_key_pub')
+                 os.path.join(env_dir, 'ssh_key.pub')
                  ]
     ssh_states = [os.path.exists(_f) for _f in ssh_files]
 
