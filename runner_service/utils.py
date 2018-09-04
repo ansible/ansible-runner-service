@@ -397,22 +397,19 @@ def ssh_connect_ok(host, user='root'):
         client.connect(**conn_args)
 
     except socket.timeout:
-        logger.error("SSH timeout waiting for response")
-        return False
+        return False, "TIMEOUT:SSH timeout waiting for response"
 
     except (AuthenticationException, SSHException):
-        logger.error("SSH auth error - passwordless ssh not configured")
-        return False
+        return False, "NOAUTH:SSH auth error - passwordless ssh not configured"
 
     except NoValidConnectionsError:
-        logger.error("SSH target uncontactable, host offline, port 22 blocked?")
-        return False
+        return False, "NOCONN:SSH target uncontactable, host offline, port " \
+                      "22 blocked?"
 
     except socket.gaierror:
-        logger.error("SSH error: hostname not found, not in DNS or /etc/hosts?")
-        return False
+        return False, "NOCONN:SSH error - hostname not found, not in DNS or " \
+                      "/etc/hosts?"
 
     else:
-        logger.info("SSH connection check to {} successful".format(host))
         client.close()
-        return True
+        return True, "OK:SSH connection check to {} successful".format(host)
