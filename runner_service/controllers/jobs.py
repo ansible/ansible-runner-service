@@ -1,17 +1,18 @@
 import os
 # from flask import request
-from flask_restful import Resource, request
+from flask_restful import request
 # import logging
 from .utils import requires_auth, log_request
+from .base import BaseResource
 
 from ..services.jobs import get_events, get_event
-from ..services.utils import build_pb_path
+from ..services.utils import build_pb_path, APIResponse
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-class ListEvents(Resource):
+class ListEvents(BaseResource):
     """Return a list of events within a given playbook run (job) """
 
     @requires_auth
@@ -50,26 +51,24 @@ class ListEvents(Resource):
         # TODO could the to_dict throw an exception?
         filter = request.args.to_dict()
 
+        _e = APIResponse()
+
         if not play_uuid:
-            return {"message": "playbook uuid missing"}, 400
+            _e.status, _e.msg = "INVALID", "playbook uuid missing"
+            return _e.__dict__, self.state_to_http[_e.status]
 
         pb_path = build_pb_path(play_uuid)
 
         if not os.path.exists(pb_path):
-            return {"message": "playbook uuid given does not exist"}, 404
+            _e.status, _e.msg = "NOTFOUND", "playbook uuid given does not exist"
+            return _e.__dict__, self.state_to_http[_e.status]
 
         response = get_events(pb_path, filter)
 
-        if response:
-            return {"play_uuid": play_uuid,
-                    "total_events": len(response),
-                    "job_events": response}, 200
-        else:
-            return {"message": "Unable to find matching events for "
-                    "{}".format(play_uuid)}, 404
+        return response.__dict__, self.state_to_http[response.status]
 
 
-class GetEvent(Resource):
+class GetEvent(BaseResource):
     """Return the output of a specific task within a playbook"""
 
     @requires_auth
@@ -115,11 +114,6 @@ class GetEvent(Resource):
 
         pb_path = build_pb_path(play_uuid)
 
-        event_data = get_event(pb_path, event_uuid)
+        response = get_event(pb_path, event_uuid)
 
-        if event_data:
-            return {"play_uuid": play_uuid,
-                    "event_uuid": event_uuid,
-                    "data": event_data}, 200
-        else:
-            return {"message": "Task requested not found"}, 404
+        return response.__dict__, self.state_to_http[response.status]

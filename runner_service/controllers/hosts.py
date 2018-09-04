@@ -1,4 +1,5 @@
-from flask_restful import Resource
+
+from .base import BaseResource
 from .utils import requires_auth, log_request
 from ..services.hosts import (get_hosts,
                               add_host,
@@ -10,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Hosts(Resource):
+class Hosts(BaseResource):
     """Return a list of hosts from the inventory - PLACEHOLDER"""
 
     @requires_auth
@@ -21,12 +22,12 @@ class Hosts(Resource):
         Return all hosts from the ansible inventory
         """
 
-        host_list = get_hosts()
+        response = get_hosts()
 
-        return {"hosts": host_list}, 200
+        return response.__dict__, self.state_to_http[response.status]
 
 
-class HostDetails(Resource):
+class HostDetails(BaseResource):
     """Manage ansible control of a given host - PLACEHOLDER"""
 
     @requires_auth
@@ -37,13 +38,12 @@ class HostDetails(Resource):
         Return the groups that the given host is a member of
         """
 
-        groups = get_host_membership(host_name)
+        response = get_host_membership(host_name)
 
-        return {"host": host_name,
-                "groups": groups}, 200
+        return response.__dict__, self.state_to_http[response.status]
 
 
-class HostMgmt(Resource):
+class HostMgmt(BaseResource):
     """Manage ansible control of a given host - PLACEHOLDER"""
 
     @requires_auth
@@ -54,13 +54,8 @@ class HostMgmt(Resource):
         Add a new host to a group in the ansible inventory
         """
 
-        status = add_host(host_name, group_name)
-        if status == 'OK':
-            return {"message": "Host {} added to {}".format(host_name,
-                                                            group_name)}, 200
-        else:
-            # TODO more to do here
-            return {"message": "Failed to add host - {}".format(status)}, 400
+        response = add_host(host_name, group_name)
+        return response.__dict__, self.state_to_http[response.status]
 
     @requires_auth
     @log_request(logger)
@@ -70,8 +65,5 @@ class HostMgmt(Resource):
         Remove a host from ansible group
         """
 
-        status = remove_host(host_name, group_name)
-        if status == 'OK':
-            return {"message": "Host removed from {}".format(group_name)}, 200
-        else:
-            return {"message": "Unable to remove host: {}".format(status)}, 400
+        response = remove_host(host_name, group_name)
+        return response.__dict__, self.state_to_http[response.status]

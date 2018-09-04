@@ -1,14 +1,15 @@
 
-from flask_restful import Resource, request     # reqparse
+from flask_restful import request     # reqparse
 import threading
 import logging
 import os
 import re
 
+from .base import BaseResource
 from .utils import requires_auth, log_request
 from ..services.playbook import list_playbooks
 from ..services.playbook import get_status, start_playbook
-from ..services.utils import playbook_exists
+from ..services.utils import playbook_exists, APIResponse
 from runner_service import configuration
 from runner_service.utils import TimeOutLock
 
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 file_mutex = threading.Lock()
 
 
-class ListPlaybooks(Resource):
+class ListPlaybooks(BaseResource):
     """ Return the names of all available playbooks """
 
     @requires_auth
@@ -43,15 +44,12 @@ class ListPlaybooks(Resource):
         ```
         """
 
-        playbook_names = list_playbooks()
+        response = list_playbooks()
 
-        if playbook_names:
-            return {"playbooks": playbook_names}, 200
-        else:
-            return {"message": "No playbook files found"}, 404
+        return response.__dict__, self.state_to_http[response.status]
 
 
-class PlaybookState(Resource):
+class PlaybookState(BaseResource):
     """ Query the state of a playbook run, by uuid """
 
     @requires_auth
@@ -80,26 +78,25 @@ class PlaybookState(Resource):
         ```
         """
 
-        status = get_status(play_uuid)
+        response = get_status(play_uuid)
 
-        if status:
-            status['play_uuid'] = play_uuid
-            return status, 200
-        else:
-            return {"message": "playbook run with uuid {}"
-                               " not found".format(play_uuid)}, 404
+        return response.__dict__, self.state_to_http[response.status]
 
 
 def _run_playbook(playbook_name, tags=None):
     """
     Run the given playbook
     """
+    # TODO Move this function to the service package (services.playbook)
 
     # TODO We should use a list like this to restrict the query we support
     valid_filter = ['limit']
 
+    r = APIResponse()
+
     if request.content_type != 'application/json':
-        return {"message": "Bad request, endpoint expects a json request/data"}, 400
+        r.status, r.msg = "INVALID", "Bad request, endpoint expects a json request/data"
+        return r
 
     vars = request.get_json()
     filter = request.args.to_dict()
@@ -111,12 +108,15 @@ def _run_playbook(playbook_name, tags=None):
 
     # does the playbook exist?
     if not playbook_exists(playbook_name):
-        return {"message": "playbook file not found"}, 404
+        r.status, r.msg = "NOTFOUND", "playbook file not found"
+        return r
 
     if tags:
         # overwrite the env/cmdline file with the required tags
         # Using a threading.Condition based lock to provide a timeout. If the
         # timeout is reached, we can request the caller tries again later
+
+        # TODO ditch this and just use a fcntl lock
         f_lock = TimeOutLock(file_mutex)
         ready = f_lock.wait(2)
         if ready:
@@ -134,13 +134,16 @@ def _run_playbook(playbook_name, tags=None):
                 logger.debug("Update of {} successful".format(cmd_file))
         else:
             # timeout hit acquiring the file mutex
-            return {"message": "timed out ({}secs) waiting to update "
-                               "env/cmdline, try again later"}, 503
+            r.status, r.msg = "TIMEOUT", "timed out ({}secs) waiting to " \
+                              "update env/cmdline, try again later"
+            return r
 
-    play_uuid, status = start_playbook(playbook_name, vars, filter)
+    response = start_playbook(playbook_name, vars, filter)
     if tags:
         f_lock.reset()
 
+    play_uuid = response.data.get('play_uuid', None)
+    status = response.data.get('status', None)
     msg = ("Playbook {}, UUID={} initiated :"
            " status={}".format(playbook_name,
                                play_uuid,
@@ -152,13 +155,14 @@ def _run_playbook(playbook_name, tags=None):
         logger.error(msg)
 
     if play_uuid:
-        return {"play_uuid": play_uuid,
-                "status": status}, 202
+        r.status, r.msg, r.data = "STARTED", status, {"play_uuid": play_uuid}
+        return r
     else:
-        return {"message": "Runner thread failed to start"}, 500
+        r.status, r.msg = "FAILED", "Runner thread failed to start"
+        return r
 
 
-class StartPlaybook(Resource):
+class StartPlaybook(BaseResource):
     """ Start a playbook by name, returning the play's uuid """
 
     @requires_auth
@@ -186,12 +190,11 @@ class StartPlaybook(Resource):
         ```
         """
 
-        response, status_code = _run_playbook(playbook_name)
+        response = _run_playbook(playbook_name)
+        return response.__dict__, self.state_to_http[response.status]
 
-        return response, status_code
 
-
-class StartTaggedPlaybook(Resource):
+class StartTaggedPlaybook(BaseResource):
     """ Start a playbook using tags to control which tasks run """
 
     @requires_auth
@@ -220,15 +223,16 @@ class StartTaggedPlaybook(Resource):
         ```
 
         """
-
+        _e = APIResponse()
         if not tags:
-            return {"message": "tag based run requested, but tags are missing?"}, 400
+            _e.status, _e.msg = "INVALID", "tag based run requested, but tags are missing?"
+            return _e.__dict__, self.state_to_http[_e.status]
 
         pattern = re.compile(r'[a-z0-9]+$')
         if not pattern.match(tags) or tags[-1] == ',':
-            return {"message": "Invalid tag syntax"}, 400
+            _e.status, _e.msg = "INVALID", "Invalid tag syntax"
+            return _e.__dict__, self.state_to_http[_e.status]
 
-        response, status_code = _run_playbook(playbook_name=playbook_name,
-                                              tags=tags)
-
-        return response, status_code
+        response = _run_playbook(playbook_name=playbook_name,
+                                 tags=tags)
+        return response.__dict__, self.state_to_http[response.status]
