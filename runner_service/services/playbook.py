@@ -7,29 +7,33 @@ import time
 
 from ansible_runner import run_async
 from runner_service import configuration
-from .utils import fread, cleanup_dir
+from .utils import fread, cleanup_dir, APIResponse
 
-from .jobs import event_cache
+# from .jobs import event_cache
 
 import logging
 logger = logging.getLogger(__name__)
 
 
 def get_status(play_uuid):
-
+    r = APIResponse()
     pb_artifacts = os.path.join(configuration.settings.playbooks_root_dir,
                                 "artifacts",
                                 play_uuid)
 
     if not os.path.exists(pb_artifacts):
-        return None
+        r.status, r.msg = "NOTFOUND", "Playbook run with UUID {} not found".format(play_uuid)
+        return r
 
     pb_status = os.path.join(pb_artifacts,
                              "status")
 
     if os.path.exists(pb_status):
-        return {"status": fread(pb_status)}
+        # playbook execution has finished
+        r.status, r.msg = "OK", fread(pb_status)
+        return r
     else:
+        # play is still active
         # get last event
         events_dir = os.path.join(pb_artifacts, "job_events")
         events = os.listdir(events_dir)
@@ -37,21 +41,24 @@ def get_status(play_uuid):
         last_event = events[-1]
         last_event_data = json.loads(fread(os.path.join(events_dir,
                                                         last_event)))
-        print(last_event_data)
-        return {"status": "running",
-                "task_id": last_event_data.get('counter'),
-                "task_name": last_event_data['event_data'].get('task')}
+        r.status, r.msg = "OK", "Playbook with UUID {} is active".format(play_uuid)
+        r.data = {"task_id": last_event_data.get('counter'),
+                  "task_name": last_event_data['event_data'].get('task')
+                  }
+        return r
 
 
 def list_playbooks():
 
+    r = APIResponse()
     pb_dir = os.path.join(configuration.settings.playbooks_root_dir,
                           "project")
     playbook_names = [os.path.basename(pb_path) for pb_path in
                       glob.glob(os.path.join(pb_dir,
                                              "*.yml"))]
+    r.status, r.data = "OK", {"playbooks": playbook_names}
 
-    return playbook_names
+    return r
 
 
 def stop_playbook(play_uuid):
@@ -83,6 +90,7 @@ def cb_event_handler(event_data):
 def start_playbook(playbook_name, vars=None, filter=None):
     """ Initiate a playbook run """
 
+    r = APIResponse()
     play_uuid = str(uuid.uuid1())
 
     settings = {"suppress_ansible_output": True}
@@ -98,7 +106,6 @@ def start_playbook(playbook_name, vars=None, filter=None):
         "event_handler": cb_event_handler,
         "quiet": False,
         "ident": play_uuid,
-        # inventory='localhost',
         "playbook": playbook_name
     }
 
@@ -133,9 +140,13 @@ def start_playbook(playbook_name, vars=None, filter=None):
         time.sleep(delay)
         ctr += 1
         if ctr > timeout:
-            return play_uuid, "timeout"
+            r.status, r.msg = "TIMEOUT", "Timeout hit while waiting for " \
+                                         "playbook to start"
+            return r
 
     logger.debug("Playbook {} started in {}s".format(play_uuid,
                                                      ctr * delay))
 
-    return play_uuid, _runner.status
+    r.status, r.data = "OK", {"status": _runner.status,
+                              "play_uuid": play_uuid}
+    return r

@@ -5,7 +5,7 @@ import json
 import threading
 import queue
 
-from .utils import fread
+from .utils import fread, APIResponse
 from runner_service import configuration
 
 import logging
@@ -125,6 +125,8 @@ def scan_event_data(work_queue, filter, matched_events):
 
 def get_events(pb_path, filter):
 
+    r = APIResponse()
+
     event_dir = os.path.join(pb_path, "job_events")
     play_uuid = os.path.basename(pb_path)
     _events = os.listdir(event_dir)
@@ -148,24 +150,24 @@ def get_events(pb_path, filter):
     # Wait for the queue to signal all items have been processed
     work_queue.join()
 
-    if matched_events:
-        # sort the keys into numeric order
-        srtd_keys = sorted(matched_events, key=lambda x: int(x.split('-')[0]))
-        return {k[:-5]: matched_events[k] for k in srtd_keys}
-    else:
-        # TODO need a distinction here for the return value, if the filter excludes
-        # everything != no event files found
-        logger.debug("No events matched/found within {}".format(pb_path))
-        return None
+    # sort the keys into numeric order
+    srtd_keys = sorted(matched_events, key=lambda x: int(x.split('-')[0]))
+    r.status, r.data = "OK", {"events": {k[:-5]: matched_events[k]
+                                         for k in srtd_keys},
+                              "total_events": len(srtd_keys)}
+
+    return r
 
 
 def get_event(pb_path, event_uuid):
-
+    r = APIResponse()
     event_path = glob.glob(os.path.join(pb_path,
                                         "job_events",
                                         "{}.json".format(event_uuid)))
 
     if event_path:
-        return json.loads(fread(event_path[0]))
+        r.status, r.data = "OK", json.loads(fread(event_path[0]))
+        return r
     else:
-        return None
+        r.status, r.msg = "NOTFOUND", "Event not found"
+        return r
