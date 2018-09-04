@@ -23,7 +23,14 @@ def build_pb_path(play_uuid):
                         play_uuid)
 
 
-def cleanup_dir(dir_name, exclude=['ssh_key', 'ssh_key_pub']):
+def cleanup_dir(dir_name, exclude=['ssh_key', 'ssh_key.pub']):
     for _path_name in glob.glob("{}/*".format(dir_name)):
         if os.path.basename(_path_name) not in exclude:
             rm_r(_path_name)
+
+
+class APIResponse(object):
+    def __init__(self):
+        self.status = ''
+        self.msg = ''
+        self.data = dict()
