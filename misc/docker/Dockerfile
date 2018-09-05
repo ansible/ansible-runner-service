@@ -12,9 +12,9 @@ FROM centos:7
 RUN yum -y install epel-release  && \
     yum -y install bash wget unzip ansible \
            pexpect python-daemon  bubblewrap \
-           bzip2  openssh openssh-clients \
+           bzip2  openssh openssh-clients python2-psutil\
            python34 python34-setuptools python34-psutil python34-crypto \
-           python34-pip python34-docutils && \
+           python34-pip python34-docutils python34-paramiko && \
     localedef -c -i en_US -f UTF-8 en_US.UTF-8 && \
     pip3 install PyYAML pyOpenSSL flask flask-restful && \
     pip3 install --no-cache-dir ansible-runner && \
