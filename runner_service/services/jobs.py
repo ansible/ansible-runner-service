@@ -25,6 +25,12 @@ event_cache = {}
 
 def filter_event(event_path, filter):
 
+    event_fname = os.path.basename(event_path)
+
+    if event_fname.endswith("-partial.json"):
+        logger.debug("Skipping partial event file: {}".format(event_fname))
+        return None
+
     with open(event_path, 'r') as event_fd:
         try:
             event_info = json.loads(event_fd.read())
@@ -37,7 +43,6 @@ def filter_event(event_path, filter):
         return event_info
 
     tname = threading.current_thread().name
-    event_fname = os.path.basename(event_path)
 
     if event_info.get('event') in ignored_events:
         logger.debug('[{}] Skipping start/stats event: {}'.format(tname,
