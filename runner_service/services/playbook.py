@@ -36,15 +36,26 @@ def get_status(play_uuid):
         # play is still active
         # get last event
         events_dir = os.path.join(pb_artifacts, "job_events")
-        events = os.listdir(events_dir)
-        events.sort(key=lambda filenm: int(filenm.split("-", 1)[0]))
-        last_event = events[-1]
-        last_event_data = json.loads(fread(os.path.join(events_dir,
-                                                        last_event)))
-        r.status, r.msg = "OK", "Playbook with UUID {} is active".format(play_uuid)
-        r.data = {"task_id": last_event_data.get('counter'),
-                  "task_name": last_event_data['event_data'].get('task')
-                  }
+
+        # gather the events, excluding any partially complete files
+        events = [_f for _f in os.listdir(events_dir)
+                  if not _f.endswith('-partial.json')]
+
+        r.status = "OK"
+
+        if events:
+            events.sort(key=lambda filenm: int(filenm.split("-", 1)[0]))
+            last_event = events[-1]
+            last_event_data = json.loads(fread(os.path.join(events_dir,
+                                                            last_event)))
+            r.msg = "Playbook with UUID {} is active".format(play_uuid)
+            r.data = {"task_id": last_event_data.get('counter'),
+                      "task_name": last_event_data['event_data'].get('task')
+                      }
+        else:
+            r.msg = "Job appears active, but no task information is available"
+            logger.error("Play with UUID {} looks active, but doesn't have any"
+                         " valid files within job_events dir".format(play_uuid))
         return r
 
 
