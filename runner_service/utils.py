@@ -292,7 +292,7 @@ class AnsibleInventory(object):
     def group_show(self, group):
         if isinstance(self.inventory['all']['children'][group], dict):
             if isinstance(self.inventory['all']['children'][group]['hosts'], dict):
-                return self.inventory['all']['children'][group]['hosts'].keys()
+                return list(self.inventory['all']['children'][group]['hosts'].keys())
             else:
                 return []
         else:
