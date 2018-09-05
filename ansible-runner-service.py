@@ -67,7 +67,7 @@ def get_mode():
     """ get the runtime mode """
 
     # set the mode based on where this is running from
-    if os.path.dirname(__file__) == "/usr/bin":
+    if os.path.dirname(__file__).startswith("/usr"):
         return 'prod'
     else:
         return 'dev'
