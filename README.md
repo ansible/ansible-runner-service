@@ -66,7 +66,7 @@ Here's a quick 'cheat sheet' of the API endpoints.
 
 
 ## Testing
-Testing to date has all been lab based i.e. please **do not use in production** environments. Playbook integration with Ceph and Gluster has been the primary focus together with the probe-disks.yml playbook.*Did you spot the theme...it's all about the storage :) *
+Testing to date has all been lab based i.e. please **do not use in production** environments. Playbook integration with Ceph and Gluster has been the primary focus together with the probe-disks.yml playbook. Did you spot the theme?..*It's all about the storage™ :)*  
 
 For example, with ceph the ```osd-configure.yml``` playbook has been tested successfully.
 
