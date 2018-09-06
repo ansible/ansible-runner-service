@@ -5,7 +5,8 @@ import json
 import threading
 import queue
 
-from .utils import fread, APIResponse
+from .utils import APIResponse
+from ..utils import fread
 from runner_service import configuration
 
 import logging

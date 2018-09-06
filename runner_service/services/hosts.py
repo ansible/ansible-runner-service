@@ -1,8 +1,8 @@
 import os
 
 from runner_service import AnsibleInventory, configuration
-from .utils import APIResponse, fread
-from ..utils import ssh_connect_ok
+from .utils import APIResponse
+from ..utils import ssh_connect_ok, fread
 
 import logging
 logger = logging.getLogger(__name__)
