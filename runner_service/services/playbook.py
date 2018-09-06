@@ -5,9 +5,11 @@ import json
 import uuid
 import time
 
+
 from ansible_runner import run_async
 from runner_service import configuration
-from .utils import fread, cleanup_dir, APIResponse
+from .utils import cleanup_dir, APIResponse
+from ..utils import fread
 
 # from .jobs import event_cache
 
@@ -98,7 +100,17 @@ def cb_event_handler(event_data):
     return True
 
 
-def start_playbook(playbook_name, vars=None, filter=None):
+def add_tags(tags):
+
+    cmd_file = os.path.join(configuration.settings.playbooks_root_dir,
+                            "env", "cmdline")
+    tags_param = " --tags {}".format(tags)
+    logger.debug("Creating env/cmdline file with tags: {}".format(tags_param))
+    with open(cmd_file, "w") as cmdline:
+        cmdline.write(tags_param)
+
+
+def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     """ Initiate a playbook run """
 
     r = APIResponse()
@@ -132,9 +144,12 @@ def start_playbook(playbook_name, vars=None, filter=None):
     if limit_hosts:
         parms['limit'] = limit_hosts
 
-    logger.debug("clearing up old env directory")
+    logger.debug("Clearing up old env directory")
     cleanup_dir(os.path.join(configuration.settings.playbooks_root_dir,
                              "env"))
+
+    if tags:
+        add_tags(tags)
 
     _thread, _runner = run_async(**parms)
 

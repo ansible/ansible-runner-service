@@ -2,7 +2,6 @@
 from flask_restful import request     # reqparse
 import threading
 import logging
-import os
 import re
 
 from .base import BaseResource
@@ -10,8 +9,6 @@ from .utils import requires_auth, log_request
 from ..services.playbook import list_playbooks
 from ..services.playbook import get_status, start_playbook
 from ..services.utils import playbook_exists, APIResponse
-from runner_service import configuration
-from runner_service.utils import TimeOutLock
 
 logger = logging.getLogger(__name__)
 file_mutex = threading.Lock()
@@ -111,36 +108,7 @@ def _run_playbook(playbook_name, tags=None):
         r.status, r.msg = "NOTFOUND", "playbook file not found"
         return r
 
-    if tags:
-        # overwrite the env/cmdline file with the required tags
-        # Using a threading.Condition based lock to provide a timeout. If the
-        # timeout is reached, we can request the caller tries again later
-
-        # TODO ditch this and just use a fcntl lock
-        f_lock = TimeOutLock(file_mutex)
-        ready = f_lock.wait(2)
-        if ready:
-            cmd_file = os.path.join(configuration.settings.playbooks_root_dir,
-                                    "env", "cmdline")
-            logger.debug("Attempting to update {}".format(cmd_file))
-
-            try:
-                with open(cmd_file, 'w') as cmdline:
-                    cmdline.write(" --tags {}".format(tags))
-            except IOError:
-                logger.error("TAGS requested for {}, but unable to create"
-                             " env/cmdline file".format(playbook_name))
-            else:
-                logger.debug("Update of {} successful".format(cmd_file))
-        else:
-            # timeout hit acquiring the file mutex
-            r.status, r.msg = "TIMEOUT", "timed out ({}secs) waiting to " \
-                              "update env/cmdline, try again later"
-            return r
-
     response = start_playbook(playbook_name, vars, filter)
-    if tags:
-        f_lock.reset()
 
     play_uuid = response.data.get('play_uuid', None)
     status = response.data.get('status', None)
