@@ -16,6 +16,9 @@ from .controllers import (ListPlaybooks,
                           HostMgmt,
                           HostDetails
                           )
+
+from runner_service import configuration
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -23,6 +26,9 @@ logger = logging.getLogger(__name__)
 def create_app():
 
     app = Flask("runner_service")
+
+    # Apply any local configuration to the flask instance
+    app.config.from_object(configuration.settings)
 
     api = Api(app)
 

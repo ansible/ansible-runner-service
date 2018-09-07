@@ -52,6 +52,9 @@ class Config(object):
         self.ip_address = '0.0.0.0'
         self.loglevel = logging.DEBUG
 
+        # flask config setting to hide the "production use" warning
+        self.ENV = ''
+
         if os.path.exists(self.config_file):
             self._apply_local()
 
