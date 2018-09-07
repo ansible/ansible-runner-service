@@ -88,44 +88,50 @@ def rm_r(path):
         shutil.rmtree(path)
 
 
-def ssh_create_key(ssh_dir):
+def ssh_create_key(ssh_dir, user='root'):
 
     key = RSAKey.generate(4096)
     pub_file = os.path.join(ssh_dir, 'ssh_key.pub')
     prv_file = os.path.join(ssh_dir, 'ssh_key')
-    comment_str = 'root@{}'.format(socket.gethostname())
+    comment_str = '{}@{}'.format(user, socket.gethostname())
 
     # Setup the public key file
     try:
         with open(pub_file, "w") as pub:
             pub.write("ssh-rsa {} {}\n".format(key.get_base64(),
                                                comment_str))
-    except IOError:
-        logger.error("SSH setup unable to write to '{}'".format(pub_file))
-        raise RunnerServiceError("Unable to create SSH public key")
-    except SSHException:
-        logger.critical("SSH key generation failed")
-        raise RunnerServiceError("SSH 'pub' key generation failed")
+    except (PermissionError, IOError) as err:
+        msg = "Unable to write public ssh key to {}: {}".format(ssh_dir, err)
+        logger.critical(msg)
+        raise RunnerServiceError(msg)
+    except Exception as err:
+        logger.critical("Unknown error creating the public key "
+                        "to {}: {}".format(ssh_dir, err))
+        raise
     else:
         # python3 syntax
         os.chmod(pub_file, 0o600)
-        logger.debug("Created SSH public key @ '{}'".format(pub_file))
+        logger.info("Created SSH public key @ '{}'".format(pub_file))
 
     # setup the private key file
     try:
         with open(prv_file, "w") as prv:
             key.write_private_key(prv)
-    except IOError:
-        logger.error("SSH unable to write to '{}'".format(prv_file))
-        raise RunnerServiceError("Unable to create SSH private key file")
-    except SSHException:
-        logger.critical("SSH key generation failed")
-        raise RunnerServiceError("SSH 'priv' key generation failed")
-        return
+    except (PermissionError, IOError) as err:
+        msg = "Unable to write to private key to '{}': {}".format(ssh_dir, err)
+        logger.critical(msg)
+        raise RunnerServiceError(msg)
+    except SSHException as err:
+        msg = "SSH key generated is invalid: {}".format(err)
+        logger.critical(msg)
+        raise RunnerServiceError(msg)
+    except Exception as err:
+        logger.critical("Unknown error writing private key: {}".format(err))
+        raise
     else:
         # python3 syntax
         os.chmod(prv_file, 0o600)
-        logger.debug("Created SSH private key @ '{}'".format(prv_file))
+        logger.info("Created SSH private key @ '{}'".format(prv_file))
 
 
 def ssh_connect_ok(host, user='root'):
