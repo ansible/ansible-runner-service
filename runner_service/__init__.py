@@ -1,11 +1,11 @@
 
-from .utils import (RunnerServiceError,
-                    InventoryGroupEmpty,
-                    InventoryWriteError,
-                    InventoryGroupExists,
-                    InventoryHostMissing,
-                    InventoryGroupMissing)
+from .utils import RunnerServiceError
 
-from .utils import AnsibleInventory
+from .inventory import (AnsibleInventory,
+                        InventoryGroupEmpty,
+                        InventoryWriteError,
+                        InventoryGroupExists,
+                        InventoryHostMissing,
+                        InventoryGroupMissing)
 
-__version__ = 0.5
+__version__ = 0.7

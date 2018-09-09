@@ -10,7 +10,7 @@ to provide runtime, playbooks and artifacts persistence. This approach allows yo
 install an rpm containing the playbooks specific to ceph or gluster, then map these
 through to the Container.
 
-At this point the container enables you to test the API, but not run anything meaningful...but it will :)
+The provided container uses CentOS with Python 3.6 (most of the development work is being done against Fedora, with Python3.6).
 
 
 ## Local Preparation
@@ -20,14 +20,18 @@ store it in the misc/docker directory
 3. set up you local environment to persist the config
 ```
  sudo mkdir /etc/ansible-runner-service
- sudo mkdir /usr/share/ansible-runner-service
+ sudo mkdir -p /usr/share/ansible-runner-service/{artifacts,env,inventory, project}
+```
+3.a. If you have selinux enabled you'll need to give the container permissions to these directories  
+```
+cd /usr/share
+chcon -Rt container_file_t ansible-runner-service
 ```
 4. from the root of the ansible-runner-service directory
 ```
  cp {logging,config}.yaml /etc/ansible-runner-service/.
- cp samples/* /usr/share/ansible-runner-service/
+ cp -r samples/project/* /usr/share/ansible-runner-service/project
 ```
-*(the paths don't matter, they're just the ones I'm using for test)*
 
 ## Building (as root, or use sudo)
 1. from the ansible-runner-service directory
@@ -40,19 +44,22 @@ docker build -f Dockerfile -t runner-service .
 ```
 
 ## Running the container
-### basic - no persistence (i.e. not much use)
+### basic - no persistence (i.e. not much use, just a quick test)
 ```
 docker run -d --network=host -p 5001:5001/tcp --name runner-service runner-service
 ```
 
 ### with persistence
+Here's an example of using the container that perists state to the host's filesystem.
 ```
 docker run -d --network=host -p 5001:5001/tcp -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service runner-service
 ```
 
-## future stuff
-To make the container really useful we need to persist more 'stuff'  
-```/etc/ansible/hosts``` ... to persist hosts and groups  
-```/root/.ssh``` ... to perists ssh key access for passwordless ssh  
+Be aware that the container will need access to these bind-mounted locations, so you may need to ensure file and selinux permissions are set correctly.
 
-However the inclusion of the hosts and ssh keys needs additional code to support host management.
+
+At this point, the container persists the following content;
+- ssh keys
+- inventory
+- playbooks
+- artifacts (job/playbook run output)

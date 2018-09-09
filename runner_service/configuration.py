@@ -42,12 +42,18 @@ class Config(object):
         # expiration period in years for the self-signed cert that we generate
         self.cert_expiration = 3
 
+        # ssh connection timeout
+        self.ssh_timeout = 2
+
         # event_threads controls how many event files are scanned concurrently
         self.event_threads = 10
 
         self.port = 5001
         self.ip_address = '0.0.0.0'
         self.loglevel = logging.DEBUG
+
+        # flask config setting to hide the "production use" warning
+        self.ENV = ''
 
         if os.path.exists(self.config_file):
             self._apply_local()

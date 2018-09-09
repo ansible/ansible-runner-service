@@ -1,72 +1,147 @@
-from flask_restful import Resource
+
+from .base import BaseResource
 from .utils import requires_auth, log_request
+from ..services.hosts import (get_hosts,
+                              add_host,
+                              remove_host,
+                              get_host_membership
+                              )
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-class Hosts(Resource):
-    """Return a list of hosts from the inventory - PLACEHOLDER"""
+class Hosts(BaseResource):
+    """Return a list of hosts from the inventory"""
 
     @requires_auth
     @log_request(logger)
     def get(self):
         """
         GET
-        Return a list of hosts known to the ansible inventory - NOT IMPLEMENTED
+        Return all hosts from the ansible inventory
+
+        Example.
+
+        ```
+        $ curl -k -i https://localhost:5001/api/v1/hosts -X get
+        HTTP/1.0 200 OK
+        Content-Type: application/json
+        Content-Length: 150
+        Server: Werkzeug/0.14.1 Python/3.6.6
+        Date: Wed, 05 Sep 2018 04:58:31 GMT
+
+        {
+            "status": "OK",
+            "msg": "",
+            "data": {
+                "hosts": [
+                    "con-1",
+                    "con-2",
+                    "con-3"
+                ]
+            }
+        }
+        ```
         """
 
-        return {"message": "NOT Implemented"}, 501
+        response = get_hosts()
+
+        return response.__dict__, self.state_to_http[response.status]
 
 
-class HostMgmt(Resource):
-    """Manage ansible control of a given host - PLACEHOLDER"""
+class HostDetails(BaseResource):
+    """Show group membership for a given host"""
 
     @requires_auth
     @log_request(logger)
-    def get(self):
+    def get(self, host_name):
         """
         GET {host_name}
         Return the groups that the given host is a member of
+
+        Example.
+
+        ```
+        $ curl -k -i https://localhost:5001/api/v1/hosts/con-1 -X get
+        HTTP/1.0 200 OK
+        Content-Type: application/json
+        Content-Length: 108
+        Server: Werkzeug/0.14.1 Python/3.6.6
+        Date: Wed, 05 Sep 2018 04:59:05 GMT
+
+        {
+            "status": "OK",
+            "msg": "",
+            "data": {
+                "groups": [
+                    "osds"
+                ]
+            }
+        }
+        ```
         """
-        return {"message": "NOT Implemented"}, 501
+
+        response = get_host_membership(host_name)
+
+        return response.__dict__, self.state_to_http[response.status]
+
+
+class HostMgmt(BaseResource):
+    """Manage ansible control of a given host"""
 
     @requires_auth
     @log_request(logger)
-    def post(self):
+    def post(self, host_name, group_name):
         """
-        POST {host_name}
-        Add a new host to the ansible configuration
+        POST hosts/{host_name}/groups/{group_name}
+        Add a new host to an existing group in the ansible inventory
+
+        Example.
+
+        ```
+        $ curl -k -i https://localhost:5001/api/v1/hosts/con-1/groups/dummy -X post
+        HTTP/1.0 200 OK
+        Content-Type: application/json
+        Content-Length: 54
+        Server: Werkzeug/0.14.1 Python/3.6.6
+        Date: Wed, 05 Sep 2018 05:00:33 GMT
+
+        {
+            "status": "OK",
+            "msg": "",
+            "data": {}
+        }
+        ```
         """
-        return {"message": "NOT Implemented"}, 501
+
+        response = add_host(host_name, group_name)
+        return response.__dict__, self.state_to_http[response.status]
 
     @requires_auth
     @log_request(logger)
-    def delete(self):
+    def delete(self, host_name, group_name):
         """
-        DELETE {host_name}
-        Remove a host from ansible control
-        """
-        return {"message": "NOT Implemented"}, 501
+        DELETE hosts/{host_name}/group/{group_name}
+        Remove a host from an ansible group
 
+        Example.
 
-class HostUpdate(Resource):
-    """Manage group membership of an existing host - PLACEHOLDER"""
+        ```
+        $ curl -k -i https://localhost:5001/api/v1/hosts/con-1/groups/dummy -X delete
+        HTTP/1.0 200 OK
+        Content-Type: application/json
+        Content-Length: 54
+        Server: Werkzeug/0.14.1 Python/3.6.6
+        Date: Wed, 05 Sep 2018 05:02:03 GMT
 
-    @requires_auth
-    @log_request(logger)
-    def put(self):
+        {
+            "status": "OK",
+            "msg": "",
+            "data": {}
+        }
+        ```
         """
-        PUT {host_name, group_name}
-        Update the groups a given host belongs to
-        """
-        return {"message": "NOT Implemented"}, 501
 
-    @requires_auth
-    @log_request(logger)
-    def delete(self):
-        """
-        DELETE {host_name, group_name}
-        Remove a host from a specific group
-        """
-        return {"message": "NOT Implemented"}, 501
+        response = remove_host(host_name, group_name)
+        return response.__dict__, self.state_to_http[response.status]

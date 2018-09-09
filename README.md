@@ -10,9 +10,11 @@ So far I've just been testing against Fedora28 - other distros may use older
 versions of packages like flask that may not work correctly.
 
 ### Package Dependencies
-- Python 3.5 or above
+- Python 3.6
 - pyOpenSSL  (python3-pyOpenSSL on Fedora, CentOS pyOpenSSL)
-- ansible_runner 1.0.5 or above
+- ansible_runner 1.0.5 or above  
+
+*if in doubt, look inthe misc/docker folder and build the container!*
 
 ## Installation
 Try before you buy...simply unzip the archive and run :)
@@ -45,8 +47,28 @@ You may click on any row to expand the description of the API route and show the
 
 **Note**: *It is not the intent of this API to validate the parameters passed to it. It is assumed that parameter selection and validation happen prior to the API call.*  
 
+Here's a quick 'cheat sheet' of the API endpoints.  
+
+| API Route | Description |
+|-----------|-------------|
+|/api | Show available API endpoints (this page)|
+|/api/v1/groups| List all the defined groups in the inventory|
+|/api/v1/groups/<group_name>| Manage groups within the inventory|
+|/api/v1/hosts| Return a list of hosts from the inventory|
+|/api/v1/hosts/<host_name>| Show group membership for a given host|
+|/api/v1/hosts/<host_name>/groups/<group_name>| Manage ansible control of a given host|
+|/api/v1/jobs/<play_uuid>/events| Return a list of events within a given playbook run (job)|
+|/api/v1/jobs/<play_uuid>/events/<event_uuid>| Return the output of a specific task within a playbook|
+|/api/v1/playbooks| Return the names of all available playbooks|
+|/api/v1/playbooks/<play_uuid>| Query the state of a playbook run, by uuid|
+|/api/v1/playbooks/<playbook_name>| Start a playbook by name, returning the play's uuid|
+|/api/v1/playbooks/<playbook_name>/tags/<tags>| Start a playbook using tags to control which tasks run|
+
+
 ## Testing
-The only testing to date is purely functional, using a test playbook (test.yml). Changes will be needed to support 'real' playbooks!  
+Testing to date has all been lab based i.e. please **do not use in production** environments. Playbook integration with Ceph and Gluster has been the primary focus together with the probe-disks.yml playbook. Did you spot the theme?..*It's all about the storage™ :)*  
+
+For example, with ceph the ```osd-configure.yml``` playbook has been tested successfully.
 
 ### Manual Testing
 The archive, downloaded from github, contains a simple playbook that just uses the bash sleep command - enabling you to quickly experiment with the API.
@@ -65,8 +87,11 @@ Use the steps below (dev mode), to quickly exercise the API
 
 Obviously you'll need to change the play and job uuids for your run :)
 
-### Regression Testing
-TODO  
+## Usage and Workflows
+< INSERT WARP DRIVE HERE >
+
+## Regression Testing
+< INSERT HYPERDRIVE HERE >
 
 ## File Layout (Proposed)
 
@@ -80,7 +105,9 @@ TODO
 - artifacts  
 - inventory  
 - env  
-- project  
+- project
+    -  roles (optional)
+    -  library (optional)
     -  test.yaml  
 - roles
 
@@ -93,5 +120,5 @@ TODO
 /etc/systemd/system  
 - ansible-runner-service.service  
 
-/usr/bin/  
+/usr/bin/ or /usr/local/bin    
 - ansible-runner-service  

@@ -4,5 +4,6 @@ from .playbooks import (ListPlaybooks,
                         StartPlaybook,
                         StartTaggedPlaybook)
 from .api import API
-from .hosts import Hosts, HostMgmt, HostUpdate
+from .hosts import Hosts, HostMgmt, HostDetails
 from .jobs import ListEvents, GetEvent
+from .groups import ListGroups, ManageGroups

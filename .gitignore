@@ -1,11 +1,11 @@
 *.pyc
 *.pyo
 samples/artifacts/*
-samples/env/*
-samples/inventory/*
 samples/roles/*
 OLD_STUFF/*
 __pycache__
 dist
 build
 *.egg-info
+.idea
+venv

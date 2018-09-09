@@ -5,53 +5,73 @@ import json
 import uuid
 import time
 
+
 from ansible_runner import run_async
 from runner_service import configuration
-from .utils import fread, cleanup_dir
+from .utils import cleanup_dir, APIResponse
+from ..utils import fread
 
-from .jobs import event_cache
+# from .jobs import event_cache
 
 import logging
 logger = logging.getLogger(__name__)
 
 
 def get_status(play_uuid):
-
+    r = APIResponse()
     pb_artifacts = os.path.join(configuration.settings.playbooks_root_dir,
                                 "artifacts",
                                 play_uuid)
 
     if not os.path.exists(pb_artifacts):
-        return None
+        r.status, r.msg = "NOTFOUND", "Playbook run with UUID {} not found".format(play_uuid)
+        return r
 
     pb_status = os.path.join(pb_artifacts,
                              "status")
 
     if os.path.exists(pb_status):
-        return {"status": fread(pb_status)}
+        # playbook execution has finished
+        r.status, r.msg = "OK", fread(pb_status)
+        return r
     else:
+        # play is still active
         # get last event
         events_dir = os.path.join(pb_artifacts, "job_events")
-        events = os.listdir(events_dir)
-        events.sort(key=lambda filenm: int(filenm.split("-", 1)[0]))
-        last_event = events[-1]
-        last_event_data = json.loads(fread(os.path.join(events_dir,
-                                                        last_event)))
-        print(last_event_data)
-        return {"status": "running",
-                "task_id": last_event_data.get('counter'),
-                "task_name": last_event_data['event_data'].get('task')}
+
+        # gather the events, excluding any partially complete files
+        events = [_f for _f in os.listdir(events_dir)
+                  if not _f.endswith('-partial.json')]
+
+        r.status = "OK"
+
+        if events:
+            events.sort(key=lambda filenm: int(filenm.split("-", 1)[0]))
+            last_event = events[-1]
+            last_event_data = json.loads(fread(os.path.join(events_dir,
+                                                            last_event)))
+            r.msg = "Playbook with UUID {} is active".format(play_uuid)
+            r.data = {"task_id": last_event_data.get('counter'),
+                      "task_name": last_event_data['event_data'].get('task')
+                      }
+        else:
+            r.msg = "Job appears active, but no task information is available"
+            logger.error("Play with UUID {} looks active, but doesn't have any"
+                         " valid files within job_events dir".format(play_uuid))
+        return r
 
 
 def list_playbooks():
 
+    r = APIResponse()
     pb_dir = os.path.join(configuration.settings.playbooks_root_dir,
                           "project")
     playbook_names = [os.path.basename(pb_path) for pb_path in
                       glob.glob(os.path.join(pb_dir,
                                              "*.yml"))]
+    r.status, r.data = "OK", {"playbooks": playbook_names}
 
-    return playbook_names
+    return r
 
 
 def stop_playbook(play_uuid):
@@ -80,9 +100,20 @@ def cb_event_handler(event_data):
     return True
 
 
-def start_playbook(playbook_name, vars=None, filter=None):
+def add_tags(tags):
+
+    cmd_file = os.path.join(configuration.settings.playbooks_root_dir,
+                            "env", "cmdline")
+    tags_param = " --tags {}".format(tags)
+    logger.debug("Creating env/cmdline file with tags: {}".format(tags_param))
+    with open(cmd_file, "w") as cmdline:
+        cmdline.write(tags_param)
+
+
+def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     """ Initiate a playbook run """
 
+    r = APIResponse()
     play_uuid = str(uuid.uuid1())
 
     settings = {"suppress_ansible_output": True}
@@ -98,7 +129,6 @@ def start_playbook(playbook_name, vars=None, filter=None):
         "event_handler": cb_event_handler,
         "quiet": False,
         "ident": play_uuid,
-        # inventory='localhost',
         "playbook": playbook_name
     }
 
@@ -114,9 +144,12 @@ def start_playbook(playbook_name, vars=None, filter=None):
     if limit_hosts:
         parms['limit'] = limit_hosts
 
-    logger.debug("clearing up old env directory")
+    logger.debug("Clearing up old env directory")
     cleanup_dir(os.path.join(configuration.settings.playbooks_root_dir,
                              "env"))
+
+    if tags:
+        add_tags(tags)
 
     _thread, _runner = run_async(**parms)
 
@@ -133,9 +166,13 @@ def start_playbook(playbook_name, vars=None, filter=None):
         time.sleep(delay)
         ctr += 1
         if ctr > timeout:
-            return play_uuid, "timeout"
+            r.status, r.msg = "TIMEOUT", "Timeout hit while waiting for " \
+                                         "playbook to start"
+            return r
 
     logger.debug("Playbook {} started in {}s".format(play_uuid,
                                                      ctr * delay))
 
-    return play_uuid, _runner.status
+    r.status, r.data = "OK", {"status": _runner.status,
+                              "play_uuid": play_uuid}
+    return r

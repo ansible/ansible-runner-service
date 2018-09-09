@@ -10,10 +10,15 @@ from .controllers import (ListPlaybooks,
                           API,
                           ListEvents,
                           GetEvent,
+                          ListGroups,
+                          ManageGroups,
                           Hosts,
                           HostMgmt,
-                          HostUpdate
+                          HostDetails
                           )
+
+from runner_service import configuration
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -21,6 +26,9 @@ logger = logging.getLogger(__name__)
 def create_app():
 
     app = Flask("runner_service")
+
+    # Apply any local configuration to the flask instance
+    app.config.from_object(configuration.settings)
 
     api = Api(app)
 
@@ -32,9 +40,13 @@ def create_app():
     api.add_resource(ListEvents, "/api/v1/jobs/<play_uuid>/events")
     api.add_resource(GetEvent, "/api/v1/jobs/<play_uuid>/events/<event_uuid>")
 
+    api.add_resource(ListGroups, "/api/v1/groups")
+    api.add_resource(ManageGroups, "/api/v1/groups/<group_name>")
+
     api.add_resource(Hosts, "/api/v1/hosts")
-    api.add_resource(HostMgmt, "/api/v1/hosts/<host_name>")
-    api.add_resource(HostUpdate, "/api/v1/hosts/<host_name>/groups/<group_name>")
+    api.add_resource(HostDetails, "/api/v1/hosts/<host_name>")
+    api.add_resource(HostMgmt, "/api/v1/hosts/<host_name>/groups/<group_name>")
+
     api.add_resource(API, "/api")
 
     # push the app into the API class, so it can walk the
