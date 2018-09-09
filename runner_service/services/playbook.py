@@ -8,6 +8,7 @@ import time
 
 from ansible_runner import run_async
 from runner_service import configuration
+from runner_service.cache import runner_cache
 from .utils import cleanup_dir, APIResponse
 from ..utils import fread
 
@@ -75,6 +76,9 @@ def list_playbooks():
 
 
 def stop_playbook(play_uuid):
+    logger.info("Cancel request for {} issued".format(play_uuid))
+    _runner = runner_cache[play_uuid].get('runner')
+    _runner.canceled = True
     return
 
 
@@ -93,6 +97,9 @@ def cb_playbook_finished(runner):
                                    runner.status))
     logger.info("Playbook {} Stats: {}".format(runner.config.playbook,
                                                runner.stats))
+
+    logger.debug("Dropping runner object from runner_cache")
+    del runner_cache[runner.config.ident]
 
 
 # Placeholder for populating the event_cache
@@ -175,4 +182,8 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
 
     r.status, r.data = "OK", {"status": _runner.status,
                               "play_uuid": play_uuid}
+
+    runner_cache[play_uuid] = {"runner": _runner,
+                               "current_task": "<-placeholder->"}
+
     return r
