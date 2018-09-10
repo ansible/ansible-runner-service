@@ -29,7 +29,7 @@ class ListPlaybooks(BaseResource):
         GET
         Return a list of playbook names
 
-        Example
+        Example.
 
         ```
         $ curl -i -k https://localhost:5001/api/v1/playbooks
@@ -68,7 +68,7 @@ class PlaybookState(BaseResource):
         GET {play_uuid}
         Return the given playbooks current state
 
-        Example
+        Example.
 
         ```
         $ curl -k -i https://localhost:5001/api/v1/playbooks/1733c3ac-b483-11e8-ad05-c85b7671906d -X get
@@ -190,7 +190,7 @@ class StartPlaybook(BaseResource):
         Start a given playbook, passing a set of variables as json to use for
         the run
 
-        Example
+        Example.
 
         ```
         $ curl -k -i -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml -X post
