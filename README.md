@@ -60,7 +60,7 @@ Here's a quick 'cheat sheet' of the API endpoints.
 |/api/v1/jobs/<play_uuid>/events| Return a list of events within a given playbook run (job)|
 |/api/v1/jobs/<play_uuid>/events/<event_uuid>| Return the output of a specific task within a playbook|
 |/api/v1/playbooks| Return the names of all available playbooks|
-|/api/v1/playbooks/<play_uuid>| Query the state of a playbook run, by uuid|
+|/api/v1/playbooks/<play_uuid>| Query the state or cancel a playbook run (by uuid)|
 |/api/v1/playbooks/<playbook_name>| Start a playbook by name, returning the play's uuid|
 |/api/v1/playbooks/<playbook_name>/tags/<tags>| Start a playbook using tags to control which tasks run|
 
