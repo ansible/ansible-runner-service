@@ -6,9 +6,14 @@ import re
 
 from .base import BaseResource
 from .utils import requires_auth, log_request
-from ..services.playbook import list_playbooks
-from ..services.playbook import get_status, start_playbook
+
+from ..services.playbook import (list_playbooks,
+                                 get_status,
+                                 start_playbook,
+                                 stop_playbook)
+
 from ..services.utils import playbook_exists, APIResponse
+from runner_service.cache import runner_cache
 
 logger = logging.getLogger(__name__)
 file_mutex = threading.Lock()
@@ -23,20 +28,27 @@ class ListPlaybooks(BaseResource):
         """
         GET
         Return a list of playbook names
+
         Example
 
         ```
-        [paul@rh460p ~]$ curl -k -i https://localhost:5001/api/v1/playbooks -X GET
+        $ curl -i -k https://localhost:5001/api/v1/playbooks
         HTTP/1.0 200 OK
         Content-Type: application/json
-        Content-Length: 48
-        Server: Werkzeug/0.12.2 Python/2.7.15
-        Date: Mon, 06 Aug 2018 02:51:37 GMT
+        Content-Length: 179
+        Server: Werkzeug/0.12.2 Python/3.6.6
+        Date: Sun, 09 Sep 2018 22:51:21 GMT
 
         {
-            "playbooks": [
-                "test.yml"
-            ]
+            "status": "OK",
+            "msg": "",
+            "data": {
+                "playbooks": [
+                    "osd-configure.yml",
+                    "test.yml",
+                    "probe-disks.yml"
+                ]
+            }
         }
         ```
         """
@@ -47,7 +59,7 @@ class ListPlaybooks(BaseResource):
 
 
 class PlaybookState(BaseResource):
-    """ Query the state of a playbook run, by uuid """
+    """Query the state or cancel a playbook run (by uuid)"""
 
     @requires_auth
     @log_request(logger)
@@ -55,29 +67,66 @@ class PlaybookState(BaseResource):
         """
         GET {play_uuid}
         Return the given playbooks current state
+
         Example
 
         ```
-        [paul@rh460p ~]$ curl -k -i https://localhost:5001/api/v1/playbooks/f39069aa-9f3d-11e8-852f-c85b7671906d -X GET
+        $ curl -k -i https://localhost:5001/api/v1/playbooks/1733c3ac-b483-11e8-ad05-c85b7671906d -X get
         HTTP/1.0 200 OK
         Content-Type: application/json
-        Content-Length: 134
-        Server: Werkzeug/0.12.2 Python/2.7.15
-        Date: Mon, 13 Aug 2018 21:15:34 GMT
+        Content-Length: 176
+        Server: Werkzeug/0.12.2 Python/3.6.6
+        Date: Sun, 09 Sep 2018 22:53:16 GMT
 
         {
-            "play_uuid": "f39069aa-9f3d-11e8-852f-c85b7671906d",
-            "status": "running",
-            "task_id": 13,
-            "task_name": "Step 2"
+            "status": "OK",
+            "msg": "Playbook with UUID 1733c3ac-b483-11e8-ad05-c85b7671906d is active",
+            "data": {
+                "task_id": 4,
+                "task_name": "Step 1"
+            }
         }
-
         ```
         """
 
         response = get_status(play_uuid)
 
         return response.__dict__, self.state_to_http[response.status]
+
+    @requires_auth
+    @log_request(logger)
+    def delete(self, play_uuid):
+        """
+        DELETE {play_uuid}
+        Issue a cancel request to a running playbook
+
+        Example.
+
+        ```
+        $ curl -i -k https://localhost:5001/api/v1/playbooks/b7ea3922-b481-11e8-a992-c85b7671906d -X delete
+        HTTP/1.0 200 OK
+        Content-Type: application/json
+        Content-Length: 75
+        Server: Werkzeug/0.12.2 Python/3.6.6
+        Date: Sun, 09 Sep 2018 22:43:16 GMT
+
+        {
+            "status": "OK",
+            "msg": "Cancel request issued",
+            "data": {}
+        }
+        ```
+        """
+        r = APIResponse()
+        if play_uuid not in runner_cache.keys():
+            # play_uuid may be valie but it's not actually running
+            r.status, r.msg = "NOT ACTIVE", \
+                              "playbook with uuid {} is not active".format(play_uuid)
+            return r.__dict__, 404
+
+        stop_playbook(play_uuid)
+        r.status, r.msg = 'OK', "Cancel request issued"
+        return r.__dict__, 200
 
 
 def _run_playbook(playbook_name, tags=None):
@@ -140,20 +189,23 @@ class StartPlaybook(BaseResource):
         POST {playbook, var1, var2...}
         Start a given playbook, passing a set of variables as json to use for
         the run
+
         Example
 
         ```
-        [paul@rh460p ~]$ curl -k -i -H "Content-Type: application/json" --data '{"time_delay": 10}' \
-        https://localhost:5001/api/v1/playbooks/test.yml -X POST
+        $ curl -k -i -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml -X post
         HTTP/1.0 202 ACCEPTED
         Content-Type: application/json
-        Content-Length: 86
-        Server: Werkzeug/0.12.2 Python/2.7.15
-        Date: Tue, 07 Aug 2018 00:21:38 GMT
+        Content-Length: 132
+        Server: Werkzeug/0.12.2 Python/3.6.6
+        Date: Sun, 09 Sep 2018 22:52:55 GMT
 
         {
-            "play_uuid": "da069894-99d7-11e8-9ffc-c85b7671906d",
-            "status": "started"
+            "status": "STARTED",
+            "msg": "starting",
+            "data": {
+                "play_uuid": "1733c3ac-b483-11e8-ad05-c85b7671906d"
+            }
         }
         ```
         """
@@ -173,23 +225,24 @@ class StartTaggedPlaybook(BaseResource):
         Start a given playbook using tags to control execution.
         The call is expected to be in json format and may contain json 'payload' to define the variables
         required by the playbook
-
         Example.
 
         ```
-        [paul@rh460p ~] curl -k -i -H "Content-Type: application/json" --data '{"time_delay": 20}' https://localhost:5001/api/v1/playbooks/test.yml/tags/onlyme -X POST
+        $ curl -k -i -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml/tags/onlyme -X post
         HTTP/1.0 202 ACCEPTED
         Content-Type: application/json
-        Content-Length: 86
-        Server: Werkzeug/0.12.2 Python/2.7.15
-        Date: Wed, 22 Aug 2018 00:04:35 GMT
+        Content-Length: 132
+        Server: Werkzeug/0.12.2 Python/3.6.6
+        Date: Sun, 09 Sep 2018 22:59:40 GMT
 
         {
-            "play_uuid": "f405051e-a59e-11e8-b1be-c85b7671906d",
-            "status": "running"
+            "status": "STARTED",
+            "msg": "starting",
+            "data": {
+                "play_uuid": "0884ec40-b484-11e8-b114-c85b7671906d"
+            }
         }
         ```
-
         """
         _e = APIResponse()
         if not tags:
