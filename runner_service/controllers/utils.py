@@ -28,17 +28,13 @@ def requires_auth(f):
         #     return jsonify(message="username/password mismatch with the "
         #                            "configuration file"), 401
 
-        #if there is a whitelist
-        if configuration.settings.ip_whitelist:
-            #check if response can from not whitelisted ip
-            if request.remote_addr not in configuration.settings.ip_whitelist:
-                responce = APIResponse()
-                responce.status, responce.msg = "NOAUTH", "Access denied not on whitelist"
-                logger.info("{} made a requested and is not whitelisted".format(request.remote_addr))
-                return responce.__dict__, BaseResource.state_to_http[responce.status]
-            else:#it came from a whitelisted ip
-                return f(*args, **kwargs)
-        else:# there is no whitlist let everything through
+        #if there is a whitelist and if response came from not whitelisted ip
+        if configuration.settings.ip_whitelist and request.remote_addr not in configuration.settings.ip_whitelist:
+            responce = APIResponse()
+            responce.status, responce.msg = "NOAUTH", "Access denied not on whitelist"
+            logger.info("{} made a requested and is not whitelisted".format(request.remote_addr))
+            return responce.__dict__, BaseResource.state_to_http[responce.status]
+        else:# there is no whitelist let everything through or it came from a whitelisted ip
             return f(*args, **kwargs)
 
     return decorated
