@@ -7,4 +7,4 @@ install:
   - python setup.py -q install
 
 script:
-  - flake8 ansible-runner-service.py runner-service/
+  - flake8 --ignore=E501 ansible-runner-service.py runner-service/
