@@ -6,7 +6,7 @@ version: 1
 # playbooks_root_dir: './samples'
 
 # port
-# tcp port for the service to listen to 
+# tcp port for the service to listen to
 # port: 5001
 #
 # ip_address
@@ -15,3 +15,6 @@ version: 1
 
 # passwords :
     # {"admin": "admin"}
+
+# ip_whitelist:
+#   - '127.0.0.1'
