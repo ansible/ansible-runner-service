@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.6"
+
+branches:
+  only:
+  - master
+
+install:
+  - pip install -r requirements.txt
+  - python setup.py -q install
+
+script:
+  - flake8 --ignore=E501 ansible-runner-service.py runner-service/
