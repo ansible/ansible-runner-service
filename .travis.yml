@@ -1,13 +1,10 @@
 language: python
 python:
-    - "3.6"
-
-branches:
-    only:
-        - master
+  - "3.6"
 
 install:
-    - ./.travis-pre.sh
+  - pip install -r requirements.txt
+  - python setup.py -q install
 
 script:
-    - tox
+  - flake8 ansible-runner-service.py runner-service/

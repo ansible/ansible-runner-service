@@ -1,6 +1,7 @@
-flask_restful
-flask
 ansible_runner
-uuid
-pyyaml
-pyopenssl
+crypto
+paramiko
+PyYAML
+pyOpenSSL
+flask
+flask-restful
