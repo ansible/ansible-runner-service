@@ -9,3 +9,4 @@ build
 *.egg-info
 .idea
 venv
+.tox

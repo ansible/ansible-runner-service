@@ -59,11 +59,12 @@ def remove_host(host_name, group_name):
     inventory = AnsibleInventory(excl=True)
 
     if not inventory.loaded:
-        r.status, r.msg = "LOCKED", "Unable to lock the inventory file, try later"
+        r.status, r.msg = "LOCKED", "Unable to lock the inventory file, " \
+                                    "try later"
         return r
 
-    if group_name not in inventory.groups or \
-      host_name not in inventory.group_show(group_name):
+    if (group_name not in inventory.groups or
+       host_name not in inventory.group_show(group_name)):
         # invalid request
         r.status, r.msg = "INVALID", "No such group found in the inventory"
         inventory.unlock()
