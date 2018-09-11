@@ -141,11 +141,16 @@ def _run_playbook(playbook_name, tags=None):
     r = APIResponse()
 
     if request.content_type != 'application/json':
-        r.status, r.msg = "INVALID", "Bad request, endpoint expects a json request/data"
+        r.status, r.msg = "INVALID", "Bad request, endpoint expects a json " \
+                                     "request/data"
         return r
 
     vars = request.get_json()
     filter = request.args.to_dict()
+    if not all([_k in valid_filter for _k in filter.keys()]):
+        r.status, r.msg = "INVALID", "Bad request, supported " \
+                          "filters are: {}".format(','.join(valid_filter))
+        return r
 
     logger.info("Playbook run request for {}, from {}, "
                 "parameters: {}".format(playbook_name,

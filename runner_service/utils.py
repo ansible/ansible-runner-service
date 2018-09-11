@@ -55,7 +55,7 @@ def create_self_signed_cert(cert_dir, cert_pfx):
         cert.get_subject().C = "US"
         cert.get_subject().ST = "North Carolina"
         cert.get_subject().L = "Raliegh"
-        cert.get_subject().O = "Red Hat"
+        cert.get_subject().O = "Red Hat"         # noqa: E741
         cert.get_subject().OU = "Ansible"
         cert.get_subject().CN = socket.gethostname()
         cert.set_serial_number(1000)

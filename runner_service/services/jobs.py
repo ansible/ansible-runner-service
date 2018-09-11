@@ -35,9 +35,10 @@ def filter_event(event_path, filter):
     with open(event_path, 'r') as event_fd:
         try:
             event_info = json.loads(event_fd.read())
-        except:
-            # TODO invalid json?
-            pass
+        except json.JSONDecodeError as err:
+            logger.warning("Invalid JSON within {}..."
+                           "skipping".format(event_fname))
+            return None
 
     # if the filter is null, our work here is done!
     if not filter:
