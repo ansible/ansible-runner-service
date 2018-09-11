@@ -33,20 +33,20 @@ class TestInventory(unittest.TestCase):
         self.assertTrue(os.path.exists(self.filename))
 
     def test_02_check_empty(self):
-        self.assertEqual(self.inventory.sections, [])
-
+        self.assertEqual(self.inventory.groups, [])
+        self.assertEqual(self.inventory.hosts, [])
+        
     def test_03_group_missing(self):
         with self.assertRaises(InventoryGroupMissing):
             self.inventory.group_remove('dodgy')
 
     def test_04_group_add(self):
         self.inventory.group_add('newgroup')
-        # self.inventory.write()
-        self.assertIn('newgroup', self.inventory.sections)
-
+        self.assertIn('newgroup', self.inventory.groups)
+    
     def test_05_group_remove(self):
         self.inventory.group_remove('newgroup')
-        self.assertNotIn('newgroup', self.inventory.sections)
+        self.assertNotIn('newgroup', self.inventory.groups)
 
     def test_06_host_add_invalid(self):
         with self.assertRaises(InventoryGroupMissing):
@@ -54,8 +54,8 @@ class TestInventory(unittest.TestCase):
 
     def test_07_group_add(self):
         self.inventory.group_add('mygroup')
-        self.assertIn('mygroup', self.inventory.sections)
-
+        self.assertIn('mygroup', self.inventory.groups)
+    
     def test_08_host_add(self):
         self.inventory.host_add('mygroup', 'myhost')
         self.assertIn('myhost', self.inventory.group_show('mygroup'))
@@ -67,22 +67,24 @@ class TestInventory(unittest.TestCase):
     def test_10_save(self):
         self.inventory.host_add('mygroup', 'host-1')
         self.inventory.host_add('mygroup', 'host-2')
-        self.inventory.write()
+        self.inventory.save()
         with open(self.filename) as i:
             data = i.readlines()
 
-        # should only be 7 records in the file
-        self.assertEqual(len(data), 7)
+        # should only be 6 records in the file
+        #['all:\n', '  children:\n', '    mygroup:\n', '
+        #  hosts:\n', '        host-1:\n', '        host-2:\n']
+        self.assertEqual(len(data), 6)
 
     def test_11_remove_nonempty(self):
         self.inventory.group_remove('mygroup')
-        self.assertNotIn('mygroup', self.inventory.sections)
+        self.assertNotIn('mygroup', self.inventory.groups)
+    
 
     @classmethod
     def tearDownClass(cls):
         # Remove the inventory file we were using
         os.unlink(TestInventory.filename)
-
 
 def main():
     unittest.main(verbosity=2)
