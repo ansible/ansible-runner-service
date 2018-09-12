@@ -1,4 +1,4 @@
-# ansible-runner-service
+# ansible-runner-service    ![Build status](https://travis-ci.com/pcuzner/ansible-runner-service.svg?branch=master)
 This is a POC project which wraps the ansible_runner interface inside a REST API.  
 
 The incentive for this is two-fold;
