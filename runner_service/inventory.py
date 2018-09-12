@@ -49,6 +49,9 @@ class InventoryreadError(Exception):
 class InventoryCorruptError(Exception):
     pass
 
+class InventoryOperationNotAllowed(Exception):
+    pass
+
 
 def no_group(func):
     def func_wrapper(*args):
@@ -95,6 +98,13 @@ class AnsibleInventory(object):
         self.fd = None
         self.load()
 
+    def __del__(self):
+        """ The destructor is needed because we keep a file descriptor open 
+        if we work in exclusive mode and we do not execute a write op.
+        """
+        if self.exclusive_lock:
+            self.fd.close()
+
     def load(self):
 
         if not os.path.exists(self.filename):
@@ -108,7 +118,7 @@ class AnsibleInventory(object):
             except IOError:
                 raise InventoryWriteError("Unable to create the seed inventory"
                                           " file at {}".format(self.filename))
-            
+
         try:    
             if self.exclusive_lock:
                 try:
@@ -128,7 +138,7 @@ class AnsibleInventory(object):
 
         if not raw:
             # If the inventory is empty for some extrange reason
-            self.inventory = AnsibleInventory.inventory_seed
+            self.inventory = None
         else:
             # invalid yaml management
             try:
@@ -141,20 +151,20 @@ class AnsibleInventory(object):
         return yaml.dump(self.inventory, default_flow_style=False)
 
     def save(self):
-        # Get the only when fd when we are going to save
-        self.fd = open(self.filename, 'w')
-        if self.exclusive_lock:
-            self.lock()
+        # Changes in inventory only allowed with exclusive lock
+        if not self.exclusive_lock:
+            raise InventoryOperationNotAllowed("Internal issue: Inventory modification not allowed")
+        
         self.fd.seek(0)
         self.fd.write(self._dump())
         self.fd.truncate()
         self.unlock()
 
     def lock(self):
-        fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-
+        fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)        
+        
     def unlock(self):
-        fcntl.flock(self.fd, fcntl.LOCK_UN)
+        fcntl.flock(self.fd, fcntl.LOCK_UN)        
         self.fd.close()
 
     def __str__(self):
