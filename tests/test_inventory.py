@@ -13,9 +13,18 @@ logger.setLevel(logging.DEBUG)
 # runner_service needs to be installed
 #
 
+INV_FILENAME = os.path.expanduser('~/inventory')
+
+def delete_file(filename):
+    """ Delete the file passed as parameter if it exists
+    """
+
+    if os.path.isfile(filename):
+        os.remove(filename)
+
 
 class TestInventory(unittest.TestCase):
-    # setup the inventory file
+    # setup the inventory file (with/without exclusive access)
     # add a group
     # remove a group that doesn't exist
     # remove a group that does
@@ -26,63 +35,143 @@ class TestInventory(unittest.TestCase):
     # add multiple hosts to a group
     #   then remove the group
     # shutdown - delete the inventory file
-    filename = os.path.expanduser('~/inventory')
-    inventory = AnsibleInventory(filename)
+    
+
+    def setUp(self):
+        """ Start with a clean environment in each test
+        """
+
+        delete_file(INV_FILENAME)
+
+    def test_01_exclusive_inventory_created(self):
+        """Setup the inventory file with exclusive access)
+        """
+        
+        inventory = AnsibleInventory(INV_FILENAME, True)
+      
+        self.assertTrue(os.path.exists(INV_FILENAME))
+
+
+        # this should raise an error ... 
+        inventory2 = AnsibleInventory(INV_FILENAME, True)
 
     def test_01_inventory_created(self):
-        self.assertTrue(os.path.exists(self.filename))
+        """Setup the inventory file without exclusive access)
+        """
+        
+        inventory = AnsibleInventory(INV_FILENAME)
+      
+        self.assertTrue(os.path.exists(INV_FILENAME))
+
+        # This should work
+        inventory2 = AnsibleInventory(INV_FILENAME)
 
     def test_02_check_empty(self):
-        self.assertEqual(self.inventory.sections, [])
-
+        """Check inventory is empty
+        """
+        
+        inventory = AnsibleInventory(INV_FILENAME, True)
+        
+        self.assertEqual(inventory.groups, [])
+        self.assertEqual(inventory.hosts, [])
+    
     def test_03_group_missing(self):
+        """Check error raised when a group does not exist
+        """
+
+        inventory = AnsibleInventory(INV_FILENAME, True)
         with self.assertRaises(InventoryGroupMissing):
-            self.inventory.group_remove('dodgy')
+            inventory.group_remove('dodgy')
 
     def test_04_group_add(self):
-        self.inventory.group_add('newgroup')
-        # self.inventory.write()
-        self.assertIn('newgroup', self.inventory.sections)
+        """Check group addition
+        """
+        
+        inventory = AnsibleInventory(INV_FILENAME, excl=True)
+        inventory.group_add('newgroup')
+        self.assertIn('newgroup', inventory.groups)
+
 
     def test_05_group_remove(self):
-        self.inventory.group_remove('newgroup')
-        self.assertNotIn('newgroup', self.inventory.sections)
+        """Check remove a group that exists
+        """
+
+        inventory = AnsibleInventory(INV_FILENAME, excl=True)
+        inventory.group_add('newgroup')
+        self.assertIn('newgroup', inventory.groups)
+
+        # two write operations not supported.. 
+        # Needed another AnsibleInventary Object
+        inventory = AnsibleInventory(INV_FILENAME, excl=True)  
+        inventory.group_remove('newgroup')
+        self.assertNotIn('newgroup', inventory.groups)
 
     def test_06_host_add_invalid(self):
-        with self.assertRaises(InventoryGroupMissing):
-            self.inventory.host_add('mygroup', 'myhost')
+        """add a host to a non-existent group
+        """
 
-    def test_07_group_add(self):
-        self.inventory.group_add('mygroup')
-        self.assertIn('mygroup', self.inventory.sections)
+        inventory = AnsibleInventory(INV_FILENAME, excl=True)
+        with self.assertRaises(InventoryGroupMissing):
+            inventory.host_add('mygroup', 'myhost')
 
     def test_08_host_add(self):
-        self.inventory.host_add('mygroup', 'myhost')
-        self.assertIn('myhost', self.inventory.group_show('mygroup'))
+        """add a host to an existent group
+        """        
+        inventory = AnsibleInventory(INV_FILENAME, excl=True)
+        inventory.group_add('mygroup')
+        self.assertIn('mygroup', inventory.groups)
+        
+        # two write operations not supported.. 
+        # Needed another AnsibleInventary Object 
+        inventory = AnsibleInventory(INV_FILENAME, excl=True)       
+        inventory.host_add('mygroup', 'myhost')
+        self.assertIn('myhost', inventory.group_show('mygroup'))
+
 
     def test_09_host_remove(self):
-        self.inventory.host_remove('mygroup', 'myhost')
-        self.assertNotIn('myhost', self.inventory.group_show('mygroup'))
+        """remove a host from an existent group
+        """ 
+        inventory = AnsibleInventory(INV_FILENAME, excl=True)
+        inventory.group_add('mygroup')
+        self.assertIn('mygroup', inventory.groups)
+        
+        # two write operations not supported.. 
+        # Needed another AnsibleInventary Object 
+        inventory = AnsibleInventory(INV_FILENAME, excl=True)       
+        inventory.host_add('mygroup', 'myhost')
+        self.assertIn('myhost', inventory.group_show('mygroup'))        
+        
+        # two write operations not supported.. 
+        # Needed another AnsibleInventary Object
+        inventory = AnsibleInventory(INV_FILENAME, excl=True) 
+        inventory.host_remove('mygroup', 'myhost')
+        self.assertNotIn('myhost', inventory.group_show('mygroup'))
 
-    def test_10_save(self):
-        self.inventory.host_add('mygroup', 'host-1')
-        self.inventory.host_add('mygroup', 'host-2')
-        self.inventory.write()
-        with open(self.filename) as i:
-            data = i.readlines()
-
-        # should only be 7 records in the file
-        self.assertEqual(len(data), 7)
 
     def test_11_remove_nonempty(self):
-        self.inventory.group_remove('mygroup')
-        self.assertNotIn('mygroup', self.inventory.sections)
+        """remove a group with hosts
+        """ 
+
+        inventory = AnsibleInventory(INV_FILENAME, excl=True)
+        inventory.group_add('mygroup')
+        self.assertIn('mygroup', inventory.groups)
+        
+        # two write operations not supported.. 
+        # Needed another AnsibleInventary Object 
+        inventory = AnsibleInventory(INV_FILENAME, excl=True)       
+        inventory.host_add('mygroup', 'myhost')
+        self.assertIn('myhost', inventory.group_show('mygroup'))        
+
+        # two write operations not supported.. 
+        # Needed another AnsibleInventary Object 
+        inventory = AnsibleInventory(INV_FILENAME, excl=True)         
+        inventory.group_remove('mygroup')
+        self.assertNotIn('mygroup', inventory.groups)
 
     @classmethod
     def tearDownClass(cls):
         # Remove the inventory file we were using
-        os.unlink(TestInventory.filename)
-
+        os.unlink(INV_FILENAME)
 
 def main():
     unittest.main(verbosity=2)

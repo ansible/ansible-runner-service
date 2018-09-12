@@ -42,6 +42,17 @@ class InventoryWriteError(Exception):
     pass
 
 
+class InventoryreadError(Exception):
+    pass
+
+
+class InventoryCorruptError(Exception):
+    pass
+
+class InventoryOperationNotAllowed(Exception):
+    pass
+
+
 def no_group(func):
     def func_wrapper(*args):
         obj, group = args
@@ -87,51 +98,73 @@ class AnsibleInventory(object):
         self.fd = None
         self.load()
 
+    def __del__(self):
+        """ The destructor is needed because we keep a file descriptor open 
+        if we work in exclusive mode and we do not execute a write op.
+        """
+        if self.exclusive_lock:
+            self.fd.close()
+
     def load(self):
 
         if not os.path.exists(self.filename):
             try:
-                with open(self.filename, 'w') as inv:
+                # Using Python 3 exclusive creation
+                with open(self.filename, 'x') as inv:                    
                     inv.write(yaml.dump(AnsibleInventory.inventory_seed,
-                                        default_flow_style=False))
+                                            default_flow_style=False))
+            except FileExistsError:
+                logger.info("Inventory file '{}' already created".format(self.filename))
             except IOError:
                 raise InventoryWriteError("Unable to create the seed inventory"
                                           " file at {}".format(self.filename))
 
-        if self.exclusive_lock:
-
-            try:
-                self.fd = open(self.filename, 'r+')
-                self.lock()
-            except (BlockingIOError, OSError):
-                # Can't obtain an exclusive_lock
-                self.fd.close()
-                return
+        try:    
+            if self.exclusive_lock:
+                try:
+                    self.fd = open(self.filename, 'r+')
+                    self.lock()
+                except (BlockingIOError, OSError):
+                    # Can't obtain an exclusive_lock
+                    self.fd.close()
+                    return
+                else:
+                    raw = self.fd.read().strip()
             else:
-                raw = self.fd.read().strip()
-        else:
-            raw = fread(self.filename)
+                raw = fread(self.filename)
+        except Exception as ex:
+            raise InventoryreadError("Unable to read the inventory"
+                                     " file at {}, error: {}".format(self.filename, ex))
 
         if not raw:
+            # If the inventory is empty for some extrange reason
             self.inventory = None
         else:
-            # TODO what happens with invalid yaml?
-            self.inventory = yaml.safe_load(raw)
-
+            # invalid yaml management
+            try:
+                self.inventory = yaml.safe_load(raw)
+            except yaml.YAMLError as ex:
+                raise InventoryCorruptError("Unable to understand the inventory"
+                                            " yaml file at {}, error: {}".format(self.filename, ex))
+        
     def _dump(self):
         return yaml.dump(self.inventory, default_flow_style=False)
 
     def save(self):
+        # Changes in inventory only allowed with exclusive lock
+        if not self.exclusive_lock:
+            raise InventoryOperationNotAllowed("Internal issue: Inventory modification not allowed")
+        
         self.fd.seek(0)
         self.fd.write(self._dump())
         self.fd.truncate()
         self.unlock()
 
     def lock(self):
-        fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-
+        fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)        
+        
     def unlock(self):
-        fcntl.flock(self.fd, fcntl.LOCK_UN)
+        fcntl.flock(self.fd, fcntl.LOCK_UN)        
         self.fd.close()
 
     def __str__(self):

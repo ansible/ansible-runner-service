@@ -2,6 +2,8 @@ language: python
 python:
   - "3.6"
 
+cache: pip
+
 branches:
   only:
   - master
@@ -12,3 +14,4 @@ install:
 
 script:
   - flake8 --ignore=E501 ansible-runner-service.py runner-service/
+  - python -m unittest tests/test_*.py
