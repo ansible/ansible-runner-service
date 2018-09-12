@@ -1,5 +1,11 @@
 from functools import wraps
-from flask import request
+from flask import request, jsonify
+from ..services.utils import APIResponse
+from .base import BaseResource
+from runner_service import configuration
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 def requires_auth(f):
@@ -10,7 +16,8 @@ def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         """ check the request carries a valid username/password header """
-        pass
+
+
         # # check credentials supplied in the http request are valid
         # auth = request.authorization
         # if not auth:
@@ -21,7 +28,14 @@ def requires_auth(f):
         #     return jsonify(message="username/password mismatch with the "
         #                            "configuration file"), 401
 
-        return f(*args, **kwargs)
+        #if there is a whitelist and if request came from not whitelisted ip
+        if configuration.settings.ip_whitelist and request.remote_addr not in configuration.settings.ip_whitelist:
+            response = APIResponse()
+            response.status, response.msg = "NOAUTH", "Access denied not on whitelist"
+            logger.info("{} made a request and is not whitelisted".format(request.remote_addr))
+            return response.__dict__, BaseResource.state_to_http[response.status]
+        else:# there is no whitelist let everything through or it came from a whitelisted ip
+            return f(*args, **kwargs)
 
     return decorated
 

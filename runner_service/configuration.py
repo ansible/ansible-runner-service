@@ -55,6 +55,9 @@ class Config(object):
         # flask config setting to hide the "production use" warning
         self.ENV = ''
 
+        #ip_whitelist
+        self.ip_whitelist = []
+
         if os.path.exists(self.config_file):
             self._apply_local()
 
