@@ -35,7 +35,7 @@ setup(
         "runner_service/services"
     ],
     scripts=[
-        'ansible-runner-service.py'
+        'ansible_runner_service.py'
     ],
     include_package_data=True,
     zip_safe=False,
