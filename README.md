@@ -19,7 +19,7 @@ versions of packages like flask that may not work correctly.
 ## Installation
 Try before you buy...simply unzip the archive and run :)
 ```
-python3 ansible-runner-service.py
+python3 ansible_runner_service.py
 ```
 This is 'dev' mode - all files and paths are relative to the path that you've
 unzipped the project into.
@@ -33,7 +33,7 @@ sudo python3 setup.py install --record installed_files --single-version-external
 
 Once this is installed, you may start the service with
 ```
-ansible-runner-service
+ansible_runner_service
 ```
 Word of warning though ... 'prod' mode is less tested!
 
@@ -122,4 +122,4 @@ Obviously you'll need to change the play and job uuids for your run :)
 - ansible-runner-service.service  
 
 /usr/bin/ or /usr/local/bin    
-- ansible-runner-service  
+- ansible_runner_service  
