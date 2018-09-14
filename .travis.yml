@@ -13,5 +13,5 @@ install:
   - python setup.py -q install
 
 script:
-  - flake8 --ignore=E501 ansible-runner-service.py runner-service/
+  - flake8 --ignore=E501 ansible_runner_service.py runner-service/
   - python -m unittest tests/test_*.py
