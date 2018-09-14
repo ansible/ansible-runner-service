@@ -14,7 +14,7 @@ versions of packages like flask that may not work correctly.
 - pyOpenSSL  (python3-pyOpenSSL on Fedora, CentOS pyOpenSSL)
 - ansible_runner 1.0.5 or above  
 
-*if in doubt, look inthe misc/docker folder and build the container!*
+*if in doubt, look in the misc/docker folder and build the container!*
 
 ## Installation
 Try before you buy...simply unzip the archive and run :)
@@ -63,6 +63,7 @@ Here's a quick 'cheat sheet' of the API endpoints.
 |/api/v1/playbooks/<play_uuid>| Query the state or cancel a playbook run (by uuid)|
 |/api/v1/playbooks/<playbook_name>| Start a playbook by name, returning the play's uuid|
 |/api/v1/playbooks/<playbook_name>/tags/<tags>| Start a playbook using tags to control which tasks run|
+|/metrics| Provide prometheus compatible statistics which describe playbook [activity](./misc/dashboards/README.md) |
 
 
 ## Testing
