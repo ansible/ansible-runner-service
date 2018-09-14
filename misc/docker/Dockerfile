@@ -32,4 +32,4 @@ RUN tar xvzf ansible-runner-service.tar.gz && \
     python36 setup.py install --record installed_files \
            --single-version-externally-managed
 
-ENTRYPOINT ["/usr/local/bin/ansible-runner-service"]
+ENTRYPOINT ["/usr/local/bin/ansible_runner_service"]
