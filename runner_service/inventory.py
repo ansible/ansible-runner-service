@@ -49,6 +49,7 @@ class InventoryreadError(Exception):
 class InventoryCorruptError(Exception):
     pass
 
+
 class InventoryOperationNotAllowed(Exception):
     pass
 
@@ -99,7 +100,7 @@ class AnsibleInventory(object):
         self.load()
 
     def __del__(self):
-        """ The destructor is needed because we keep a file descriptor open 
+        """ The destructor is needed because we keep a file descriptor open
         if we work in exclusive mode and we do not execute a write op.
         """
         if self.exclusive_lock:
@@ -110,16 +111,16 @@ class AnsibleInventory(object):
         if not os.path.exists(self.filename):
             try:
                 # Using Python 3 exclusive creation
-                with open(self.filename, 'x') as inv:                    
+                with open(self.filename, 'x') as inv:
                     inv.write(yaml.dump(AnsibleInventory.inventory_seed,
-                                            default_flow_style=False))
+                              default_flow_style=False))
             except FileExistsError:
                 logger.info("Inventory file '{}' already created".format(self.filename))
             except IOError:
                 raise InventoryWriteError("Unable to create the seed inventory"
                                           " file at {}".format(self.filename))
 
-        try:    
+        try:
             if self.exclusive_lock:
                 try:
                     self.fd = open(self.filename, 'r+')
@@ -146,7 +147,7 @@ class AnsibleInventory(object):
             except yaml.YAMLError as ex:
                 raise InventoryCorruptError("Unable to understand the inventory"
                                             " yaml file at {}, error: {}".format(self.filename, ex))
-        
+
     def _dump(self):
         return yaml.dump(self.inventory, default_flow_style=False)
 
@@ -154,17 +155,17 @@ class AnsibleInventory(object):
         # Changes in inventory only allowed with exclusive lock
         if not self.exclusive_lock:
             raise InventoryOperationNotAllowed("Internal issue: Inventory modification not allowed")
-        
+
         self.fd.seek(0)
         self.fd.write(self._dump())
         self.fd.truncate()
         self.unlock()
 
     def lock(self):
-        fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)        
-        
+        fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
     def unlock(self):
-        fcntl.flock(self.fd, fcntl.LOCK_UN)        
+        fcntl.flock(self.fd, fcntl.LOCK_UN)
         self.fd.close()
 
     def __str__(self):
