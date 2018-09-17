@@ -81,13 +81,15 @@ class APITestCase(unittest.TestCase):
             'artifacts'
             ])
 
+        user_home_dir = os.path.expanduser('~')
+
         seed_dirs([
             ('./data/artifacts/53b955f2-b79a-11e8-8be9-c85b7671906d',
              './samples/artifacts/53b955f2-b79a-11e8-8be9-c85b7671906d'),
             ('./data/project/testplaybook.yml',
              './samples/project/testplaybook.yml'),
             ('./data/project/.ansible.cfg',
-             './samples/project/.ansible.cfg')
+             os.path.join(user_home_dir, '.ansible.cfg'))
             ])
 
         configuration.init("dev")
