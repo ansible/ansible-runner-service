@@ -116,4 +116,4 @@ class APITestCase(unittest.TestCase):
 
         root_dir = os.getcwd()
         samples = os.path.join(root_dir, 'samples')
-        # shutil.rmtree(samples)
+        shutil.rmtree(samples)
