@@ -1,0 +1,1 @@
+{"uuid": "992a67f3-deb5-4b6d-9ebd-fd680ad79c0e", "counter": 2, "stdout": "", "start_line": 1, "end_line": 1, "created": "2018-09-13T21:16:50.316667", "pid": 26662, "event_data": {"pid": 26662, "playbook_uuid": "992a67f3-deb5-4b6d-9ebd-fd680ad79c0e", "playbook": "probe-disks.yml"}, "event": "playbook_on_start"}
