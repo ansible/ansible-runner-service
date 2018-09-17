@@ -8,8 +8,7 @@ class RunnerStats(object):
         "successful": 0,
         "failed": 0,
         "canceled": 0,
-        "timeout": 0
-        }
+        "timeout": 0}
 
     event_stats = {
         "ok": 0,
@@ -20,8 +19,7 @@ class RunnerStats(object):
         "file_diff": 0,
         "async_failed": 0,
         "async_ok": 0,
-        "async_poll": 0
-        }
+        "async_poll": 0}
 
 
 event_cache = {}
