@@ -14,4 +14,4 @@ install:
 
 script:
   - flake8 --ignore=E501 ansible_runner_service.py runner-service/
-  - python -m unittest tests/test_*.py
+  - cd tests && python -m unittest test_*.py
