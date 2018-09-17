@@ -33,6 +33,13 @@ class TestPlaybooks(APITestCase):
         payload = response.json()
         self.assertTrue(payload['msg'] == "successful")
 
+    def test_invalid_playbook_status(self):
+        """- get playbook state for a non-existant playbook run"""
+        response = requests.get("https://localhost:5001/api/v1/playbooks/9353b955f2-b79a-11e8-8be9-c85b76719093", # noqa
+                                verify=False)
+        self.assertEqual(response.status_code,
+                         404)
+
     def test_run_missing_playbook_(self):
         """- run a dummy playbook - should error 404"""
         response = requests.post("https://localhost:5001/api/v1/playbooks/imnotallthere.yml", # noqa
@@ -40,30 +47,6 @@ class TestPlaybooks(APITestCase):
                                  verify=False)
         self.assertEqual(response.status_code,
                          404)
-
-    # def test_run_playbook_(self):
-    #     """- run a test playbook - and check completion"""
-    #     response = requests.post("https://localhost:5001/api/v1/groups/test", # noqa
-    #                              verify=False)
-    #     self.assertEqual(response.status_code,
-    #                      200)
-    #     response = requests.post("https://localhost:5001/api/v1/hosts/localhost/groups/test", # noqa
-    #                              verify=False)
-    #     self.assertEqual(response.status_code,
-    #                      200)
-    #
-    #     response = requests.post("https://localhost:5001/api/v1/playbooks/testplaybook.yml", # noqa
-    #                              json={},
-    #                              verify=False)
-    #     self.assertEqual(response.status_code,
-    #                      202)
-    #
-    #     play_uuid = response.json()['data']['play_uuid']
-    #
-    #     # wait for it to complete
-    #     response = requests.get("https://localhost:5001/api/v1/playbooks/{}".format(play_uuid), # noqa
-    #                             verify=False)
-    #     print(response.json())
 
 
 if __name__ == "__main__":
