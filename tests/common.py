@@ -61,6 +61,7 @@ def tcp_port_free(port_num=5001):
 
 class APITestCase(unittest.TestCase):
     server = None
+    config = None
 
     @classmethod
     def setUpClass(cls):
@@ -93,6 +94,7 @@ class APITestCase(unittest.TestCase):
             ])
 
         configuration.init("dev")
+        cls.config = configuration.settings
 
         # wait for port to be free to bind to, incase multiple instances run
         # concurrently
