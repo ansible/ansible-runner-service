@@ -139,10 +139,13 @@ def ssh_create_key(ssh_dir, user=None):
 
 
 def ssh_connect_ok(host, user=None):
+<<<<<<< HEAD
 
     if not user:
         user = getpass.getuser()
 
+=======
+>>>>>>> Change default connect user to current login
     client = SSHClient()
     client.set_missing_host_key_policy(AutoAddPolicy())
 
