@@ -54,8 +54,8 @@ class Login(BaseResource):
                     if user_info['password'] == password:
                         # got a valid user and pass
                         # generate token
-                        exp = datetime.datetime.utcnow() + datetime.timedelta(hours=24)
-                        encoded = jwt.encode({'exp': exp}, 'secret', algorithm='HS256')
+                        exp = datetime.datetime.utcnow() + datetime.timedelta(hours=configuration.settings.token_hours)
+                        encoded = jwt.encode({'exp': exp}, configuration.settings.token_secret, algorithm='HS256')
                         token = encoded.decode('utf-8')
 
                         response = APIResponse()

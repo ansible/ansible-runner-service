@@ -31,7 +31,7 @@ def requires_auth(f):
             else:  # check for valid token
                 token = request.headers.get('Authorization')
                 try:
-                    jwt.decode(token, 'secret', algorithms='HS256')
+                    jwt.decode(token, configuration.settings.token_secret, algorithms='HS256')
                 except jwt.DecodeError:
                     response = APIResponse()
                     response.status, response.msg = "NOAUTH", "Access denied invalid token"

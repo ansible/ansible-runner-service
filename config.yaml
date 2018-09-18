@@ -13,8 +13,11 @@ version: 1
 # Specific IP address to bind to
 # ip_address: '0.0.0.0'
 
-passwords :
+passwords:
     {"admin": "admin"}
 
-ip_whitelist:
-  - '127.0.0.1'
+token_secret: 'secret'
+token_hours: 24
+
+# ip_whitelist:
+#   - '127.0.0.1'
