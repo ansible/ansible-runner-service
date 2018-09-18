@@ -15,25 +15,27 @@ class Login(BaseResource):
 
     @requires_auth
     @log_request(logger)
-    def post(self):
+    def get(self):
         """
-        POST {username, password}
+        GET {username, password}
         Login to get token
 
         Example.
 
         ```
-        $ curl -k -i -H "Content-Type: application/json" --data '{"username":"admin", "password": "admin"}' https://localhost:5001/api/v1/login -X post
+        $ curl -k -i -H "Content-Type: application/json" --data '{"username":"admin", "password": "admin"}' https://localhost:5001/api/v1/login -X get
         HTTP/1.0 200 OK
         Content-Type: application/json
-        Content-Length: 71
-        Server: Werkzeug/0.14.1 Python/3.6.6
-        Date: Wed, 05 Sep 2018 04:54:51 GMT
+        Content-Length: 198
+        Server: Werkzeug/0.14.1 Python/3.6.5
+        Date: Tue, 18 Sep 2018 18:29:18 GMT
 
         {
             "status": "OK",
             "msg": "Token returned",
-            "data": {"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczNzgzNzJ9.7TF9t91mG7Wj8MMyh08a-kZvck8wXjpGpPDvjpQP3a8"}
+            "data": {
+                "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODE3NTh9.6H5cRsNhbWM40T4VsBKH6bYSrINUZHnnKhjGLJqZtVQ"
+            }
         }
         ```
         """
