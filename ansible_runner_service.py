@@ -111,11 +111,10 @@ def setup_localhost_ssh():
         os.mkdir(ssh_home)
         os.chmod(ssh_home, 0o700)
     authorized_keys = os.path.join(ssh_home, "authorized_keys")
-    app_pub_key = fread(
-                    os.path.join(
-                        configuration.settings.playbooks_root_dir,
-                        "env",
-                        "ssh_key.pub"))
+
+    root_dir = configuration.settings.playbooks_root_dir
+    app_pub_key = fread(os.path.join(root_dir, "env", "ssh_key.pub"))
+
     if not os.path.exists(authorized_keys):
         with open(authorized_keys, "w") as auth_file:
             auth_file.write(app_pub_key)
