@@ -15,9 +15,9 @@ branches:
   - master
 
 before_install:
-    - sudo apt-add-repository ppa:ansible/ansible
+    - sudo apt-add-repository --yes ppa:ansible/ansible
     - sudo apt-get update
-    - sudo apt-get install ansible
+    - sudo apt-get --yes install ansible
 
 install:
   - pip install -r requirements.txt
