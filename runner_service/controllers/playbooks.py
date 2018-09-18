@@ -32,7 +32,7 @@ class ListPlaybooks(BaseResource):
         Example.
 
         ```
-        $ curl -i -k https://localhost:5001/api/v1/playbooks
+        $ curl -i -k -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 179
@@ -71,7 +71,7 @@ class PlaybookState(BaseResource):
         Example.
 
         ```
-        $ curl -k -i https://localhost:5001/api/v1/playbooks/1733c3ac-b483-11e8-ad05-c85b7671906d -X get
+        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks/1733c3ac-b483-11e8-ad05-c85b7671906d -X get
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 176
@@ -103,7 +103,7 @@ class PlaybookState(BaseResource):
         Example.
 
         ```
-        $ curl -i -k https://localhost:5001/api/v1/playbooks/b7ea3922-b481-11e8-a992-c85b7671906d -X delete
+        $ curl -i -k -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks/b7ea3922-b481-11e8-a992-c85b7671906d -X delete
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 75
@@ -198,7 +198,7 @@ class StartPlaybook(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml -X post
+        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml -X post
         HTTP/1.0 202 ACCEPTED
         Content-Type: application/json
         Content-Length: 132
@@ -233,7 +233,7 @@ class StartTaggedPlaybook(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml/tags/onlyme -X post
+        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml/tags/onlyme -X post
         HTTP/1.0 202 ACCEPTED
         Content-Type: application/json
         Content-Length: 132
