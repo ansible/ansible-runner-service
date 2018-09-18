@@ -6,12 +6,18 @@ addons:
   apt:
     packages:
       - openssh-server
+      - software-properties-common
 
 cache: pip
 
 branches:
   only:
   - master
+
+before_install:
+    - sudo apt-add-repository ppa:ansible/ansible
+    - sudo apt-get update
+    - sudo apt-get install ansible
 
 install:
   - pip install -r requirements.txt
