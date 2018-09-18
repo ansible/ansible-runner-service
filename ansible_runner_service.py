@@ -126,7 +126,7 @@ def setup_localhost_ssh():
             auth_data = auth_file.read().splitlines()
         if app_pub_key not in auth_data:
             with open(authorized_keys, "a") as auth_file:
-                auth_file.write(app_pub_key)
+                auth_file.write("{}\n".format(app_pub_key))
         else:
             pass
 
