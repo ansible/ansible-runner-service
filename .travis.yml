@@ -2,6 +2,11 @@ language: python
 python:
   - "3.6"
 
+addons:
+  apt:
+    packages:
+      - openssh-server
+
 cache: pip
 
 branches:
@@ -14,4 +19,4 @@ install:
 
 script:
   - flake8 --ignore=E501 ansible_runner_service.py runner-service/
-  - cd tests && ssh_checks=false python -m unittest test_*.py
+  - cd tests && python -m unittest test_*.py
