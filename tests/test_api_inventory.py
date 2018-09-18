@@ -66,18 +66,27 @@ class TestInventory(APITestCase):
         self.assertNotIn("group2", inv_data['all']['children'].keys())
 
     def test_host_add(self):
-        """- Add a host to a group - expecting 404 NOCONN error"""
+        """- Add a host to a group - 404 unless ssh_checks turned off"""
         response = requests.post("https://localhost:5001/api/v1/groups/newhost",    # noqa
                                  verify=False)
         self.assertEqual(response.status_code,
                          200)
         response = requests.post("https://localhost:5001/api/v1/hosts/dummy/groups/newhost",    # noqa
                                  verify=False)
-        self.assertEqual(response.status_code,
-                         404)
 
-        payload = response.json()
-        self.assertTrue(payload['status'] == 'NOCONN')
+        if TestInventory.config.ssh_checks:
+
+            self.assertEqual(response.status_code,
+                             404)
+            payload = response.json()
+            self.assertTrue(payload['status'] == 'NOCONN')
+        else:
+            # execution in Travis should use not use ssh_checks, so we check
+            # the message to check the logic flow
+            self.assertEqual(response.status_code,
+                             200)
+            payload = response.json()
+            self.assertTrue(payload['msg'].upper().startswith('SKIPPED'))
 
     def test_host_add_localhost(self):
         """- Add a localhost to a group"""
