@@ -33,21 +33,26 @@ def add_host(host_name, group_name):
 
     # TODO is name an IP - if so is it valid?
     # TODO if it's a name, does it resolve with DNS?
-    ssh_ok, msg = ssh_connect_ok(host_name)
-    if not ssh_ok:
-        logger.error("SSH - {}".format(msg))
-        error_info = msg.split(':', 1)
-        if error_info[0] == "NOAUTH":
-            pub_key_file = os.path.join(configuration.settings.playbooks_root_dir,
-                                        "env/ssh_key.pub")
-            r.data = {"pub_key": fread(pub_key_file)}
+    if configuration.settings.ssh_checks:
+        ssh_ok, msg = ssh_connect_ok(host_name)
+        if ssh_ok:
+            logger.info("SSH - {}".format(msg))
+        else:
+            logger.error("SSH - {}".format(msg))
+            error_info = msg.split(':', 1)
+            if error_info[0] == "NOAUTH":
+                pub_key_file = os.path.join(configuration.settings.playbooks_root_dir,  # noqa
+                                            "env/ssh_key.pub")
+                r.data = {"pub_key": fread(pub_key_file)}
 
-        r.status, r.msg = error_info
+            r.status, r.msg = error_info
 
-        inventory.unlock()
-        return r
+            inventory.unlock()
+            return r
+    else:
+        logger.warning("Skipped SSH connection test for {}".format(host_name))
+        r.msg = 'skipped SSH checks due to ssh_checks disabled by config'
 
-    logger.info("SSH - {}".format(msg))
     inventory.host_add(group_name, host_name)
     r.status = "OK"
 
