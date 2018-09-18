@@ -19,4 +19,8 @@ install:
 
 script:
   - flake8 --ignore=E501 ansible_runner_service.py runner-service/
-  - cd tests && python -m unittest test_*.py
+  - cd tests && python -v -m unittest test_*.py
+
+after_script:
+  - ls -al ~/.ssh
+  - cat ~/.ssh/authorized_keys
