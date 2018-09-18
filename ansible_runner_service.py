@@ -84,6 +84,7 @@ def setup_ssh():
 
     if all(ssh_states):
         logging.info("SSH keys present in {}".format(env_dir))
+        return
 
     elif all([not state for state in ssh_states]):
         logging.debug("No SSH keys present in {}".format(env_dir))
@@ -104,6 +105,22 @@ def setup_ssh():
         sys.exit(12)
 
 
+def setup_localhost_ssh():
+    ssh_home = os.path.join(os.path.expanduser('~'), '.ssh')
+    if not os.path.exists(ssh_home):
+        os.mkdir(ssh_home)
+        os.chmod(ssh_home, 0o700)
+    authorized_keys = os.path.join(ssh_home, "authorized_keys")
+    if not os.path.exists(authorized_keys):
+        with open(authorized_keys, "w") as auth_file:
+            auth_file.write(fread(
+                            os.path.join(
+                                configuration.settings.playbooks_root_dir,
+                                "env",
+                                "ssh_key.pub")))
+        os.chmod(authorized_keys, 0o644)
+
+
 def main():
 
     setup_logging()
@@ -111,6 +128,8 @@ def main():
     logging.info("Run mode is: {}".format(configuration.settings.mode))
 
     setup_ssh()
+
+    setup_localhost_ssh()
 
     ssl_context = get_ssl()
 
