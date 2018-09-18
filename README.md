@@ -59,6 +59,7 @@ Here's a quick 'cheat sheet' of the API endpoints.
 |/api/v1/hosts/<host_name>/groups/<group_name>| Manage ansible control of a given host|
 |/api/v1/jobs/<play_uuid>/events| Return a list of events within a given playbook run (job)|
 |/api/v1/jobs/<play_uuid>/events/<event_uuid>| Return the output of a specific task within a playbook|
+|/api/v1/login| Authenticate user and provide token|
 |/api/v1/playbooks| Return the names of all available playbooks|
 |/api/v1/playbooks/<play_uuid>| Query the state or cancel a playbook run (by uuid)|
 |/api/v1/playbooks/<playbook_name>| Start a playbook by name, returning the play's uuid|
@@ -76,15 +77,15 @@ The archive, downloaded from github, contains a simple playbook that just uses t
 
 Use the steps below (dev mode), to quickly exercise the API  
 1. Get the list of available playbooks (should just be test.yml)  
-```curl -k -i https://localhost:5001/api/v1/playbooks  -X GET```
+```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks  -X GET```
 2. Run the test.yml playbook, passing the time_delay parameter (30 secs should be enough).  
-```curl -k -i -H "Content-Type: application/json" --data '{"time_delay": 30}' https://localhost:5001/api/v1/playbooks/test.yml -X POST```  
+```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" -H "Content-Type: application/json" --data '{"time_delay": 30}' https://localhost:5001/api/v1/playbooks/test.yml -X POST```  
 3. The previous command will return the playbooks UUID. Use this identifier to query the state or progress of the run.  
-```curl -k -i https://localhost:5001/api/v1/playbooks/f39069aa-9f3d-11e8-852f-c85b7671906d -X GET```
+```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks/f39069aa-9f3d-11e8-852f-c85b7671906d -X GET```
 4. Get a list of all the events in a playbook. The return list consists of all the job event ID's  
-```curl -k -i https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events  -X GET```
+```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events  -X GET```
 5. To get specific output from a job event, you can query the job event  
-```curl -k -i https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events/13-c85b7671-906d-e52d-d421-000000000008  -X GET```  
+```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events/13-c85b7671-906d-e52d-d421-000000000008  -X GET```  
 
 Obviously you'll need to change the play and job uuids for your run :)
 
