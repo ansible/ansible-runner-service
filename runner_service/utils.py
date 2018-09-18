@@ -172,7 +172,7 @@ def ssh_connect_ok(host, user=None):
 
     except (AuthenticationException, SSHException):
         return False, "NOAUTH:SSH auth error - passwordless ssh not " \
-                      "configured for '{}'".format(host)
+                      "configured for '{}' on '{}'".format(user, host)
 
     except NoValidConnectionsError:
         return False, "NOCONN:SSH target '{}' not contactable; host offline" \
