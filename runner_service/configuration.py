@@ -117,7 +117,7 @@ class Config(object):
         bool_types = {
             "TRUE": True,
             "FALSE": False,
-            }
+        }
 
         if value.isdigit():
             value = int(value)
