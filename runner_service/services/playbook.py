@@ -25,7 +25,8 @@ def get_status(play_uuid):
                                 play_uuid)
 
     if not os.path.exists(pb_artifacts):
-        r.status, r.msg = "NOTFOUND", "Playbook run with UUID {} not found".format(play_uuid)
+        r.status, r.msg = "NOTFOUND", \
+                          "Playbook with UUID {} not found".format(play_uuid)
         return r
 
     pb_status = os.path.join(pb_artifacts,
@@ -39,6 +40,9 @@ def get_status(play_uuid):
         # play is still active
         # get last event
         events_dir = os.path.join(pb_artifacts, "job_events")
+        if not os.path.exists(events_dir):
+            r.status, r.msg = "NOTFOUND", "No events recorded yet"
+            return r
 
         # gather the events, excluding any partially complete files
         events = [_f for _f in os.listdir(events_dir)
