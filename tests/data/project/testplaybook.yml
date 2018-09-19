@@ -2,8 +2,7 @@
 
 - name: test Playbook execution against localhost
   hosts:
-    - 127.0.0.1
-  connection: local
+    - localhost
   gather_facts: False
   tasks:
     - name: Just go to sleep for a second
