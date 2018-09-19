@@ -48,6 +48,34 @@ class TestPlaybooks(APITestCase):
         self.assertEqual(response.status_code,
                          404)
 
+    def test_run_playbook(self):
+        """- start a playbook"""
+        # create a playbook group and put localhost in it
+        """- Add a host to a group - 404 unless ssh_checks turned off"""
+        response = requests.post("https://localhost:5001/api/v1/groups/playbook",    # noqa
+                                 verify=False)
+        self.assertEqual(response.status_code,
+                         200)
+        response = requests.post("https://localhost:5001/api/v1/hosts/localhost/groups/playbook",    # noqa
+                                 verify=False)
+        self.assertEqual(response.status_code,
+                         200)
+                         
+        response = requests.post("https://localhost:5001/api/v1/playbooks/testplaybook.yml", # noqa
+                                 json={},
+                                 verify=False)
+        self.assertEqual(response.status_code, 202)     # it started OK
+
+        play_uuid = response.json()['data']['play_uuid']
+        # wait for playbook completion
+        while True:
+            response = requests.get("https://localhost:5001/api/v1/playbooks/{}".format(play_uuid), # noqa
+                                    verify=False)
+            self.assertEqual(response.status_code, 200)
+            if response.json()['msg'] in ['failed', 'successful']:
+                break
+
+
 
 if __name__ == "__main__":
 
