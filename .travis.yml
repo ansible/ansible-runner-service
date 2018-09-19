@@ -23,9 +23,12 @@ install:
   - pip install -r requirements.txt
   - python setup.py -q install
 
+before_script:
+  - cp -pr tests /tmp
+
 script:
   - flake8 --ignore=E501 ansible_runner_service.py runner-service/
-  - cd tests && python -v -m unittest test_*.py
+  - cd /tmp/tests && python -m unittest test_*.py
 
 after_script:
   - ls -al ~/.ssh
