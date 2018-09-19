@@ -60,7 +60,7 @@ class TestPlaybooks(APITestCase):
                                  verify=False)
         self.assertEqual(response.status_code,
                          200)
-                         
+
         response = requests.post("https://localhost:5001/api/v1/playbooks/testplaybook.yml", # noqa
                                  json={},
                                  verify=False)
@@ -71,7 +71,7 @@ class TestPlaybooks(APITestCase):
         while True:
             response = requests.get("https://localhost:5001/api/v1/playbooks/{}".format(play_uuid), # noqa
                                     verify=False)
-            self.assertEqual(response.status_code, 200)
+            self.assertIn(response.status_code, [200, 404])
             if response.json()['msg'] in ['failed', 'successful']:
                 break
 
