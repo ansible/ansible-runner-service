@@ -25,6 +25,7 @@ install:
 
 before_script:
   - cp -pr tests /tmp
+  - cp ansible_runner_service.py /tmp
 
 script:
   - flake8 --ignore=E501 ansible_runner_service.py runner-service/
