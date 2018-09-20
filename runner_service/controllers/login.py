@@ -72,7 +72,7 @@ class Login(BaseResource):
                 response = APIResponse()
                 response.status, response.msg = "NOAUTH", "Access denied invalid data"
                 return response.__dict__, BaseResource.state_to_http[response.status]
-        else: # did not get anything passed
+        else:  # did not get anything passed
             response = APIResponse()
             response.status, response.msg = "NOAUTH", "Access denied no login provided"
             return response.__dict__, BaseResource.state_to_http[response.status]

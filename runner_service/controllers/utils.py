@@ -45,7 +45,7 @@ def requires_auth(f):
                         return response.__dict__, BaseResource.state_to_http[response.status]
                     # no exceptions thrown token was good
                     return f(*args, **kwargs)
-                else: # there was no token
+                else:  # there was no token
                     response = APIResponse()
                     response.status, response.msg = "NOAUTH", "Access denied missing token"
                     logger.info("{} made a request without a token".format(request.remote_addr))
