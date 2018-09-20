@@ -15,7 +15,8 @@ from .controllers import (ListPlaybooks,
                           Hosts,
                           HostMgmt,
                           HostDetails,
-                          PrometheusMetrics
+                          PrometheusMetrics,
+                          Login
                           )
 
 from runner_service import configuration
@@ -50,6 +51,7 @@ def create_app():
 
     api.add_resource(API, "/api")
     api.add_resource(PrometheusMetrics, "/metrics")
+    api.add_resource(Login, "/api/v1/login")
 
     # push the app object into the API class, so it can walk the
     # API endpoints.
