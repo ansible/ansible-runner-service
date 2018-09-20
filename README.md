@@ -76,7 +76,7 @@ For example, with ceph the ```osd-configure.yml``` playbook has been tested succ
 The archive, downloaded from github, contains a simple playbook that just uses the bash sleep command - enabling you to quickly experiment with the API.
 
 Use the steps below (dev mode), to quickly exercise the API  
-1. Authenticate user and provide token
+1. Authenticate user and provide token  
 ```curl -k -i --user admin:admin https://localhost:5001/api/v1/login -X get```
 2. Get the list of available playbooks (should just be test.yml)  
 ```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks  -X GET```
@@ -89,7 +89,7 @@ Use the steps below (dev mode), to quickly exercise the API
 6. To get specific output from a job event, you can query the job event  
 ```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events/13-c85b7671-906d-e52d-d421-000000000008  -X GET```  
 
-Obviously you'll need to change the play and job uuids for your run :)
+Obviously you'll need to change the token, play and job uuids for your run :)
 
 ## Usage and Workflows
 < INSERT WARP DRIVE HERE >
