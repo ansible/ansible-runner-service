@@ -3,6 +3,7 @@ import sys
 import logging
 import requests
 import unittest
+import time
 
 sys.path.extend(["../", "./"])
 from common import APITestCase                # noqa
@@ -74,6 +75,7 @@ class TestPlaybooks(APITestCase):
             self.assertIn(response.status_code, [200, 404])
             if response.json()['msg'] in ['failed', 'successful']:
                 break
+            time.sleep(0.5)
 
 
 if __name__ == "__main__":
