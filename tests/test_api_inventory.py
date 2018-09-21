@@ -3,7 +3,6 @@ import os
 import sys
 import yaml
 import logging
-import requests
 import unittest
 
 sys.path.extend(["../", "./"])
@@ -20,9 +19,7 @@ class TestInventory(APITestCase):
 
     def test_groups(self):
         """- Get a list of groups from the inventory"""
-
-        response = requests.get("https://localhost:5001/api/v1/groups",
-                                verify=False)
+        response = self.get('/groups')
 
         self.assertEqual(response.status_code,
                          200)
@@ -35,8 +32,8 @@ class TestInventory(APITestCase):
 
     def test_group_add(self):
         """- Add a group to the inventory"""
-        response = requests.post("https://localhost:5001/api/v1/groups/group1",
-                                 verify=False)
+        response = self.post('/groups/group1')
+
         self.assertEqual(response.status_code,
                          200)
         self.assertEqual(response.headers['Content-Type'],
@@ -50,13 +47,11 @@ class TestInventory(APITestCase):
     def test_group_remove(self):
         """- Remove a group from the inventory"""
         # first, setup the group we're going to remove
-        response = requests.post("https://localhost:5001/api/v1/groups/group2",
-                                 verify=False)
+        response = self.post('/groups/group2')
         self.assertEqual(response.status_code,
                          200)
 
-        response = requests.delete("https://localhost:5001/api/v1/groups/group2",   # noqa
-                                   verify=False)
+        response = self.delete('/groups/group2')
         self.assertEqual(response.status_code,
                          200)
 
@@ -67,12 +62,12 @@ class TestInventory(APITestCase):
 
     def test_host_add(self):
         """- Add a host to a group - 404 unless ssh_checks turned off"""
-        response = requests.post("https://localhost:5001/api/v1/groups/newhost",    # noqa
-                                 verify=False)
+
+        response = self.post('/groups/newhost')
         self.assertEqual(response.status_code,
                          200)
-        response = requests.post("https://localhost:5001/api/v1/hosts/dummy/groups/newhost",    # noqa
-                                 verify=False)
+
+        response = self.post("/hosts/dummy/groups/newhost")
 
         if TestInventory.config.ssh_checks:
 
@@ -81,8 +76,6 @@ class TestInventory(APITestCase):
             payload = response.json()
             self.assertTrue(payload['status'] == 'NOCONN')
         else:
-            # execution in Travis should use not use ssh_checks, so we check
-            # the message to check the logic flow
             self.assertEqual(response.status_code,
                              200)
             payload = response.json()
@@ -90,12 +83,12 @@ class TestInventory(APITestCase):
 
     def test_host_add_localhost(self):
         """- Add a localhost to a group"""
-        response = requests.post("https://localhost:5001/api/v1/groups/local",
-                                 verify=False)
+
+        response = self.post('/groups/local')
         self.assertEqual(response.status_code,
                          200)
-        response = requests.post("https://localhost:5001/api/v1/hosts/localhost/groups/local",    # noqa
-                                 verify=False)
+
+        response = self.post('/hosts/localhost/groups/local')
         self.assertEqual(response.status_code,
                          200)
 
@@ -106,10 +99,10 @@ class TestInventory(APITestCase):
 
     def test_hosts(self):
         """- Get a list of hosts in the inventory"""
-        response = requests.get("https://localhost:5001/api/v1/hosts",
-                                verify=False)
+        response = self.get('/hosts')
         self.assertEqual(response.status_code,
                          200)
+
         payload = response.json()
         self.assertTrue(isinstance(payload['data']['hosts'], list))
 
