@@ -4,6 +4,7 @@ import shutil
 import socket
 import urllib3
 import unittest
+import requests
 from multiprocessing import Process
 
 from ansible_runner_service import *        # noqa
@@ -62,6 +63,7 @@ def tcp_port_free(port_num=5001):
 class APITestCase(unittest.TestCase):
     server = None
     config = None
+    token = None
 
     @classmethod
     def setUpClass(cls):
@@ -95,7 +97,7 @@ class APITestCase(unittest.TestCase):
         # wait for port to be free to bind to, incase multiple instances run
         # concurrently
         while True:
-            if tcp_port_free():
+            if tcp_port_free(port_num=configuration.settings.port):
                 break
             time.sleep(0.1)
 
@@ -107,7 +109,18 @@ class APITestCase(unittest.TestCase):
         cls.server.daemon = True
         cls.server.start()
 
-        wait_for_api()
+        wait_for_api(port_num=configuration.settings.port)
+
+        cls.token = APITestCase.get_token()
+
+    @classmethod
+    def get_token(cls):
+        response = requests.get("https://localhost:{}/api/v1/login".format(configuration.settings.port), # noqa
+                                auth=('admin',
+                                configuration.settings.passwords['admin']),
+                                verify=False)
+        assert response.status_code == 200, "Unable to get login token"
+        cls.token = response.json()['data']['token']
 
     @classmethod
     def tearDownClass(cls):
@@ -117,3 +130,42 @@ class APITestCase(unittest.TestCase):
         root_dir = os.getcwd()
         samples = os.path.join(root_dir, 'samples')
         shutil.rmtree(samples)
+
+    def get(self, endpoint, auth=None):
+        url = "https://localhost:{}/api/v1{}".format(configuration.settings.port,      # noqa
+                                                      endpoint)
+        parms = {
+            "url": url,
+            "headers": {"Authorization": APITestCase.token},
+            "verify": False
+        }
+
+        if auth:
+            parms['auth'] = auth
+
+        return requests.get(**parms)
+
+    def post(self, endpoint, payload=None):
+        url = "https://localhost:{}/api/v1{}".format(configuration.settings.port,      # noqa
+                                                     endpoint)
+        parms = {
+            "url": url,
+            "headers": {"Authorization": APITestCase.token},
+            "verify": False
+        }
+
+        if isinstance(payload, dict):
+            parms['json'] = payload
+
+        return requests.post(**parms)
+
+    def delete(self, endpoint):
+        url = "https://localhost:{}/api/v1{}".format(configuration.settings.port,      # noqa
+                                                     endpoint)
+        parms = {
+            "url": url,
+            "headers": {"Authorization": APITestCase.token},
+            "verify": False
+        }
+
+        return requests.delete(**parms)
