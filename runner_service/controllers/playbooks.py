@@ -13,6 +13,7 @@ from ..services.playbook import (list_playbooks,
                                  stop_playbook)
 
 from ..services.utils import playbook_exists, APIResponse
+from ..inventory import AnsibleInventory
 from runner_service.cache import runner_cache
 
 logger = logging.getLogger(__name__)
@@ -151,6 +152,21 @@ def _run_playbook(playbook_name, tags=None):
         r.status, r.msg = "INVALID", "Bad request, supported " \
                           "filters are: {}".format(','.join(valid_filter))
         return r
+
+    if 'limit' in filter:
+
+        target_hosts = filter['limit'].split(',')
+        inv_hosts = AnsibleInventory().hosts
+        logger.debug("Checking host limit against the inventory")
+        if all([_h in inv_hosts for _h in target_hosts]):
+            logger.debug("hosts in the limit list match the inventory")
+
+        else:
+            logger.error("limit hosts don't match with the inventory")
+            # host(s) provided are not all in the inventory
+            r.status, r.msg = "INVALID", \
+                              "Host(s) provided not in Ansible inventory"
+            return r
 
     logger.info("Playbook run request for {}, from {}, "
                 "parameters: {}".format(playbook_name,

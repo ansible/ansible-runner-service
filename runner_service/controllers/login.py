@@ -60,12 +60,12 @@ class Login(BaseResource):
                         else:
                             # valid user but pass is wrong
                             response = APIResponse()
-                            response.status, response.msg = "NOAUTH", "Access denied invalid login"
+                            response.status, response.msg = "NOAUTH", "Access denied invalid login: password incorrect"
                             logger.info("{} tried to login with invalid password".format(request.remote_addr))
                             return response.__dict__, BaseResource.state_to_http[response.status]
                 # no valid user found
                 response = APIResponse()
-                response.status, response.msg = "NOAUTH", "Access denied invalid login"
+                response.status, response.msg = "NOAUTH", "Access denied invalid login: unknown user"
                 logger.info("{} tried to login with invalid user".format(request.remote_addr))
                 return response.__dict__, BaseResource.state_to_http[response.status]
             else:  # did not get expected data
@@ -74,5 +74,5 @@ class Login(BaseResource):
                 return response.__dict__, BaseResource.state_to_http[response.status]
         else:  # did not get anything passed
             response = APIResponse()
-            response.status, response.msg = "NOAUTH", "Access denied no login provided"
+            response.status, response.msg = "NOAUTH", "Access denied login credentials missing"
             return response.__dict__, BaseResource.state_to_http[response.status]

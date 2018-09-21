@@ -1,6 +1,7 @@
 import os
 import shutil
 import socket
+import getpass
 
 from OpenSSL import crypto
 from paramiko.rsakey import RSAKey
@@ -62,7 +63,7 @@ def create_self_signed_cert(cert_dir, cert_pfx):
         cert.gmtime_adj_notBefore(0)
 
         # define cert expiration period(years)
-        cert.gmtime_adj_notAfter(configuration.settings.cert_expiration * 365 * 24 * 60 * 60)
+        cert.gmtime_adj_notAfter(configuration.settings.cert_expiration * 365 * 24 * 60 * 60)   # noqa
 
         cert.set_issuer(cert.get_subject())
         cert.set_pubkey(k)
@@ -70,11 +71,11 @@ def create_self_signed_cert(cert_dir, cert_pfx):
 
         logger.debug("Writing crt file to {}".format(cert_filename))
         with open(os.path.join(cert_dir, cert_filename), "wt") as cert_fd:
-            cert_fd.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode('utf-8'))
+            cert_fd.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode('utf-8'))   # noqa
 
         logger.debug("Writing key file to {}".format(key_filename))
         with open(os.path.join(cert_dir, key_filename), "wt") as key_fd:
-            key_fd.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode('utf-8'))
+            key_fd.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode('utf-8'))    # noqa
 
         return (cert_filename, key_filename)
 
@@ -88,7 +89,10 @@ def rm_r(path):
         shutil.rmtree(path)
 
 
-def ssh_create_key(ssh_dir, user='root'):
+def ssh_create_key(ssh_dir, user=None):
+
+    if not user:
+        user = getpass.getuser()
 
     key = RSAKey.generate(4096)
     pub_file = os.path.join(ssh_dir, 'ssh_key.pub')
@@ -134,7 +138,11 @@ def ssh_create_key(ssh_dir, user='root'):
         logger.info("Created SSH private key @ '{}'".format(prv_file))
 
 
-def ssh_connect_ok(host, user='root'):
+def ssh_connect_ok(host, user=None):
+
+    if not user:
+        user = getpass.getuser()
+
     client = SSHClient()
     client.set_missing_host_key_policy(AutoAddPolicy())
 

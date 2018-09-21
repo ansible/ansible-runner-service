@@ -32,16 +32,20 @@ def requires_auth(f):
                 token = request.headers.get('Authorization')
                 if token:
                     try:
-                        jwt.decode(token, configuration.settings.token_secret, algorithms='HS256')
+                        jwt.decode(token,
+                                   configuration.settings.token_secret,
+                                   algorithms='HS256')
                     except jwt.DecodeError:
                         response = APIResponse()
                         response.status, response.msg = "NOAUTH", "Access denied invalid token"
-                        logger.info("{} made a request without a valid token".format(request.remote_addr))
+                        logger.info("{} made a request without a valid "
+                                    "token".format(request.remote_addr))
                         return response.__dict__, BaseResource.state_to_http[response.status]
                     except jwt.ExpiredSignatureError:
                         response = APIResponse()
                         response.status, response.msg = "NOAUTH", "Access denied expired token"
-                        logger.info("{} made a request with expired valid token".format(request.remote_addr))
+                        logger.info("{} made a request with expired valid "
+                                    "token".format(request.remote_addr))
                         return response.__dict__, BaseResource.state_to_http[response.status]
                     # no exceptions thrown token was good
                     return f(*args, **kwargs)
