@@ -67,8 +67,7 @@ class Config(object):
         self.token_secret = 'secret'
         self.token_hours = 24
 
-        if os.path.exists(self.config_file):
-            self._apply_local()
+        self._apply_overrides()
 
     def _apply_local(self):
 
