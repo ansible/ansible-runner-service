@@ -15,3 +15,7 @@ install:
 script:
   - flake8 --ignore=E501 ansible-runner-service.py runner-service/
   - python -m unittest tests/test_*.py
+
+after_success:
+- coverage run --source=runner_service -m unittest tests/test_*.py
+- bash < (curl -s https://codecov.io/bash)
