@@ -26,7 +26,7 @@ class ListGroups(BaseResource):
         Example.
 
         ```
-        $ curl -k -i https://localhost:5001/api/v1/groups -X get
+        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/groups -X get
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 108
@@ -65,7 +65,7 @@ class ManageGroups(BaseResource):
         Example.
 
         ```
-        $ curl -k -i https://localhost:5001/api/v1/groups/osds -X get
+        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/groups/osds -X get
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 152
@@ -99,7 +99,7 @@ class ManageGroups(BaseResource):
         Example.
 
         ```
-        $ curl -k -i https://localhost:5001/api/v1/groups/dummy -X post
+        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/groups/dummy -X post
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 71
@@ -128,7 +128,7 @@ class ManageGroups(BaseResource):
         Example.
 
         ```
-        $ curl -k -i https://localhost:5001/api/v1/groups/dummy -X delete
+        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/groups/dummy -X delete
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 73

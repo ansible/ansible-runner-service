@@ -13,6 +13,7 @@ from ..services.playbook import (list_playbooks,
                                  stop_playbook)
 
 from ..services.utils import playbook_exists, APIResponse
+from ..inventory import AnsibleInventory
 from runner_service.cache import runner_cache
 
 logger = logging.getLogger(__name__)
@@ -32,7 +33,7 @@ class ListPlaybooks(BaseResource):
         Example.
 
         ```
-        $ curl -i -k https://localhost:5001/api/v1/playbooks
+        $ curl -i -k -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 179
@@ -71,7 +72,7 @@ class PlaybookState(BaseResource):
         Example.
 
         ```
-        $ curl -k -i https://localhost:5001/api/v1/playbooks/1733c3ac-b483-11e8-ad05-c85b7671906d -X get
+        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks/1733c3ac-b483-11e8-ad05-c85b7671906d -X get
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 176
@@ -103,7 +104,7 @@ class PlaybookState(BaseResource):
         Example.
 
         ```
-        $ curl -i -k https://localhost:5001/api/v1/playbooks/b7ea3922-b481-11e8-a992-c85b7671906d -X delete
+        $ curl -i -k -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks/b7ea3922-b481-11e8-a992-c85b7671906d -X delete
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 75
@@ -152,6 +153,21 @@ def _run_playbook(playbook_name, tags=None):
                           "filters are: {}".format(','.join(valid_filter))
         return r
 
+    if 'limit' in filter:
+
+        target_hosts = filter['limit'].split(',')
+        inv_hosts = AnsibleInventory().hosts
+        logger.debug("Checking host limit against the inventory")
+        if all([_h in inv_hosts for _h in target_hosts]):
+            logger.debug("hosts in the limit list match the inventory")
+
+        else:
+            logger.error("limit hosts don't match with the inventory")
+            # host(s) provided are not all in the inventory
+            r.status, r.msg = "INVALID", \
+                              "Host(s) provided not in Ansible inventory"
+            return r
+
     logger.info("Playbook run request for {}, from {}, "
                 "parameters: {}".format(playbook_name,
                                         request.remote_addr,
@@ -198,7 +214,7 @@ class StartPlaybook(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml -X post
+        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml -X post
         HTTP/1.0 202 ACCEPTED
         Content-Type: application/json
         Content-Length: 132
@@ -233,7 +249,7 @@ class StartTaggedPlaybook(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml/tags/onlyme -X post
+        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml/tags/onlyme -X post
         HTTP/1.0 202 ACCEPTED
         Content-Type: application/json
         Content-Length: 132

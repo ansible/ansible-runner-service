@@ -20,4 +20,4 @@ script:
   - coverage run --source=runner_service -m unittest tests/test_*.py
 
 after_success:
-- codecov
+  - codecov

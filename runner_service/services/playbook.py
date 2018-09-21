@@ -8,7 +8,7 @@ import time
 
 from ansible_runner import run_async
 from runner_service import configuration
-from runner_service.cache import runner_cache
+from runner_service.cache import runner_cache, runner_stats
 from .utils import cleanup_dir, APIResponse
 from ..utils import fread
 
@@ -98,12 +98,27 @@ def cb_playbook_finished(runner):
     logger.info("Playbook {} Stats: {}".format(runner.config.playbook,
                                                runner.stats))
 
+    if runner.status in runner_stats.playbook_status:
+        runner_stats.playbook_status[runner.status] += 1
+    else:
+        runner_stats.playbook_status[runner.status] = 1
+
     logger.debug("Dropping runner object from runner_cache")
     del runner_cache[runner.config.ident]
 
 
 # Placeholder for populating the event_cache
 def cb_event_handler(event_data):
+    # first look at the event to track overall stats in the runner_stats object
+    event_type = event_data.get('event', None)
+    if event_type.startswith("runner_on_"):
+        event_shortname = event_type[10:]
+        if event_shortname in runner_stats.event_stats:
+            runner_stats.event_stats[event_shortname] += 1
+        else:
+            runner_stats.event_stats[event_shortname] = 1
+
+    # regardless return true to ensure the data is written to artifacts dir
     return True
 
 

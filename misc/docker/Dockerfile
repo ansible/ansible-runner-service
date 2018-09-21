@@ -17,7 +17,7 @@ RUN yum -y install epel-release  && \
     localedef -c -i en_US -f UTF-8 en_US.UTF-8 && \
     easy_install-3.6 pip && \
     pip3 install crypto docutils psutil paramiko PyYAML \
-                 pyOpenSSL flask flask-restful && \
+                 pyOpenSSL flask flask-restful jwt && \
     pip3 install --no-cache-dir ansible-runner && \
     rm -rf /var/cache/yum
 
@@ -32,4 +32,4 @@ RUN tar xvzf ansible-runner-service.tar.gz && \
     python36 setup.py install --record installed_files \
            --single-version-externally-managed
 
-ENTRYPOINT ["/usr/local/bin/ansible-runner-service"]
+ENTRYPOINT ["/usr/local/bin/ansible_runner_service"]

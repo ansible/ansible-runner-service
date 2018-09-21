@@ -6,3 +6,4 @@ pyOpenSSL
 flask
 flask-restful
 flake8
+jwt
