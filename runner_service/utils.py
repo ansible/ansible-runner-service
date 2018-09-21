@@ -139,19 +139,12 @@ def ssh_create_key(ssh_dir, user=None):
 
 
 def ssh_connect_ok(host, user=None):
-<<<<<<< HEAD
 
     if not user:
         user = getpass.getuser()
 
-=======
->>>>>>> Change default connect user to current login
     client = SSHClient()
     client.set_missing_host_key_policy(AutoAddPolicy())
-
-    if not user:
-        # user = os.getlogin()
-        user = getpass.getuser()
 
     priv_key = os.path.join(configuration.settings.playbooks_root_dir,
                             "env/ssh_key")
@@ -172,7 +165,7 @@ def ssh_connect_ok(host, user=None):
 
     except (AuthenticationException, SSHException):
         return False, "NOAUTH:SSH auth error - passwordless ssh not " \
-                      "configured for '{}' on '{}'".format(user, host)
+                      "configured for '{}'".format(host)
 
     except NoValidConnectionsError:
         return False, "NOCONN:SSH target '{}' not contactable; host offline" \
