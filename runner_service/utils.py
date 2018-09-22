@@ -146,9 +146,6 @@ def ssh_connect_ok(host, user=None):
     client = SSHClient()
     client.set_missing_host_key_policy(AutoAddPolicy())
 
-    if not user:
-        user = os.getlogin()
-
     priv_key = os.path.join(configuration.settings.playbooks_root_dir,
                             "env/ssh_key")
 

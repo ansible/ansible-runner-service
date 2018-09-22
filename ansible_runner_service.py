@@ -84,6 +84,7 @@ def setup_ssh():
 
     if all(ssh_states):
         logging.info("SSH keys present in {}".format(env_dir))
+        return
 
     elif all([not state for state in ssh_states]):
         logging.debug("No SSH keys present in {}".format(env_dir))
@@ -104,6 +105,31 @@ def setup_ssh():
         sys.exit(12)
 
 
+def setup_localhost_ssh():
+    ssh_home = os.path.join(os.path.expanduser('~'), '.ssh')
+    if not os.path.exists(ssh_home):
+        os.mkdir(ssh_home)
+        os.chmod(ssh_home, 0o700)
+    authorized_keys = os.path.join(ssh_home, "authorized_keys")
+
+    root_dir = configuration.settings.playbooks_root_dir
+    app_pub_key = fread(os.path.join(root_dir, "env", "ssh_key.pub"))
+
+    if not os.path.exists(authorized_keys):
+        with open(authorized_keys, "w") as auth_file:
+            auth_file.write(app_pub_key)
+        os.chmod(authorized_keys, 0o644)
+    else:
+        # it does exist, so see if our key should be appended
+        with open(authorized_keys, "r") as auth_file:
+            auth_data = auth_file.read().splitlines()
+        if app_pub_key not in auth_data:
+            with open(authorized_keys, "a") as auth_file:
+                auth_file.write("{}\n".format(app_pub_key))
+        else:
+            pass
+
+
 def main():
 
     setup_logging()
@@ -111,6 +137,8 @@ def main():
     logging.info("Run mode is: {}".format(configuration.settings.mode))
 
     setup_ssh()
+
+    setup_localhost_ssh()
 
     ssl_context = get_ssl()
 

@@ -2,16 +2,35 @@ language: python
 python:
   - "3.6"
 
+addons:
+  apt:
+    packages:
+      - openssh-server
+      - software-properties-common
+
 cache: pip
 
 branches:
   only:
   - master
 
+before_install:
+    - sudo apt-add-repository --yes ppa:ansible/ansible
+    - sudo apt-get update
+    - sudo apt-get --yes install ansible
+
 install:
   - pip install -r requirements.txt
   - python setup.py -q install
 
+before_script:
+  - cp -pr tests /tmp
+  - cp ansible_runner_service.py /tmp
+
 script:
   - flake8 --ignore=E501 ansible_runner_service.py runner-service/
-  - python -m unittest tests/test_*.py
+  - cd /tmp/tests && python -m unittest test_*.py
+
+after_script:
+  - ls -al ~/.ssh
+  - cat ~/.ssh/authorized_keys

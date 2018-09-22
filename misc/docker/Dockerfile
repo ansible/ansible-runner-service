@@ -17,7 +17,7 @@ RUN yum -y install epel-release  && \
     localedef -c -i en_US -f UTF-8 en_US.UTF-8 && \
     easy_install-3.6 pip && \
     pip3 install crypto docutils psutil paramiko PyYAML \
-                 pyOpenSSL flask flask-restful jwt && \
+                 pyOpenSSL flask flask-restful pyjwt && \
     pip3 install --no-cache-dir ansible-runner && \
     rm -rf /var/cache/yum
 
