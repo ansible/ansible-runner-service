@@ -15,12 +15,11 @@ def setup_dirs(dir_list=[]):
     """Create the sample directory structure for the daemon to work within"""
     root_dir = os.getcwd()
     samples = os.path.join(root_dir, 'samples')
-    try:
+
+    if os.path.exists(samples):
         shutil.rmtree(samples)
-    except FileNotFoundError:
-        pass
-    finally:
-        os.mkdir(samples)
+
+    os.mkdir(samples)
 
     for _d in dir_list:
         new_dir = os.path.join(samples, _d)
