@@ -114,8 +114,9 @@ class AnsibleInventory(object):
                 # could use Python 3 exclusive creation open(file, 'x'), but..
                 self.fd = open(self.filename, 'w')
                 fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            except (BlockingIOError, OSError) as _e:
-                logger.warning("Race condition hit creating Inventory file")
+            except IOError as _e:
+                logger.warning("Race condition hit creating Inventory "
+                               "file: {}".format(_e))
             else:
                 try:
                     self.fd.write(yaml.safe_dump(AnsibleInventory.inventory_seed,   # noqa
