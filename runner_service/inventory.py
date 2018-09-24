@@ -132,8 +132,9 @@ class AnsibleInventory(object):
                 try:
                     self.fd = open(self.filename, 'r+')
                     self.lock()
-                except (BlockingIOError, OSError):
+                except IOError as _e:
                     # Can't obtain an exclusive_lock
+                    logger.warning("Unable to lock inventory: {}".format(_e))
                     self.fd.close()
                     return
                 else:
