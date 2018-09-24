@@ -70,7 +70,7 @@ def no_group(func):
 
 def group_exists(func):
     def func_wrapper(*args):
-        obj, group, *rest = args
+        obj, group = args[:2]
         if group not in obj.groups:
             logger.debug("Group request for '{}' failed - it's not in "
                          "the inventory".format(group))
@@ -109,24 +109,32 @@ class AnsibleInventory(object):
     def load(self):
 
         if not os.path.exists(self.filename):
+
             try:
-                # Using Python 3 exclusive creation
-                with open(self.filename, 'x') as inv:
-                    inv.write(yaml.dump(AnsibleInventory.inventory_seed,
-                              default_flow_style=False))
-            except FileExistsError:
-                logger.info("Inventory file '{}' already created".format(self.filename))
-            except IOError:
-                raise InventoryWriteError("Unable to create the seed inventory"
-                                          " file at {}".format(self.filename))
+                # could use Python 3 exclusive creation open(file, 'x'), but..
+                self.fd = open(self.filename, 'w')
+                fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except IOError as _e:
+                logger.warning("Race condition hit creating Inventory "
+                               "file: {}".format(_e))
+            else:
+                try:
+                    self.fd.write(yaml.safe_dump(AnsibleInventory.inventory_seed,   # noqa
+                                                 default_flow_style=False))
+                    fcntl.flock(self.fd, fcntl.LOCK_UN)
+                except IOError as _e:
+                    raise InventoryWriteError("Seeding inventory failed: {}".format(_e))    # noqa
+            finally:
+                self.fd.close()
 
         try:
             if self.exclusive_lock:
                 try:
                     self.fd = open(self.filename, 'r+')
                     self.lock()
-                except (BlockingIOError, OSError):
+                except IOError as _e:
                     # Can't obtain an exclusive_lock
+                    logger.warning("Unable to lock inventory: {}".format(_e))
                     self.fd.close()
                     return
                 else:
@@ -134,8 +142,8 @@ class AnsibleInventory(object):
             else:
                 raw = fread(self.filename)
         except Exception as ex:
-            raise InventoryreadError("Unable to read the inventory"
-                                     " file at {}, error: {}".format(self.filename, ex))
+            raise InventoryreadError("Unable to read the inventory file at "
+                                     "{}, error: {}".format(self.filename, ex))
 
         if not raw:
             # If the inventory is empty for some extrange reason
@@ -149,7 +157,7 @@ class AnsibleInventory(object):
                                             " yaml file at {}, error: {}".format(self.filename, ex))
 
     def _dump(self):
-        return yaml.dump(self.inventory, default_flow_style=False)
+        return yaml.safe_dump(self.inventory, default_flow_style=False)
 
     def save(self):
         # Changes in inventory only allowed with exclusive lock

@@ -1,6 +1,7 @@
 language: python
 python:
   - "3.6"
+  - "2.7"
 
 addons:
   apt:
@@ -29,7 +30,7 @@ before_script:
 
 script:
   - flake8 --ignore=E501 ansible_runner_service.py runner-service/
-  - cd /tmp/tests && python -m unittest test_*.py
+  - cd /tmp/tests && python -m unittest discover -p "test_*.py"
 
 after_script:
   - ls -al ~/.ssh

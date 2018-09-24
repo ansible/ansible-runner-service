@@ -46,7 +46,7 @@ def setup_logging():
         try:
             config = yaml.safe_load(fread(logging_config))
         except yaml.YAMLError as _e:
-            print("ERROR: Invalid logging configuration file...aborting")
+            print("ERROR: logging configuration error: {}".format(_e))
             sys.exit(12)
 
         fname = config.get('handlers').get('file_handler')['filename']
