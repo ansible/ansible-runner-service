@@ -4,6 +4,9 @@ import yaml
 import logging
 
 logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+out = logging.StreamHandler(sys.stdout)
+logger.addHandler(out)
 
 
 def init(mode='dev'):
@@ -56,6 +59,9 @@ class Config(object):
 
         # provide the ability to skip ssh checks - useful for Travis CI!
         self.ssh_checks = True
+
+        # target user that the service will use for ssh connection
+        self.target_user = None
 
         # flask config setting to hide the "production use" warning
         self.ENV = ''

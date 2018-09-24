@@ -51,7 +51,7 @@
     - name: Get a list of block devices (excludes loop and child devices)
       command: lsblk -n --o NAME --nodeps --exclude 7
       register: lsblk_out
-    - name: check if disk is free
+    - name: check if disk {{ item }} is free
       command: pvcreate --test /dev/{{ item }}
       ignore_errors: true
       register: pv_status

@@ -141,7 +141,10 @@ def ssh_create_key(ssh_dir, user=None):
 def ssh_connect_ok(host, user=None):
 
     if not user:
-        user = getpass.getuser()
+        if configuration.settings.target_user:
+            user = configuration.settings.target_user
+        else:
+            user = getpass.getuser()
 
     client = SSHClient()
     client.set_missing_host_key_policy(AutoAddPolicy())

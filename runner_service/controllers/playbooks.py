@@ -75,16 +75,16 @@ class PlaybookState(BaseResource):
         $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks/1733c3ac-b483-11e8-ad05-c85b7671906d -X get
         HTTP/1.0 200 OK
         Content-Type: application/json
-        Content-Length: 176
+        Content-Length: 121
         Server: Werkzeug/0.12.2 Python/3.6.6
-        Date: Sun, 09 Sep 2018 22:53:16 GMT
+        Date: Sun, 23 Sep 2018 22:43:16 GMT
 
         {
             "status": "OK",
-            "msg": "Playbook with UUID 1733c3ac-b483-11e8-ad05-c85b7671906d is active",
+            "msg": "running",
             "data": {
-                "task_id": 4,
-                "task_name": "Step 1"
+                "task": "RESULTS",
+                "last_task_num": 48
             }
         }
         ```
