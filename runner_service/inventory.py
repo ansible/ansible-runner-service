@@ -70,7 +70,7 @@ def no_group(func):
 
 def group_exists(func):
     def func_wrapper(*args):
-        obj, group, *rest = args
+        obj, group = args[:2]
         if group not in obj.groups:
             logger.debug("Group request for '{}' failed - it's not in "
                          "the inventory".format(group))
