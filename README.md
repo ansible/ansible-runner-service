@@ -1,5 +1,7 @@
+[![codecov](https://codecov.io/gh/pcuzner/ansible-runner-service/branch/master/graph/badge.svg)](https://codecov.io/gh/pcuzner/ansible-runner-service)
+
 # ansible-runner-service
-This is a POC project which wraps the ansible_runner interface inside a REST API.  
+This is a POC project which wraps the ansible_runner interface inside a REST API.
 
 The incentive for this is two-fold;
 - provide Ansible integration to non-python projects
@@ -12,7 +14,7 @@ versions of packages like flask that may not work correctly.
 ### Package Dependencies
 - Python 3.6
 - pyOpenSSL  (python3-pyOpenSSL on Fedora, CentOS pyOpenSSL)
-- ansible_runner 1.0.5 or above  
+- ansible_runner 1.0.5 or above
 
 *if in doubt, look inthe misc/docker folder and build the container!*
 
@@ -26,7 +28,7 @@ unzipped the project into.
 
 For 'prod' mode, a setup.py is provided. Once the package is installed and
 called from /usr/bin, the script will expect config and output files to be
-found in all normal locations (see proposed file layout below)  
+found in all normal locations (see proposed file layout below)
 ```
 sudo python3 setup.py install --record installed_files --single-version-externally-managed
 ```
@@ -39,15 +41,15 @@ Word of warning though ... 'prod' mode is less tested!
 
 ## API Endpoints
 
-Once the service is running, you can point your browser at  ```https://localhost:5001/api``` to show which endpoints are available. Each endpoint is described along with a curl example showing invocation and output.  
+Once the service is running, you can point your browser at  ```https://localhost:5001/api``` to show which endpoints are available. Each endpoint is described along with a curl example showing invocation and output.
 
 ![API endpoints](./screenshots/runner-service-api.gif)
 
-You may click on any row to expand the description of the API route and show the curl example. The app uses a self-signed certificate, so all examples use the -k parameter (insecure mode).  
+You may click on any row to expand the description of the API route and show the curl example. The app uses a self-signed certificate, so all examples use the -k parameter (insecure mode).
 
-**Note**: *It is not the intent of this API to validate the parameters passed to it. It is assumed that parameter selection and validation happen prior to the API call.*  
+**Note**: *It is not the intent of this API to validate the parameters passed to it. It is assumed that parameter selection and validation happen prior to the API call.*
 
-Here's a quick 'cheat sheet' of the API endpoints.  
+Here's a quick 'cheat sheet' of the API endpoints.
 
 | API Route | Description |
 |-----------|-------------|
@@ -66,24 +68,24 @@ Here's a quick 'cheat sheet' of the API endpoints.
 
 
 ## Testing
-Testing to date has all been lab based i.e. please **do not use in production** environments. Playbook integration with Ceph and Gluster has been the primary focus together with the probe-disks.yml playbook. Did you spot the theme?..*It's all about the storage™ :)*  
+Testing to date has all been lab based i.e. please **do not use in production** environments. Playbook integration with Ceph and Gluster has been the primary focus together with the probe-disks.yml playbook. Did you spot the theme?..*It's all about the storage™ :)*
 
 For example, with ceph the ```osd-configure.yml``` playbook has been tested successfully.
 
 ### Manual Testing
 The archive, downloaded from github, contains a simple playbook that just uses the bash sleep command - enabling you to quickly experiment with the API.
 
-Use the steps below (dev mode), to quickly exercise the API  
-1. Get the list of available playbooks (should just be test.yml)  
+Use the steps below (dev mode), to quickly exercise the API
+1. Get the list of available playbooks (should just be test.yml)
 ```curl -k -i https://localhost:5001/api/v1/playbooks  -X GET```
-2. Run the test.yml playbook, passing the time_delay parameter (30 secs should be enough).  
-```curl -k -i -H "Content-Type: application/json" --data '{"time_delay": 30}' https://localhost:5001/api/v1/playbooks/test.yml -X POST```  
-3. The previous command will return the playbooks UUID. Use this identifier to query the state or progress of the run.  
+2. Run the test.yml playbook, passing the time_delay parameter (30 secs should be enough).
+```curl -k -i -H "Content-Type: application/json" --data '{"time_delay": 30}' https://localhost:5001/api/v1/playbooks/test.yml -X POST```
+3. The previous command will return the playbooks UUID. Use this identifier to query the state or progress of the run.
 ```curl -k -i https://localhost:5001/api/v1/playbooks/f39069aa-9f3d-11e8-852f-c85b7671906d -X GET```
-4. Get a list of all the events in a playbook. The return list consists of all the job event ID's  
+4. Get a list of all the events in a playbook. The return list consists of all the job event ID's
 ```curl -k -i https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events  -X GET```
-5. To get specific output from a job event, you can query the job event  
-```curl -k -i https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events/13-c85b7671-906d-e52d-d421-000000000008  -X GET```  
+5. To get specific output from a job event, you can query the job event
+```curl -k -i https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events/13-c85b7671-906d-e52d-d421-000000000008  -X GET```
 
 Obviously you'll need to change the play and job uuids for your run :)
 
@@ -96,29 +98,29 @@ Obviously you'll need to change the play and job uuids for your run :)
 ## File Layout (Proposed)
 
 /etc/ansible-runner-service
-- logging.yaml  
-- config.yaml  
-- ansible-runner-service.crt  
-- ansible-runner-service.key  
+- logging.yaml
+- config.yaml
+- ansible-runner-service.crt
+- ansible-runner-service.key
 
-/usr/share/ansible-runner-service  
-- artifacts  
-- inventory  
-- env  
+/usr/share/ansible-runner-service
+- artifacts
+- inventory
+- env
 - project
     -  roles (optional)
     -  library (optional)
-    -  test.yaml  
+    -  test.yaml
 - roles
 
-/var/log/ansible-runner-service.log  
+/var/log/ansible-runner-service.log
 
-/usr/share/doc/ansible-runner-service  
-- README.md  
-- LICENSE.md  
+/usr/share/doc/ansible-runner-service
+- README.md
+- LICENSE.md
 
-/etc/systemd/system  
-- ansible-runner-service.service  
+/etc/systemd/system
+- ansible-runner-service.service
 
-/usr/bin/ or /usr/local/bin    
-- ansible-runner-service  
+/usr/bin/ or /usr/local/bin
+- ansible-runner-service
