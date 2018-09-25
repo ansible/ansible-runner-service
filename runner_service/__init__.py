@@ -11,4 +11,4 @@ from .inventory import (AnsibleInventory,           # noqa: F401
                         InventoryCorruptError,
                         InventoryOperationNotAllowed)
 
-__version__ = 0.7
+__version__ = 0.8

@@ -1,4 +1,4 @@
-ansible_runner
+ansible_runner>=1.1.1
 crypto
 paramiko
 PyYAML
@@ -6,3 +6,4 @@ pyOpenSSL
 flask
 flask-restful
 flake8
+pyjwt

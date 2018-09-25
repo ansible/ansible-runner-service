@@ -15,4 +15,5 @@ bin
 include
 lib*
 pip-self*
-
+.py[cod]
+__pycache__
