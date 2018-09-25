@@ -141,13 +141,13 @@ def ssh_create_key(ssh_dir, user=None):
 def ssh_connect_ok(host, user=None):
 
     if not user:
-        user = getpass.getuser()
+        if configuration.settings.target_user:
+            user = configuration.settings.target_user
+        else:
+            user = getpass.getuser()
 
     client = SSHClient()
     client.set_missing_host_key_policy(AutoAddPolicy())
-
-    if not user:
-        user = os.getlogin()
 
     priv_key = os.path.join(configuration.settings.playbooks_root_dir,
                             "env/ssh_key")

@@ -3,7 +3,12 @@ import os
 import glob
 import json
 import threading
-import queue
+
+# conditional import for python 2.7 and python3.6 support
+try:
+    import Queue as queue
+except ImportError:
+    import queue
 
 from .utils import APIResponse
 from ..utils import fread

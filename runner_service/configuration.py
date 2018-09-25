@@ -3,6 +3,11 @@ import sys
 import yaml
 import logging
 
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+out = logging.StreamHandler(sys.stdout)
+logger.addHandler(out)
+
 
 def init(mode='dev'):
     global settings
@@ -52,6 +57,12 @@ class Config(object):
         self.ip_address = '0.0.0.0'
         self.loglevel = logging.DEBUG
 
+        # provide the ability to skip ssh checks - useful for Travis CI!
+        self.ssh_checks = True
+
+        # target user that the service will use for ssh connection
+        self.target_user = None
+
         # flask config setting to hide the "production use" warning
         self.ENV = ''
 
@@ -62,30 +73,67 @@ class Config(object):
         self.token_secret = 'secret'
         self.token_hours = 24
 
-        if os.path.exists(self.config_file):
-            self._apply_local()
+        self._apply_overrides()
 
     def _apply_local(self):
 
         # apply overrides from configuration settings in /etc/?
-        print("Analysing local configuration options from "
-              "{}".format(self.config_file))
+        logger.info("Analysing local configuration options from "
+                    "{}".format(self.config_file))
 
         try:
-            local_config = yaml.load(open(self.config_file, 'r'))
+            with open(self.config_file, "r") as _cfg:
+                local_config = yaml.load(_cfg.read())
         except yaml.YAMLError as exc:
-            print("ERROR: YAML error in configuration file: {}".format(exc))
+            logger.critical("ERROR: YAML error in configuration "
+                            "file: {}".format(exc))
             sys.exit(12)
 
         overridden_options = False
-        # apply overrides
+        # apply overrides from
         for varname in local_config.keys():
             if varname in self.__dict__.keys():
                 _value = local_config.get(varname)
-                print("- setting {} to {}".format(varname,
-                                                  _value))
+                logger.info("- setting {} to {}".format(varname,
+                                                        _value))
                 setattr(self, varname, _value)
                 overridden_options = True
 
         if not overridden_options:
-            print("No configuration settings overridden")
+            logger.info("No configuration settings overridden")
+
+    def _apply_runtime(self):
+
+        logger.info("Analysing runtime overrides from environment variables")
+
+        overridden_options = False
+
+        for varname in os.environ.keys():
+            if varname in self.__dict__.keys():
+                _value = self._convert_value(os.environ[varname])
+                logger.info("- setting {} to {}".format(varname, _value))
+                setattr(self, varname, _value)
+                overridden_options = True
+
+        if not overridden_options:
+            logger.info("No configuration settings overridden")
+
+    def _convert_value(self, value):
+        bool_types = {
+            "TRUE": True,
+            "FALSE": False,
+        }
+
+        if value.isdigit():
+            value = int(value)
+        elif value.upper() in bool_types:
+            value = bool_types[value.upper()]
+
+        return value
+
+    def _apply_overrides(self):
+
+        if os.path.exists(self.config_file):
+            self._apply_local()
+
+        self._apply_runtime()

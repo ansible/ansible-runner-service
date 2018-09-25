@@ -1,0 +1,9 @@
+---
+
+- name: test Playbook execution against localhost
+  hosts:
+    - localhost
+  gather_facts: False
+  tasks:
+    - name: Just go to sleep for a second
+      command: sleep 1

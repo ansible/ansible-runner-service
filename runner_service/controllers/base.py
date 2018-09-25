@@ -9,6 +9,7 @@ class BaseResource(Resource):
         "NOAUTH": 401,
         "NOCONN": 404,
         "NOTFOUND": 404,
+        "UNKNOWN": 404,
         "LOCKED": 409,
         "FAILED": 500,
         "TIMEOUT": 504

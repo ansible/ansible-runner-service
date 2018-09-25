@@ -1,12 +1,13 @@
 
 import os
 import glob
-import json
+# import json
 import uuid
 import time
 
 
 from ansible_runner import run_async
+from ansible_runner.exceptions import AnsibleRunnerException
 from runner_service import configuration
 from runner_service.cache import runner_cache, runner_stats
 from .utils import cleanup_dir, APIResponse
@@ -20,12 +21,33 @@ logger = logging.getLogger(__name__)
 
 def get_status(play_uuid):
     r = APIResponse()
+
+    if play_uuid in runner_cache:
+        # this is an active playbook, so just use the cache to indicate state
+        runner = runner_cache[play_uuid]['runner']
+        r.status, r.msg = "OK", runner.status
+
+        r.data = {
+            "task": runner_cache[play_uuid]['current_task'],
+            "last_task_num": runner_cache[play_uuid]['last_task_num']
+        }
+
+        logger.debug("runner_cache 'hit' for playbook status request")
+        return r
+    else:
+        logger.debug("runner_cache 'miss' for run {}".format(play_uuid))
+
+    # Status is against a playbook that has finished, so we need to look at
+    # the artifacts dir
     pb_artifacts = os.path.join(configuration.settings.playbooks_root_dir,
                                 "artifacts",
                                 play_uuid)
 
     if not os.path.exists(pb_artifacts):
-        r.status, r.msg = "NOTFOUND", "Playbook run with UUID {} not found".format(play_uuid)
+        r.status, r.msg = "NOTFOUND", \
+                          "Playbook with UUID {} not found".format(play_uuid)
+        logger.info("Request for playbook state had non-existent "
+                    "play_uuid '{}'".format(play_uuid))
         return r
 
     pb_status = os.path.join(pb_artifacts,
@@ -36,30 +58,39 @@ def get_status(play_uuid):
         r.status, r.msg = "OK", fread(pb_status)
         return r
     else:
-        # play is still active
-        # get last event
-        events_dir = os.path.join(pb_artifacts, "job_events")
-
-        # gather the events, excluding any partially complete files
-        events = [_f for _f in os.listdir(events_dir)
-                  if not _f.endswith('-partial.json')]
-
-        r.status = "OK"
-
-        if events:
-            events.sort(key=lambda filenm: int(filenm.split("-", 1)[0]))
-            last_event = events[-1]
-            last_event_data = json.loads(fread(os.path.join(events_dir,
-                                                            last_event)))
-            r.msg = "Playbook with UUID {} is active".format(play_uuid)
-            r.data = {"task_id": last_event_data.get('counter'),
-                      "task_name": last_event_data['event_data'].get('task')
-                      }
-        else:
-            r.msg = "Job appears active, but no task information is available"
-            logger.error("Play with UUID {} looks active, but doesn't have any"
-                         " valid files within job_events dir".format(play_uuid))
+        r.status, r.msg = "UNKNOWN", \
+                          "The artifacts directory is incomplete!"
+        logger.warning("Status Request for Play uuid '{}', found an incomplete"
+                       " artifacts directory...Possible ansible_runner "
+                       " error?".format(play_uuid))
         return r
+        # # play is still active
+        # # get last event
+        # events_dir = os.path.join(pb_artifacts, "job_events")
+        # if not os.path.exists(events_dir):
+        #     r.status, r.msg = "NOTFOUND", "No events recorded yet"
+        #     return r
+        #
+        # # gather the events, excluding any partially complete files
+        # events = [_f for _f in os.listdir(events_dir)
+        #           if not _f.endswith('-partial.json')]
+        #
+        # r.status = "OK"
+        #
+        # if events:
+        #     events.sort(key=lambda filenm: int(filenm.split("-", 1)[0]))
+        #     last_event = events[-1]
+        #     last_event_data = json.loads(fread(os.path.join(events_dir,
+        #                                                     last_event)))
+        #     r.msg = "Playbook with UUID {} is active".format(play_uuid)
+        #     r.data = {"task_id": last_event_data.get('counter'),
+        #               "task_name": last_event_data['event_data'].get('task')
+        #               }
+        # else:
+        #     r.msg = "Job appears active, but no task information is available"
+        #     logger.error("Play with UUID {} looks active, but doesn't have any"
+        #                  " files within job_events dir".format(play_uuid))
+        # return r
 
 
 def list_playbooks():
@@ -95,8 +126,13 @@ def cb_playbook_finished(runner):
                 "status={}".format(runner.config.playbook,
                                    runner.config.ident,
                                    runner.status))
-    logger.info("Playbook {} Stats: {}".format(runner.config.playbook,
-                                               runner.stats))
+    try:
+        stats = runner.stats
+    except AnsibleRunnerException as err:
+        stats = err
+    finally:
+        logger.info("Playbook {} Stats: {}".format(runner.config.playbook,
+                                                   stats))
 
     if runner.status in runner_stats.playbook_status:
         runner_stats.playbook_status[runner.status] += 1
@@ -117,6 +153,13 @@ def cb_event_handler(event_data):
             runner_stats.event_stats[event_shortname] += 1
         else:
             runner_stats.event_stats[event_shortname] = 1
+
+    # maintain the current state of any inflight playbook
+    ident = event_data.get('runner_ident', None)
+    if ident:
+        if event_type == "playbook_on_task_start":
+            runner_cache[ident]['current_task'] = event_data['event_data'].get('task', None)    # noqa
+        runner_cache[ident]['last_task_num'] = event_data['counter']
 
     # regardless return true to ensure the data is written to artifacts dir
     return True
@@ -199,6 +242,7 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
                               "play_uuid": play_uuid}
 
     runner_cache[play_uuid] = {"runner": _runner,
-                               "current_task": "<-placeholder->"}
+                               "current_task": None,
+                               "last_task_num": None}
 
     return r
