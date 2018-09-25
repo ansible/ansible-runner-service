@@ -23,6 +23,8 @@ before_install:
 install:
   - pip install -r requirements.txt
   - python setup.py -q install
+  - pip install coverage
+  - pip install codecov
 
 before_script:
   - cp -pr tests /tmp
@@ -31,7 +33,12 @@ before_script:
 script:
   - flake8 --ignore=E501 ansible_runner_service.py runner-service/
   - cd /tmp/tests && python -m unittest discover -p "test_*.py"
+  - coverage run --source=runner_service -m unittest discover -p "tests/test_*.py"
+
+after_success:
+  - codecov
 
 after_script:
   - ls -al ~/.ssh
   - cat ~/.ssh/authorized_keys
+
