@@ -1,12 +1,12 @@
-# ansible-runner-service    ![Build status](https://travis-ci.com/pcuzner/ansible-runner-service.svg?branch=master) [![codecov](https://codecov.io/gh/pcuzner/ansible-runner-service/branch/master/graph/badge.svg)](https://codecov.io/gh/pcuzner/ansible-runner-service)
-This project wraps the ansible_runner interface inside a REST API enabling ansible playbooks to be executed and queried from other platforms.
+# ansible-runner-service    ![Build status](https://travis-ci.com/pcuzner/ansible-runner-service.svg?branch=master)[![codecov](https://codecov.io/gh/pcuzner/ansible-runner-service/branch/master/graph/badge.svg)](https://codecov.io/gh/pcuzner/ansible-runner-service)
+This project wraps the ansible_runner interface inside a REST API enabling ansible playbooks to be executed and queried from other platforms.   
 
 The incentive for this is two-fold;
 - provide Ansible integration to non-python projects
 - provide a means of programmatically running playbooks where the ansible engine is running on a separate host or in a separate container
 
 ## Features
-The core of this project is ansible_runner, so first of all, a quick call out to those ![folks](https://github.com/ansible/ansible-runner/graphs/contributors) for such an awesome tool!
+The core of this project is ansible_runner, so first of all, a quick call out to those ![folks](https://github.com/ansible/ansible-runner/graphs/contributors) for such an awesome tool!  
 #### Security
 - https support (http not supported)
   - uses self-signed if existing crt/key files are not present
@@ -64,7 +64,7 @@ So far, testing has been mainly against Fedora (28) and the CentOS7 for the dock
 ### Package Dependencies
 - Python 3.6
 - pyOpenSSL  (python3-pyOpenSSL on Fedora, CentOS pyOpenSSL)
-- ansible_runner 1.1.1 or above
+- ansible_runner 1.1.1 or above  
 
 (see ```requirements.txt``` for a more complete list of the python dependencies)
 
@@ -80,8 +80,7 @@ unzipped the project into.
 
 For 'prod' mode, a setup.py is provided. Once the package is installed and
 called from /usr/*/bin, the script will expect config and output files to be
-found in all the normal 'production' locations (see proposed file layout below)
-
+found in all the normal 'production' locations (see proposed file layout below)  
 ```
 sudo python3 setup.py install --record installed_files --single-version-externally-managed
 ```
@@ -93,15 +92,15 @@ ansible_runner_service
 
 ## API Endpoints
 
-Once the service is running, you can point your browser at  ```https://localhost:5001/api``` to show which endpoints are available. Each endpoint is described along with a curl example showing invocation and output.
+Once the service is running, you can point your browser at  ```https://localhost:5001/api``` to show which endpoints are available. Each endpoint is described along with a curl example showing invocation and output.  
 
 ![API endpoints](./screenshots/runner-service-api.gif)
 
-You may click on any row to expand the description of the API route and show the curl example. The app uses a self-signed certificate, so all examples use the -k parameter (insecure mode).
+You may click on any row to expand the description of the API route and show the curl example. The app uses a self-signed certificate, so all examples use the -k parameter (insecure mode).  
 
-**Note**: *It is not the intent of this API to validate the parameters passed to it. It is assumed that parameter selection and validation happen prior to the API call.*
+**Note**: *It is not the intent of this API to validate the parameters passed to it. It is assumed that parameter selection and validation happen prior to the API call.*  
 
-Here's a quick 'cheat sheet' of the API endpoints.
+Here's a quick 'cheat sheet' of the API endpoints.  
 
 | API Route | Description |
 |-----------|-------------|
@@ -122,7 +121,7 @@ Here's a quick 'cheat sheet' of the API endpoints.
 
 
 ## Testing
-Testing to date has all been lab based, so please bear this in mind if considering using this tool for production use cases (*bug reports welcome!*). Playbook integration with Ceph and Gluster has been the primary focus together with the probe-disks.yml playbook. Did you spot the theme?..*It's all about the storage™ :)*
+Testing to date has all been lab based, so please bear this in mind if considering using this tool for production use cases (*bug reports welcome!*). Playbook integration with Ceph and Gluster has been the primary focus together with the probe-disks.yml playbook. Did you spot the theme?..*It's all about the storage™ :)*  
 
 For example, with ceph the ```osd-configure.yml``` playbook has been tested successfully.
 
@@ -131,22 +130,22 @@ The archive, downloaded from github, contains a simple playbook that just uses t
 
 Use the steps below (dev mode), to quickly exercise the API  
 1. Authenticate user and provide token  
-```curl -k -i --user admin:admin https://localhos:t:5001/api/v1/login -X get```
+```curl -k -i --user admin:admin https://localhost:5001/api/v1/login -X get```
 2. Get the list of available playbooks (should just be test.yml)  
 ```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks  -X GET```
 3. Run the test.yml playbook, passing the time_delay parameter (30 secs should be enough).  
-```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" -H "Content-Type: application/json" --data '{"time_delay": 30}' https://localhost:5001/api/v1/playbooks/test.yml -X POST```
+```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" -H "Content-Type: application/json" --data '{"time_delay": 30}' https://localhost:5001/api/v1/playbooks/test.yml -X POST```  
 4. The previous command will return the playbooks UUID. Use this identifier to query the state or progress of the run.  
 ```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks/f39069aa-9f3d-11e8-852f-c85b7671906d -X GET```
 5. Get a list of all the events in a playbook. The return list consists of all the job event ID's  
 ```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events  -X GET```
 6. To get specific output from a job event, you can query the job event  
-```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events/13-c85b7671-906d-e52d-d421-000000000008  -X GET```
+```curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events/13-c85b7671-906d-e52d-d421-000000000008  -X GET```  
 
 Obviously you'll need to change the token, play and job uuids for your run :)
 
 ## Tips & Tricks
-1. Tweaking the environment:The script uses a configuration module which is accessible across the different modules within the project. There are two ways that settings in the configuration module can be overridden;
+1. Tweaking the environment:The script uses a configuration module which is accessible across the different modules within the project. There are two ways that settings in the configuration module can be overridden;  
     - by using a ```config.yaml``` file
     - by providing a setting value when starting the ansible_runner_service program
 
@@ -175,29 +174,29 @@ For more info, look at the ```.travis.yml``` file.
 ## File Layout (Proposed)
 
 /etc/ansible-runner-service
-- logging.yaml
-- config.yaml
-- ansible-runner-service.crt
-- ansible-runner-service.key
+- logging.yaml  
+- config.yaml  
+- ansible-runner-service.crt  
+- ansible-runner-service.key  
 
-/usr/share/ansible-runner-service
-- artifacts
-- inventory
-- env
+/usr/share/ansible-runner-service  
+- artifacts  
+- inventory  
+- env  
 - project
     -  roles (optional)
     -  library (optional)
-    -  test.yaml
+    -  test.yaml  
 - roles
 
-/var/log/ansible-runner-service.log
+/var/log/ansible-runner-service.log  
 
-/usr/share/doc/ansible-runner-service
-- README.md
-- LICENSE.md
+/usr/share/doc/ansible-runner-service  
+- README.md  
+- LICENSE.md  
 
-/etc/systemd/system
-- ansible-runner-service.service
+/etc/systemd/system  
+- ansible-runner-service.service  
 
-/usr/bin/ or /usr/local/bin
-- ansible_runner_service
+/usr/bin/ or /usr/local/bin    
+- ansible_runner_service  
