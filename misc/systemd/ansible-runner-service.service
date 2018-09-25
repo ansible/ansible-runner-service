@@ -12,7 +12,6 @@ Type=simple
 User=root
 Group=root
 ExecStart=/usr/bin/ansible_runner_service
-ExecReload=/usr/bin/kill -HUP $MAINPID
 PrivateDevices=yes
 ProtectHome=true
 ProtectSystem=full
