@@ -1,7 +1,6 @@
 # ansible-runner-service    ![Build status](https://travis-ci.com/pcuzner/ansible-runner-service.svg?branch=master) [![codecov](https://codecov.io/gh/pcuzner/ansible-runner-service/branch/master/graph/badge.svg)](https://codecov.io/gh/pcuzner/ansible-runner-service)
 This project wraps the ansible_runner interface inside a REST API enabling ansible playbooks to be executed and queried from other platforms.
 
-
 The incentive for this is two-fold;
 - provide Ansible integration to non-python projects
 - provide a means of programmatically running playbooks where the ansible engine is running on a separate host or in a separate container
@@ -65,11 +64,7 @@ So far, testing has been mainly against Fedora (28) and the CentOS7 for the dock
 ### Package Dependencies
 - Python 3.6
 - pyOpenSSL  (python3-pyOpenSSL on Fedora, CentOS pyOpenSSL)
-<<<<<<< HEAD
-- ansible_runner 1.0.5 or above
-=======
 - ansible_runner 1.1.1 or above
->>>>>>> 58b8e3e466cac3cfcfe0fd80bb8bebdb88b92254
 
 (see ```requirements.txt``` for a more complete list of the python dependencies)
 
@@ -84,13 +79,9 @@ When you run from any directory outside of /usr, the script regards this as 'dev
 unzipped the project into.
 
 For 'prod' mode, a setup.py is provided. Once the package is installed and
-<<<<<<< HEAD
-called from /usr/bin, the script will expect config and output files to be
-found in all normal locations (see proposed file layout below)
-=======
 called from /usr/*/bin, the script will expect config and output files to be
 found in all the normal 'production' locations (see proposed file layout below)
->>>>>>> 58b8e3e466cac3cfcfe0fd80bb8bebdb88b92254
+
 ```
 sudo python3 setup.py install --record installed_files --single-version-externally-managed
 ```
@@ -131,30 +122,13 @@ Here's a quick 'cheat sheet' of the API endpoints.
 
 
 ## Testing
-<<<<<<< HEAD
-Testing to date has all been lab based i.e. please **do not use in production** environments. Playbook integration with Ceph and Gluster has been the primary focus together with the probe-disks.yml playbook. Did you spot the theme?..*It's all about the storage™ :)*
-=======
 Testing to date has all been lab based, so please bear this in mind if considering using this tool for production use cases (*bug reports welcome!*). Playbook integration with Ceph and Gluster has been the primary focus together with the probe-disks.yml playbook. Did you spot the theme?..*It's all about the storage™ :)*
->>>>>>> 58b8e3e466cac3cfcfe0fd80bb8bebdb88b92254
 
 For example, with ceph the ```osd-configure.yml``` playbook has been tested successfully.
 
 ### Manual Testing
 The archive, downloaded from github, contains a simple playbook that just uses the bash sleep command - enabling you to quickly experiment with the API.
 
-<<<<<<< HEAD
-Use the steps below (dev mode), to quickly exercise the API
-1. Get the list of available playbooks (should just be test.yml)
-```curl -k -i https://localhost:5001/api/v1/playbooks  -X GET```
-2. Run the test.yml playbook, passing the time_delay parameter (30 secs should be enough).
-```curl -k -i -H "Content-Type: application/json" --data '{"time_delay": 30}' https://localhost:5001/api/v1/playbooks/test.yml -X POST```
-3. The previous command will return the playbooks UUID. Use this identifier to query the state or progress of the run.
-```curl -k -i https://localhost:5001/api/v1/playbooks/f39069aa-9f3d-11e8-852f-c85b7671906d -X GET```
-4. Get a list of all the events in a playbook. The return list consists of all the job event ID's
-```curl -k -i https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events  -X GET```
-5. To get specific output from a job event, you can query the job event
-```curl -k -i https://localhost:5001/api/v1/jobs/f39069aa-9f3d-11e8-852f-c85b7671906d/events/13-c85b7671-906d-e52d-d421-000000000008  -X GET```
-=======
 Use the steps below (dev mode), to quickly exercise the API
 1. Authenticate user and provide token
 ```curl -k -i --user admin:admin https://localhost:5001/api/v1/login -X get```
@@ -187,7 +161,6 @@ $ ssh_checks=false python3 ansible_runner_service
 $ target_user=root python3 ansible_runner_service
 ```
 
->>>>>>> 58b8e3e466cac3cfcfe0fd80bb8bebdb88b92254
 
 ## Automated Build & Testing
 The project uses Travis CI integration to check the following;
@@ -226,10 +199,5 @@ For more info, look at the ```.travis.yml``` file.
 /etc/systemd/system
 - ansible-runner-service.service
 
-<<<<<<< HEAD
-/usr/bin/ or /usr/local/bin
-- ansible-runner-service
-=======
 /usr/bin/ or /usr/local/bin
 - ansible_runner_service
->>>>>>> 58b8e3e466cac3cfcfe0fd80bb8bebdb88b92254
