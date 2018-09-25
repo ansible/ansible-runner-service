@@ -6,7 +6,7 @@ The incentive for this is two-fold;
 - provide a means of programmatically running playbooks where the ansible engine is running on a separate host or in a separate container
 
 ## Features
-The core of this project is ansible_runner, so first of all, a quick call out to those ![folks](https://github.com/ansible/ansible-runner/graphs/contributors) for such an awesome tool!  
+The core of this project is ansible_runner, so first of all, a quick call out to those [folks](https://github.com/ansible/ansible-runner/graphs/contributors) for such an awesome tool!  
 #### Security
 - https support (http not supported)
   - uses self-signed if existing crt/key files are not present
@@ -21,7 +21,7 @@ The core of this project is ansible_runner, so first of all, a quick call out to
 
 #### Monitoring
   - /metrics endpoint provides key metrics for monitoring the instance with prometheus
-  - a sample ![Grafana](https://grafana.com/) dashboard is provided in the ```misc/dashboards``` directory to track activity
+  - a sample [Grafana](https://grafana.com/) dashboard is provided in the ```misc/dashboards``` directory to track activity
 
 #### Playbook Execution
   - exposes playbooks by name found within the project folder
@@ -152,13 +152,13 @@ Obviously you'll need to change the token, play and job uuids for your run :)
 2. Overriding configuration at run time, lets you do quick tests like this;
 
     - start the service, but don't perform any passwordless ssh tests
-```
-$ ssh_checks=false python3 ansible_runner_service
-```
+    ```
+    $ ssh_checks=false python3 ansible_runner_service
+    ```
     - change the target user when validating ssh connection is in place
-```
-$ target_user=root python3 ansible_runner_service
-```
+    ```
+    $ target_user=root python3 ansible_runner_service
+    ```
 
 
 ## Automated Build & Testing
