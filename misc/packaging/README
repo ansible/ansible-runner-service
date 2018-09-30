@@ -1,0 +1,28 @@
+EL7 build
+
+Assumptions
+- you have a valid rpmbuild environment!
+
+
+Known Issues
+- using the rpm depends on 1.1.1 of ansible_runner - but this isn't currently
+  available outside pip, so the spec file is currently missing the dependency
+  on ansible_runner
+- these steps cover a manual build process and as such the spec may need to
+  change to support automated rpm build environments.
+
+
+Building your rpm based on the 0.8 release
+- copy .spec file to your SPECS directory
+- download from github to SOURCES directory using spectool
+  spectool -g -R -d '_version 0.8' -d '_release 0' SPECS/ansible-runner-service.spec
+- cd SPECS and build the rpm with
+  rpmbuild -bb --define '_version 0.8' --define '_release 0' ansible-runner-service.spec
+
+
+Build Environment
+CentOS7
+
+
+Resulting RPM Tested Against
+- CentOS 7.4, Python 2.7.5

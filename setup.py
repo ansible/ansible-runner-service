@@ -4,14 +4,12 @@ from setuptools import setup
 import distutils.command.install_scripts
 import shutil
 
-import runner_service
-
 
 # idea from http://stackoverflow.com/a/11400431/2139420
 class StripExtension(distutils.command.install_scripts.install_scripts):
     """
-    Class to handle the stripping of .py extensions in for executable file names
-    making them more user friendly
+    Class to handle the stripping of .py extensions in for executable file
+    names making them more user friendly
     """
     def run(self):
         distutils.command.install_scripts.install_scripts.run(self)
@@ -22,7 +20,7 @@ class StripExtension(distutils.command.install_scripts.install_scripts):
 
 setup(
     name="ansible-runner-service",
-    version=runner_service.__version__,
+    version=0.8,
     description="Ansible runner based REST API",
     long_description="Ansible runner based light weight RESTful web service",
     author="Paul Cuzner",
