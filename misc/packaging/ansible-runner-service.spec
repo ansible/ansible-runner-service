@@ -21,6 +21,7 @@ Requires: python-flask
 Requires: python2-flask-restful
 Requires: python2-crypto
 Requires: python-paramiko
+Requires: openssl
 Requires: pyOpenSSL
 Requires: PyYAML
 Requires: python-jwt
@@ -30,7 +31,7 @@ This package provides a daemon that exposes a REST API interface on top of the f
 
 The daemon (ansible-runner-service) listens on https://localhost:5001 by default for playbook or ansible inventory requests. For developers interested in using the API, all the available endpoints are documented at https://localhost:5001/api.
 
-In addition to the API endpoints, the daemon also provides a /metrics endpoint for prometheus integration. A sample Grafana dashboard is provides within /usr/share/doc/ansible-runner-service
+In addition to the API endpoints, the daemon also provides a /metrics endpoint for prometheus integration. A sample Grafana dashboard is provided within /usr/share/doc/ansible-runner-service
 
 %prep
 %setup -q -n %{name}-%{version}.%{_release}

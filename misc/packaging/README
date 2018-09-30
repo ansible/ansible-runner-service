@@ -15,7 +15,7 @@ Known Issues
 Building your rpm based on the 0.8 release
 - copy .spec file to your SPECS directory
 - download from github to SOURCES directory using spectool
-  spectool -r -G -d '_version 0.8' -d '_release 0' SPECS/ansible-runner-service.spec
+  spectool -g -R -d '_version 0.8' -d '_release 0' SPECS/ansible-runner-service.spec
 - cd SPECS and build the rpm with
   rpmbuild -bb --define '_version 0.8' --define '_release 0' ansible-runner-service.spec
 
