@@ -33,7 +33,7 @@ before_script:
 script:
   - flake8 --ignore=E501 ansible_runner_service.py runner-service/
   - cd /tmp/tests && python -m unittest discover -p "test_*.py"
-  - coverage run --source=runner_service -m unittest discover -p "tests/test_*.py"
+  - coverage run -m unittest discover -p "test_*.py"
 
 after_success:
   - codecov
@@ -41,4 +41,3 @@ after_success:
 after_script:
   - ls -al ~/.ssh
   - cat ~/.ssh/authorized_keys
-
