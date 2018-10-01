@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-import base64
+from base64 import b64encode
 import shutil
 
 import unittest
@@ -39,7 +39,13 @@ def seed_dirs(seed_list):
 def get_auth_header(username, password):
 
     auth = "{}:{}".format(username, password)
-    return {'Authorization': 'Basic ' + base64.b64encode(bytes(auth,'ascii')).decode('ascii')}  # noqa
+    encoded_credentials = b64encode(auth.encode())
+
+    # account for differences in python2 and python3 encoding
+    if isinstance(encoded_credentials, bytes):
+        encoded_credentials = encoded_credentials.decode('ascii')
+
+    return {'Authorization': 'Basic ' + encoded_credentials}  # noqa
 
 
 class APITestCase(unittest.TestCase):
