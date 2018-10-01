@@ -118,6 +118,72 @@ class TestInventory(APITestCase):
         payload = json.loads(response.data)
         self.assertTrue(isinstance(payload['data']['hosts'], list))
 
+    def test_remove_valid_host(self):
+        """- remove a host from a group"""
+        response = self.app.post('api/v1/groups/temphost',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.post('/api/v1/hosts/localhost/groups/temphost',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.delete('/api/v1/hosts/localhost/groups/temphost',
+                                   headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_remove_invalid_host(self):
+        """- attempt to remove a host that is not in a specific group"""
+        response = self.app.post('api/v1/groups/invalidhost',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.delete('/api/v1/hosts/notthere/groups/invalidhost',
+                                   headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         400)
+
+    def test_check_membership(self):
+        """- show groups host is a member of"""
+        response = self.app.post('api/v1/groups/groupone',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+        response = self.app.post('api/v1/hosts/localhost/groups/groupone',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+        response = self.app.get('api/v1/hosts/localhost',
+                                headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+        payload = json.loads(response.data)
+        self.assertIn("groupone", payload['data']['groups'])
+
+    def test_show_group_members(self):
+        """- show hosts that are members of a specific group"""
+        response = self.app.post('api/v1/groups/grouptwo',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.post('api/v1/hosts/localhost/groups/grouptwo',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.get('api/v1/groups/grouptwo',
+                                headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+        payload = json.loads(response.data)
+        self.assertTrue(isinstance(payload['data']['members'], list))
+        self.assertIn('localhost', payload['data']['members'])
+
 
 if __name__ == "__main__":
 
