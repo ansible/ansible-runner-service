@@ -1,6 +1,7 @@
 
 import os
 import sys
+import json
 import yaml
 import logging
 import unittest
@@ -19,20 +20,24 @@ class TestInventory(APITestCase):
 
     def test_groups(self):
         """- Get a list of groups from the inventory"""
-        response = self.get('/groups')
+
+        response = self.app.get('api/v1/groups',
+                                headers=self.token_header())
 
         self.assertEqual(response.status_code,
                          200)
         self.assertEqual(response.headers['Content-Type'],
                          'application/json')
 
-        payload = response.json()
+        payload = json.loads(response.data)
         self.assertIn('groups', payload['data'].keys())
         self.assertTrue(isinstance(payload['data']['groups'], list))
 
     def test_group_add(self):
         """- Add a group to the inventory"""
-        response = self.post('/groups/group1')
+
+        response = self.app.post('api/v1/groups/group1',
+                                 headers=self.token_header())
 
         self.assertEqual(response.status_code,
                          200)
@@ -47,11 +52,13 @@ class TestInventory(APITestCase):
     def test_group_remove(self):
         """- Remove a group from the inventory"""
         # first, setup the group we're going to remove
-        response = self.post('/groups/group2')
+        response = self.app.post('api/v1/groups/group2',
+                                 headers=self.token_header())
         self.assertEqual(response.status_code,
                          200)
 
-        response = self.delete('/groups/group2')
+        response = self.app.delete('api/v1/groups/group2',
+                                   headers=self.token_header())
         self.assertEqual(response.status_code,
                          200)
 
@@ -63,32 +70,36 @@ class TestInventory(APITestCase):
     def test_host_add(self):
         """- Add a host to a group - 404 unless ssh_checks turned off"""
 
-        response = self.post('/groups/newhost')
+        response = self.app.post('api/v1/groups/newhost',
+                                 headers=self.token_header())
         self.assertEqual(response.status_code,
                          200)
 
-        response = self.post("/hosts/dummy/groups/newhost")
+        response = self.app.post("api/v1/hosts/dummy/groups/newhost",
+                                 headers=self.token_header())
 
         if TestInventory.config.ssh_checks:
 
             self.assertEqual(response.status_code,
                              404)
-            payload = response.json()
+            payload = json.loads(response.data)
             self.assertTrue(payload['status'] == 'NOCONN')
         else:
             self.assertEqual(response.status_code,
                              200)
-            payload = response.json()
+            payload = json.loads(response.data)
             self.assertTrue(payload['msg'].upper().startswith('SKIPPED'))
 
     def test_host_add_localhost(self):
         """- Add a localhost to a group"""
 
-        response = self.post('/groups/local')
+        response = self.app.post('api/v1/groups/local',
+                                 headers=self.token_header())
         self.assertEqual(response.status_code,
                          200)
 
-        response = self.post('/hosts/localhost/groups/local')
+        response = self.app.post('/api/v1/hosts/localhost/groups/local',
+                                 headers=self.token_header())
         self.assertEqual(response.status_code,
                          200)
 
@@ -99,11 +110,12 @@ class TestInventory(APITestCase):
 
     def test_hosts(self):
         """- Get a list of hosts in the inventory"""
-        response = self.get('/hosts')
+        response = self.app.get('api/v1/hosts',
+                                headers=self.token_header())
         self.assertEqual(response.status_code,
                          200)
 
-        payload = response.json()
+        payload = json.loads(response.data)
         self.assertTrue(isinstance(payload['data']['hosts'], list))
 
 
