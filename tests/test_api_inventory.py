@@ -49,6 +49,20 @@ class TestInventory(APITestCase):
         inv_data = yaml.safe_load(fread(inv_filename))
         self.assertIn("group1", inv_data['all']['children'].keys())
 
+    def test_group_add_clash(self):
+        """- add a group that already exists"""
+        response = self.app.post('api/v1/groups/clash',
+                                 headers=self.token_header())
+
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.post('api/v1/groups/clash',
+                                 headers=self.token_header())
+
+        self.assertEqual(response.status_code,
+                         400)
+
     def test_group_remove(self):
         """- Remove a group from the inventory"""
         # first, setup the group we're going to remove
@@ -66,6 +80,13 @@ class TestInventory(APITestCase):
         inv_filename = os.path.join(root_dir, 'samples/inventory/hosts')
         inv_data = yaml.safe_load(fread(inv_filename))
         self.assertNotIn("group2", inv_data['all']['children'].keys())
+
+    def test_remove_invalid_group(self):
+        """- Attempt a group remove with an invalid group name"""
+        response = self.app.delete('api/v1/groups/notthere',
+                                   headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         400)
 
     def test_host_add(self):
         """- Add a host to a group - 404 unless ssh_checks turned off"""
@@ -107,6 +128,37 @@ class TestInventory(APITestCase):
         inv_filename = os.path.join(root_dir, 'samples/inventory/hosts')
         inv_data = yaml.safe_load(fread(inv_filename))
         self.assertIn("localhost", inv_data['all']['children']['local']['hosts'].keys()) # noqa
+
+    def test_host_add_nogroup(self):
+        """- Attempt a host add call with a non-existent group"""
+        response = self.app.post('/api/v1/hosts/localhost/groups/biteme',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         400)
+
+    def test_host_add_duplicate(self):
+        """- Attempt to add a host multiple times to a group"""
+        dupe_count = 2
+        response = self.app.post('api/v1/groups/dupe',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        # seed the group
+        response = self.app.post('/api/v1/hosts/localhost/groups/dupe',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        # attempt to add duplicates
+        for _ctr in range(0, dupe_count, 1):
+
+            response = self.app.post('/api/v1/hosts/localhost/groups/dupe',
+                                     headers=self.token_header())
+            self.assertEqual(response.status_code,
+                             200)
+            msg = json.loads(response.data)['msg']
+            self.assertIn("Host already in the group", msg)
 
     def test_hosts(self):
         """- Get a list of hosts in the inventory"""
@@ -183,6 +235,14 @@ class TestInventory(APITestCase):
         payload = json.loads(response.data)
         self.assertTrue(isinstance(payload['data']['members'], list))
         self.assertIn('localhost', payload['data']['members'])
+
+    def test_show_group_members_missing(self):
+        """- attempt a show group members against a non-existent group"""
+        response = self.app.get('api/v1/groups/walkabout',
+                                headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         404)
+
 
 
 if __name__ == "__main__":
