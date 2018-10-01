@@ -54,6 +54,15 @@ class TestLogin(APITestCase):
         self.assertEqual(response.status_code,
                          401)
 
+    def test_access_with_bad_token(self):
+        """- test access with an unknown token"""
+        invalid_token = self.token_header()["Authorization"][::-1]  # reverse
+
+        response = self.app.get('/api/v1/groups',
+                                headers={"Authorization": invalid_token})
+        self.assertEqual(response.status_code,
+                         401)
+
 
 if __name__ == "__main__":
 
