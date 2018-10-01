@@ -127,7 +127,7 @@ class TestPlaybooks(APITestCase):
                                     headers=self.token_header())
 
             self.assertIn(response.status_code, [200, 404])
-            if json.loads(response.data)['msg'] not in ['running']:
+            if json.loads(response.data)['msg'] in ['successful', 'failed']:
                 break
 
             time.sleep(0.5)
@@ -149,7 +149,7 @@ class TestPlaybooks(APITestCase):
                                     headers=self.token_header())
 
             self.assertIn(response.status_code, [200, 404])
-            if json.loads(response.data)['msg'] not in ['running']:
+            if json.loads(response.data)['msg'] in ['successful', 'failed']:
                 break
 
             time.sleep(0.5)
