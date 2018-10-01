@@ -87,6 +87,73 @@ class TestPlaybooks(APITestCase):
                 break
             time.sleep(0.5)
 
+    def test_cancel_running_playbook(self):
+        """- Issue a cancel against a running playbook"""
+
+        response = self.app.post('api/v1/playbooks/testplaybook.yml',
+                                 data=json.dumps(dict()),
+                                 content_type="application/json",
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         202)     # it started OK
+
+        play_uuid = json.loads(response.data)['data']['play_uuid']
+        response = self.app.delete('api/v1/playbooks/{}'.format(play_uuid),
+                                   headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_cancel_nonactive_playbook(self):
+        """- attempt to cancel a playbook that isn't running"""
+        response = self.app.delete('api/v1/playbooks/9353b955f2-b79a-11e8-8be9-c85b76719093',   # noqa
+                                   headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         404)
+
+    def test_run_playbook_tags(self):
+        """- run a playbook using tags"""
+
+        response = self.app.post('api/v1/playbooks/testplaybook.yml/tags/solo',
+                                 data=json.dumps(dict()),
+                                 content_type="application/json",
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         202)     # it started OK
+
+        play_uuid = json.loads(response.data)['data']['play_uuid']
+        # wait for playbook completion
+        while True:
+            response = self.app.get('api/v1/playbooks/{}'.format(play_uuid),
+                                    headers=self.token_header())
+
+            self.assertIn(response.status_code, [200, 404])
+            if json.loads(response.data)['msg'] not in ['running']:
+                break
+
+            time.sleep(0.5)
+
+    def test_run_playbook_limited(self):
+        """- run a playbook that uses limit"""
+
+        response = self.app.post('api/v1/playbooks/testplaybook.yml?limit=localhost',   # noqa
+                                 data=json.dumps(dict()),
+                                 content_type="application/json",
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         202)     # it started OK
+
+        play_uuid = json.loads(response.data)['data']['play_uuid']
+        # wait for playbook completion
+        while True:
+            response = self.app.get('api/v1/playbooks/{}'.format(play_uuid),
+                                    headers=self.token_header())
+
+            self.assertIn(response.status_code, [200, 404])
+            if json.loads(response.data)['msg'] not in ['running']:
+                break
+
+            time.sleep(0.5)
+
 
 if __name__ == "__main__":
 
