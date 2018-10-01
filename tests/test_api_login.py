@@ -46,6 +46,13 @@ class TestLogin(APITestCase):
                          401)
         self.assertIn('unknown user', json.loads(response.data)['msg'])
 
+    def test_login_no_credentials(self):
+        """- test login without a username/password header"""
+        response = self.app.get('/api/v1/login')
+
+        self.assertEqual(response.status_code,
+                         401)
+
     def test_access_without_token(self):
         """- test access to a protected endpoint, without token"""
 
