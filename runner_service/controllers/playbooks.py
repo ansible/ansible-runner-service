@@ -178,7 +178,7 @@ def _run_playbook(playbook_name, tags=None):
         r.status, r.msg = "NOTFOUND", "playbook file not found"
         return r
 
-    response = start_playbook(playbook_name, vars, filter)
+    response = start_playbook(playbook_name, vars, filter, tags)
 
     play_uuid = response.data.get('play_uuid', None)
     status = response.data.get('status', None)

@@ -1,18 +1,18 @@
 import os
-import time
+import sys
+import json
+from base64 import b64encode
 import shutil
-import socket
-import urllib3
-import unittest
-import requests
-from multiprocessing import Process
 
-from ansible_runner_service import *        # noqa
+import unittest
+
+sys.path.extend(["../", "./"])
+from ansible_runner_service import main     # noqa E402
 from runner_service import configuration    # noqa
 
 
 def setup_dirs(dir_list=[]):
-    """Create the sample directory structure for the daemon to work within"""
+    """Create the sample directory structure for the API to work against"""
     root_dir = os.getcwd()
     samples = os.path.join(root_dir, 'samples')
 
@@ -36,33 +36,27 @@ def seed_dirs(seed_list):
             shutil.copyfile(src, dest)
 
 
-def wait_for_api(port_num=5001):
-    """Attempt a socket connect on a given port, wait until connect succeeds"""
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    while True:
-        result = sock.connect_ex(('127.0.0.1', port_num))
-        if result == 0:
-            break
-        time.sleep(0.1)
-    sock.close()
+def get_auth_header(username, password):
 
+    auth = "{}:{}".format(username, password)
+    encoded_credentials = b64encode(auth.encode())
 
-def tcp_port_free(port_num=5001):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        result = sock.connect_ex(('127.0.0.1', port_num))
-    except Exception as err:
-        raise
-    finally:
-        sock.close()
+    # account for differences in python2 and python3 encoding
+    if isinstance(encoded_credentials, bytes):
+        encoded_credentials = encoded_credentials.decode('ascii')
 
-    return False if result == 0 else True
+    return {'Authorization': 'Basic ' + encoded_credentials}  # noqa
 
 
 class APITestCase(unittest.TestCase):
-    server = None
-    config = None
+    app = None
     token = None
+
+    def token_header(self):
+        return {'Authorization': self.token}
+
+    def auth_header(self, username, password):
+        return get_auth_header(username, password)
 
     @classmethod
     def setUpClass(cls):
@@ -70,11 +64,6 @@ class APITestCase(unittest.TestCase):
         Call the main method of the ansible_runner_service script to Start
         the daemon normally
         """
-
-        # Need to handle the disable here to get rid of the urllib3
-        # InsecureRequestWarning messages due to our self signed certs
-        # i.e. InsecureRequestWarning: Unverified HTTPS request is being made.
-        urllib3.disable_warnings()
 
         setup_dirs([
             'env',
@@ -92,79 +81,26 @@ class APITestCase(unittest.TestCase):
 
         configuration.init("dev")
         cls.config = configuration.settings
+        cls.app = main(test_mode=True)
+        response = cls.app.get('/api/v1/login',
+                               headers=get_auth_header('admin', 'admin'))
 
-        # wait for port to be free to bind to, incase multiple instances run
-        # concurrently
-        while True:
-            if tcp_port_free(port_num=configuration.settings.port):
-                break
-            time.sleep(0.1)
+        assert response.status_code == 200, "Unable to get login token"
 
-        # Now the port is free, we can start the server by pushing the api
-        # server into it's own process, so we can kill it! Each testcase will
-        # create a fresh API server environment so by using a process model
-        # we can kill the api server, and clean up ready for the next testcase
-        cls.server = Process(target=main,)                 # noqa
-        cls.server.daemon = True
-        cls.server.start()
-
-        wait_for_api(port_num=configuration.settings.port)
-
-        cls.token = APITestCase.get_token()
+        cls.token = json.loads(response.data).get('data')['token']
 
     @classmethod
     def get_token(cls):
-        response = requests.get("https://localhost:{}/api/v1/login".format(configuration.settings.port), # noqa
-                                auth=('admin',
-                                configuration.settings.passwords['admin']),
-                                verify=False)
+        response = APITestCase.app.get('/api/v1/login',
+                                       headers=get_auth_header('admin', 'admin'))   # noqa
+
         assert response.status_code == 200, "Unable to get login token"
-        cls.token = response.json()['data']['token']
+
+        response_data = json.loads(response.data)
+        return response_data.get('data')['token']
 
     @classmethod
     def tearDownClass(cls):
-        cls.server.terminate()
-        cls.server.join()
-
         root_dir = os.getcwd()
         samples = os.path.join(root_dir, 'samples')
         shutil.rmtree(samples)
-
-    def get(self, endpoint, auth=None):
-        url = "https://localhost:{}/api/v1{}".format(configuration.settings.port,      # noqa
-                                                      endpoint)
-        parms = {
-            "url": url,
-            "headers": {"Authorization": APITestCase.token},
-            "verify": False
-        }
-
-        if auth:
-            parms['auth'] = auth
-
-        return requests.get(**parms)
-
-    def post(self, endpoint, payload=None):
-        url = "https://localhost:{}/api/v1{}".format(configuration.settings.port,      # noqa
-                                                     endpoint)
-        parms = {
-            "url": url,
-            "headers": {"Authorization": APITestCase.token},
-            "verify": False
-        }
-
-        if isinstance(payload, dict):
-            parms['json'] = payload
-
-        return requests.post(**parms)
-
-    def delete(self, endpoint):
-        url = "https://localhost:{}/api/v1{}".format(configuration.settings.port,      # noqa
-                                                     endpoint)
-        parms = {
-            "url": url,
-            "headers": {"Authorization": APITestCase.token},
-            "verify": False
-        }
-
-        return requests.delete(**parms)

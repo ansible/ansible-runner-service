@@ -56,7 +56,8 @@ def setup_logging():
         config.get('handlers').get('file_handler')['filename'] = full_path
 
         logging.config.dictConfig(config)
-        logging.info("Loaded logging configuration from {}".format(logging_config))
+        logging.info("Loaded logging configuration from "
+                     "{}".format(logging_config))
     else:
         logging.basicConfig(level=logging.DEBUG)
         logging.warning("Logging configuration file ({}) not found, using "
@@ -130,7 +131,7 @@ def setup_localhost_ssh():
             pass
 
 
-def main():
+def main(test_mode=False):
 
     setup_logging()
 
@@ -143,6 +144,11 @@ def main():
     ssl_context = get_ssl()
 
     app = create_app()
+
+    if test_mode:
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        return app.test_client()
 
     # Start the API server
     app.run(host=configuration.settings.ip_address,

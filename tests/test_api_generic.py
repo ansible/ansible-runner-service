@@ -1,7 +1,6 @@
 
 import sys
 import logging
-import requests
 import unittest
 
 sys.path.extend(["../", "./"])
@@ -18,7 +17,7 @@ class TestAPIGeneric(APITestCase):
     def test_api(self):
         """- Test the API endpoint '/api' responds"""
 
-        response = requests.get("https://localhost:5001/api", verify=False)
+        response = self.app.get("https://localhost:5001/api")
 
         self.assertEqual(response.status_code,
                          200)
@@ -28,7 +27,7 @@ class TestAPIGeneric(APITestCase):
     def test_metrics_content_type(self):
         """- Test the API endpoint '/metrics' responds with text"""
 
-        response = requests.get("https://localhost:5001/metrics", verify=False)
+        response = self.app.get("https://localhost:5001/metrics")
 
         self.assertEqual(response.status_code,
                          200)
@@ -38,12 +37,12 @@ class TestAPIGeneric(APITestCase):
     def test_metrics_value(self):
         """- Test a value from API endpoint '/metrics' is correct"""
 
-        response = requests.get("https://localhost:5001/metrics", verify=False)
+        response = self.app.get("https://localhost:5001/metrics")
 
         self.assertEqual(response.status_code,
                          200)
 
-        payload_list = response.text.split('\n')
+        payload_list = str(response.data).split('\n')
         for _m in payload_list:
             if _m.startswith('runner_service_playbook_count'):
                 _, v = _m.split('}')

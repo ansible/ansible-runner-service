@@ -1,7 +1,6 @@
 
 import os
 import glob
-# import json
 import uuid
 import time
 
@@ -64,33 +63,6 @@ def get_status(play_uuid):
                        " artifacts directory...Possible ansible_runner "
                        " error?".format(play_uuid))
         return r
-        # # play is still active
-        # # get last event
-        # events_dir = os.path.join(pb_artifacts, "job_events")
-        # if not os.path.exists(events_dir):
-        #     r.status, r.msg = "NOTFOUND", "No events recorded yet"
-        #     return r
-        #
-        # # gather the events, excluding any partially complete files
-        # events = [_f for _f in os.listdir(events_dir)
-        #           if not _f.endswith('-partial.json')]
-        #
-        # r.status = "OK"
-        #
-        # if events:
-        #     events.sort(key=lambda filenm: int(filenm.split("-", 1)[0]))
-        #     last_event = events[-1]
-        #     last_event_data = json.loads(fread(os.path.join(events_dir,
-        #                                                     last_event)))
-        #     r.msg = "Playbook with UUID {} is active".format(play_uuid)
-        #     r.data = {"task_id": last_event_data.get('counter'),
-        #               "task_name": last_event_data['event_data'].get('task')
-        #               }
-        # else:
-        #     r.msg = "Job appears active, but no task information is available"
-        #     logger.error("Play with UUID {} looks active, but doesn't have any"
-        #                  " files within job_events dir".format(play_uuid))
-        # return r
 
 
 def list_playbooks():

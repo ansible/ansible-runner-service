@@ -7,3 +7,8 @@
   tasks:
     - name: Just go to sleep for a second
       command: sleep 1
+    - name: Just go to sleep for a second
+      command: sleep 1
+      tags: solo
+    - name: Just go to sleep for a second
+      command: sleep 1
