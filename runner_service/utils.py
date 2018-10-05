@@ -3,7 +3,6 @@ import jwt
 import shutil
 import socket
 import getpass
-import datetime
 
 from OpenSSL import crypto
 from paramiko.rsakey import RSAKey
@@ -202,8 +201,8 @@ def setup_svc_token():
     """
     logger.debug("Checking svctoken")
     token_file = os.path.join(
-                    os.path.basename(configuration.settings.config_dir),
-                    'svctoken')
+        os.path.basename(configuration.settings.config_dir),
+        'svctoken')
 
     if os.path.exists(token_file):
         token = fread(token_file)

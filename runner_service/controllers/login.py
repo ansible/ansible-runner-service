@@ -5,7 +5,6 @@ from .base import BaseResource
 from ..services.utils import APIResponse
 from runner_service import configuration
 from ..utils import create_token
-import jwt
 import datetime
 
 logger = logging.getLogger(__name__)
