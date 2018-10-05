@@ -73,6 +73,10 @@ class Config(object):
         self.token_secret = 'secret'
         self.token_hours = 24
 
+        # service token used by daemons running on the same host
+        # to bypass the need for the login process
+        self.svctoken = None
+
         self._apply_overrides()
 
     def _apply_local(self):
