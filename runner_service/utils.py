@@ -1,4 +1,5 @@
 import os
+import jwt
 import shutil
 import socket
 import getpass
@@ -181,3 +182,97 @@ def ssh_connect_ok(host, user=None):
     else:
         client.close()
         return True, "OK:SSH connection check to {} successful".format(host)
+
+
+def setup_svc_token():
+    """
+    Create a service token
+    A service token can be used by processes runnning on the same system,
+    instead of using the http(s) login/relogin sequence
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    Raises:
+        None
+    """
+    logger.debug("Checking svctoken")
+    token_file = os.path.join(
+        os.path.basename(configuration.settings.config_dir),
+        'svctoken')
+
+    if os.path.exists(token_file):
+        token = fread(token_file)
+        if valid_token(token):
+            logger.info("svctoken exists, and is valid")
+        else:
+            token = create_token(token_file=token_file)
+            logger.info("svctoken found, but invalid so recreated")
+    else:
+        token = create_token(token_file=token_file)
+        logger.info("svctoken created")
+
+    configuration.settings.svctoken = token
+
+
+def create_token(token_file=None, exp=None):
+    """
+    Create a jwt (default is non-expiring)
+
+    Args:
+        token_file : file to commit the token to. If none, it's not persisted
+        exp : None (non-expiring), or datetime.datetime object representing the
+              expiration date/time
+
+    Returns:
+        jwt token (string)
+
+    Raises:
+        OSError if the token can not be written to the filesystem
+    """
+    claims = {"exp": exp}
+    if not exp:
+        del claims['exp']
+
+    encoded = jwt.encode(claims,
+                         configuration.settings.token_secret,
+                         algorithm='HS256')
+
+    token = encoded.decode('utf-8')
+    if token_file:
+        try:
+            with open(token_file, "w") as t:
+                t.write(token)
+        except OSError as err:
+            logger.error("Unable to persist the token: {}".format(token_file))
+            raise
+
+    return token
+
+
+def valid_token(token):
+    """
+    Check that the token (str) passed is valid
+
+    Args:
+        token : token string to check by attempting a decode op
+
+    Returns:
+        Boolean denoting successful jwt decode
+
+    Raises:
+        None
+
+    """
+    try:
+        jwt.decode(token,
+                   configuration.settings.token_secret,
+                   algorithms='HS256')
+    except (jwt.DecodeError, jwt.ExpiredSignatureError) as err:
+        logger.warning("Invalid token - needs replacing")
+        return False
+    else:
+        return True

@@ -7,6 +7,7 @@ class BaseResource(Resource):
         "STARTED": 202,
         "INVALID": 400,
         "NOAUTH": 401,
+        "FORBIDDEN": 403,
         "NOCONN": 404,
         "NOTFOUND": 404,
         "UNKNOWN": 404,

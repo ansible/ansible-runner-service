@@ -13,6 +13,7 @@ import runner_service.configuration as configuration
 from runner_service.utils import (fread,
                                   create_self_signed_cert,
                                   ssh_create_key,
+                                  setup_svc_token,
                                   RunnerServiceError)
 from runner_service.app import create_app
 
@@ -136,6 +137,8 @@ def main(test_mode=False):
     setup_logging()
 
     logging.info("Run mode is: {}".format(configuration.settings.mode))
+
+    setup_svc_token()
 
     setup_ssh()
 

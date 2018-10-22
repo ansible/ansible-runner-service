@@ -4,7 +4,7 @@ from .utils import requires_auth, log_request
 from .base import BaseResource
 from ..services.utils import APIResponse
 from runner_service import configuration
-import jwt
+from ..utils import create_token
 import datetime
 
 logger = logging.getLogger(__name__)
@@ -50,9 +50,8 @@ class Login(BaseResource):
                         if user_info['password'] == password:
                             # got a valid user and pass
                             # generate token
-                            exp = datetime.datetime.utcnow() + datetime.timedelta(hours=configuration.settings.token_hours)
-                            encoded = jwt.encode({'exp': exp}, configuration.settings.token_secret, algorithm='HS256')
-                            token = encoded.decode('utf-8')
+                            expdt = datetime.datetime.utcnow() + datetime.timedelta(hours=configuration.settings.token_hours)
+                            token = create_token(exp=expdt)
 
                             response = APIResponse()
                             response.status, response.msg, response.data = "OK", "Token returned", {"token": token}

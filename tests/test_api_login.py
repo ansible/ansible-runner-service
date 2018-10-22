@@ -8,6 +8,7 @@ import unittest
 sys.path.extend(["../", "./"])
 from common import APITestCase  # noqa
 from ansible_runner_service import main     # noqa E402
+from runner_service import configuration    # noqa E402
 
 # turn of normal logging that the ansible_runner_service will generate
 nh = logging.NullHandler()
@@ -16,6 +17,21 @@ r.addHandler(nh)
 
 
 class TestLogin(APITestCase):
+
+    def test_svctoken_access(self):
+        """- test svtoken access over localhost"""
+        headers = {"Authorization": configuration.settings.svctoken}
+        response = self.app.get("/api/v1/playbooks",
+                                headers=headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_svctoken_foreign_host(self):
+        """- test use of svctoken from non-localhost"""
+        headers = {"Authorization": configuration.settings.svctoken}
+        response = self.app.get("/api/v1/playbooks",
+                                environ_base={"REMOTE_ADDR": "192.168.1.1"},
+                                headers=headers)
+        self.assertEqual(response.status_code, 403)
 
     def test_good_login(self):
         """- test happy state login"""
