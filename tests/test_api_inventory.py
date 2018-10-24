@@ -61,7 +61,7 @@ class TestInventory(APITestCase):
                                  headers=self.token_header())
 
         self.assertEqual(response.status_code,
-                         400)
+                         200)
 
     def test_group_remove(self):
         """- Remove a group from the inventory"""
@@ -243,6 +243,69 @@ class TestInventory(APITestCase):
         self.assertEqual(response.status_code,
                          404)
 
+    def test_add_host_multiple_groups(self):
+        """- add a host to multiple groups"""
+
+        response = self.app.post('api/v1/groups/multi1',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.post('api/v1/groups/multi2',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.post('api/v1/groups/multi3',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.post('api/v1/hosts/localhost/groups/multi1?others=multi2,multi3', # noqa
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+    def test_hosts_with_invalid_parms(self):
+        """- issue a host/group request with an invalid parameter"""
+        response = self.app.post('api/v1/groups/parmcheck',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+        response = self.app.post('api/v1/hosts/localhost/groups/parmcheck?myparm=dumb,dumber', # noqa
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         400)
+
+    def test_remove_host(self):
+        """- remove a host from all groups"""
+        response = self.app.post('api/v1/groups/removehost1',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.post('api/v1/groups/removehost2',
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.post('api/v1/hosts/localhost/groups/removehost1?others=removehost2', # noqa
+                                 headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.delete('api/v1/hosts/localhost',
+                                   headers=self.token_header())
+        self.assertEqual(response.status_code,
+                         200)
+
+        root_dir = os.getcwd()
+        inv_filename = os.path.join(root_dir, 'samples/inventory/hosts')
+        inv_data = yaml.safe_load(fread(inv_filename))
+        groups = inv_data['all']['children'].keys()
+        for group in groups:
+            self.assertNotIn("localhost",
+                             inv_data['all']['children'][group]['hosts'].keys()) # noqa
 
 
 if __name__ == "__main__":
