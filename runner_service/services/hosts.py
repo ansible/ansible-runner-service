@@ -12,7 +12,8 @@ def add_host(host_name, group_name):
     r = APIResponse()
     inventory = AnsibleInventory(excl=True)
     if not inventory.loaded:
-        r.status, r.msg = "LOCKED", "Unable to lock the inventory file, try later"
+        r.status, r.msg = "LOCKED", \
+                          "Unable to lock the inventory file, try later"
         return r
 
     if group_name not in inventory.groups:
@@ -24,7 +25,8 @@ def add_host(host_name, group_name):
     group_members = inventory.group_show(group_name)
     if host_name in group_members:
         # host already in that group!
-        r.status, r.msg = "OK", "Host already in the group {}".format(group_name)
+        r.status, r.msg = "OK", \
+                          "Host already in the group {}".format(group_name)
         inventory.unlock()
         return r
 
