@@ -2,6 +2,7 @@
 import os
 import yaml
 import fcntl
+import time
 
 from .utils import fread
 
@@ -129,16 +130,27 @@ class AnsibleInventory(object):
 
         try:
             if self.exclusive_lock:
-                try:
-                    self.fd = open(self.filename, 'r+')
-                    self.lock()
-                except IOError as _e:
-                    # Can't obtain an exclusive_lock
-                    logger.warning("Unable to lock inventory: {}".format(_e))
+                locked = False
+                self.fd = open(self.filename, 'r+')
+                num_retries = 5
+                for _d in range(num_retries):
+                    try:
+                        self.lock()
+                    except IOError as _e:
+                        # Can't obtain an exclusive_lock
+                        logger.warning("Unable to lock inventory (attempt "
+                                       "{}/{}): {}".format(_d + 1,
+                                                           num_retries,
+                                                           _e))
+                        time.sleep(.05)     # wait 50ms before retry
+                    else:
+                        locked = True
+                        raw = self.fd.read().strip()
+                        break
+
+                if not locked:
                     self.fd.close()
                     return
-                else:
-                    raw = self.fd.read().strip()
             else:
                 raw = fread(self.filename)
         except Exception as ex:
@@ -185,14 +197,14 @@ class AnsibleInventory(object):
 
     @property
     def hosts(self):
-        _host_list = list()
+        _host_list = set()
         for group_name in self.groups:
             try:
-                _host_list.extend(list(self.inventory['all']['children'][group_name]['hosts'].keys()))
+                _host_list.update(list(self.inventory['all']['children'][group_name]['hosts'].keys())) # noqa
             except (AttributeError, TypeError):
                 # group is empty
                 pass
-        return _host_list
+        return sorted(list(_host_list))
 
     @property
     def groups(self):
