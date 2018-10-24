@@ -304,8 +304,10 @@ class TestInventory(APITestCase):
         inv_data = yaml.safe_load(fread(inv_filename))
         groups = inv_data['all']['children'].keys()
         for group in groups:
-            self.assertNotIn("localhost",
-                             inv_data['all']['children'][group]['hosts'].keys()) # noqa
+            hosts_in_group = inv_data['all']['children'][group]['hosts']
+            if isinstance(hosts_in_group, dict):
+                self.assertNotIn("localhost",
+                                 hosts_in_group.keys())
 
 
 if __name__ == "__main__":
