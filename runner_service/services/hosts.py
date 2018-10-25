@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 def add_host(host_name, group_name):
     r = APIResponse()
+    r.data = {"hostname": host_name}
     inventory = AnsibleInventory(excl=True)
     if not inventory.loaded:
         r.status, r.msg = "LOCKED", \
@@ -57,6 +58,7 @@ def add_host(host_name, group_name):
 
     inventory.host_add(group_name, host_name)
     r.status = "OK"
+    r.msg = "{} added".format(host_name)
 
     return r
 
