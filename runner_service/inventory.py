@@ -259,7 +259,7 @@ class AnsibleInventory(object):
                                                                       group))
             else:
                 del self.inventory['all']['children'][group]['hosts'][host]
-                logger.info("Host ''{}' removed from inventory group "
+                logger.info("Host '{}' removed from inventory group "
                             "'{}'".format(host, group))
                 if not self.inventory['all']['children'][group]['hosts']:
                     self.inventory['all']['children'][group]['hosts'] = None
