@@ -16,7 +16,7 @@ def add_group(group_name):
         try:
             inventory.group_add(group_name)
         except InventoryGroupExists:
-            r.status, r.msg = 'INVALID', 'Group already exists'
+            r.status, r.msg = 'OK', 'Group already exists'
         else:
             r.status, r.msg = 'OK', 'Group {} added'.format(group_name)
 

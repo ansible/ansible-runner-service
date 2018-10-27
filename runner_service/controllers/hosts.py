@@ -1,3 +1,4 @@
+from flask_restful import request
 
 from .base import BaseResource
 from .utils import requires_auth, log_request
@@ -6,6 +7,7 @@ from ..services.hosts import (get_hosts,
                               remove_host,
                               get_host_membership
                               )
+from ..services.utils import APIResponse
 
 import logging
 logger = logging.getLogger(__name__)
@@ -43,7 +45,7 @@ class Hosts(BaseResource):
             }
         }
         ```
-        """
+        """ # noqa
 
         response = get_hosts()
 
@@ -51,7 +53,7 @@ class Hosts(BaseResource):
 
 
 class HostDetails(BaseResource):
-    """Show group membership for a given host"""
+    """For a given host either show group membership or remove the host"""
 
     @requires_auth
     @log_request(logger)
@@ -80,9 +82,54 @@ class HostDetails(BaseResource):
             }
         }
         ```
-        """
+        """ # noqa
 
         response = get_host_membership(host_name)
+
+        return response.__dict__, self.state_to_http[response.status]
+
+    @requires_auth
+    @log_request(logger)
+    def delete(self, host_name):
+        """
+        DELETE {host_name}
+        Delete the given host from all ansible roles
+
+        Example.
+
+        ```
+        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/hosts/con-1 -X delete
+        HTTP/1.0 200 OK
+        Content-Type: application/json
+        Content-Length: 108
+        Server: Werkzeug/0.14.1 Python/3.6.6
+        Date: Wed, 05 Sep 2018 04:59:05 GMT
+
+        {
+            "status": "OK",
+            "msg": "",
+            "data": {
+                "groups": [
+                    "osds"
+                ]
+            }
+        }
+        ```
+        """ # noqa
+
+        response = get_host_membership(host_name)
+        group_list = response.data['groups']
+        for group_name in group_list:
+            response = remove_host(host_name, group_name)
+            if response.status != 'OK':
+                return response.__dict__, self.state_to_http[response.status]
+
+        # removal from all groups was successful
+        response.msg = "{} removed from {} group(s) " \
+                       "({})".format(host_name,
+                                     len(group_list),
+                                     ','.join(group_list))
+        response.data = {}
 
         return response.__dict__, self.state_to_http[response.status]
 
@@ -94,8 +141,9 @@ class HostMgmt(BaseResource):
     @log_request(logger)
     def post(self, host_name, group_name):
         """
-        POST hosts/{host_name}/groups/{group_name}
-        Add a new host to an existing group in the ansible inventory
+        POST hosts/{host_name}/groups/{group_name}[?others=group2,group3]
+        Add a new host to an existing group or groups within the ansible
+        inventory
 
         Example.
 
@@ -113,9 +161,31 @@ class HostMgmt(BaseResource):
             "data": {}
         }
         ```
-        """
+        """ # noqa
 
-        response = add_host(host_name, group_name)
+        valid_parms = ['others']
+        group_list = []
+        group_list.append(group_name)
+
+        args = request.args.to_dict()
+        if args:
+            logger.debug("additional args received")
+            if all(p in valid_parms for p in args.keys()):
+                if 'others' in args:
+                    group_list.extend(args['others'].split(','))
+            else:
+                r = APIResponse()
+                r.status = 'INVALID'
+                r.msg = "Supported additional parameters are " \
+                        "{}".format(','.join(valid_parms))
+                return r.__dict__, self.state_to_http[r.status]
+
+        for group in group_list:
+            logger.debug("Adding host {} to group {}".format(host_name, group))
+            response = add_host(host_name, group)
+            if response.status != 'OK':
+                break
+
         return response.__dict__, self.state_to_http[response.status]
 
     @requires_auth
@@ -141,7 +211,7 @@ class HostMgmt(BaseResource):
             "data": {}
         }
         ```
-        """
+        """ # noqa
 
         response = remove_host(host_name, group_name)
         return response.__dict__, self.state_to_http[response.status]
