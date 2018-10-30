@@ -171,8 +171,17 @@ def get_events(pb_path, filter):
     return r
 
 
-def get_event(pb_path, event_uuid):
+def get_event(pb_path, play_uuid, event_uuid):
     r = APIResponse()
+
+    #  try to use cache first
+    cut_event_uuid = event_uuid.split('-', 1)[1]
+    if play_uuid in event_cache:
+        if cut_event_uuid in event_cache[play_uuid]:
+            print ("cache used")
+            r.status, r.data = "OK", event_cache[play_uuid][cut_event_uuid]
+            return r
+
     event_path = glob.glob(os.path.join(pb_path,
                                         "job_events",
                                         "{}.json".format(event_uuid)))

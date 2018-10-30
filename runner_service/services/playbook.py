@@ -12,7 +12,7 @@ from runner_service.cache import runner_cache, runner_stats
 from .utils import cleanup_dir, APIResponse
 from ..utils import fread
 
-# from .jobs import event_cache
+from .jobs import event_cache
 
 import logging
 logger = logging.getLogger(__name__)
@@ -117,6 +117,7 @@ def cb_playbook_finished(runner):
 
 # Placeholder for populating the event_cache
 def cb_event_handler(event_data):
+
     # first look at the event to track overall stats in the runner_stats object
     event_type = event_data.get('event', None)
     if event_type.startswith("runner_on_"):
@@ -132,6 +133,11 @@ def cb_event_handler(event_data):
         if event_type == "playbook_on_task_start":
             runner_cache[ident]['current_task'] = event_data['event_data'].get('task', None)    # noqa
         runner_cache[ident]['last_task_num'] = event_data['counter']
+
+
+    
+    event_cache[ident].update({event_data['uuid']: event_data})
+
 
     # regardless return true to ensure the data is written to artifacts dir
     return True
@@ -216,5 +222,7 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     runner_cache[play_uuid] = {"runner": _runner,
                                "current_task": None,
                                "last_task_num": None}
+
+    event_cache[play_uuid] = {}
 
     return r

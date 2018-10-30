@@ -137,6 +137,6 @@ class GetEvent(BaseResource):
 
         pb_path = build_pb_path(play_uuid)
 
-        response = get_event(pb_path, event_uuid)
+        response = get_event(pb_path, play_uuid, event_uuid)
 
         return response.__dict__, self.state_to_http[response.status]
