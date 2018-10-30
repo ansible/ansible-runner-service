@@ -125,6 +125,7 @@ def scan_event_data(work_queue, filter, matched_events):
             break
         else:
             event_filename = os.path.basename(event_path)
+            print (event_filename)
             logger.debug("[{}] Checking {}".format(tname, event_filename))
             event_info = get_event_info(event_path)
             event_info = filter_event(event_info, filter)
@@ -140,11 +141,26 @@ def scan_event_data(work_queue, filter, matched_events):
 def get_events(play_uuid, filter):
 
     r = APIResponse()
+    matched_events = {}
 
     print (play_uuid)
     if play_uuid in event_cache:
-        print ("hey there")
-        print (len(event_cache[play_uuid].items()))
+        print ("cache used")
+        events = event_cache[play_uuid].values()
+        for event_info in events:
+            event_info = filter_event(event_info, filter)
+            if event_info:
+                 event_filename = str(event_info['counter']) + '-' + event_info['uuid']
+                 matched_events[event_filename] = event_summary(event_info)
+
+        # sort the keys into numeric order
+        srtd_keys = sorted(matched_events, key=lambda x: int(x.split('-')[0]))
+        r.status, r.data = "OK", {"events": {k[:-5]: matched_events[k]
+                                             for k in srtd_keys},
+                                  "total_events": len(srtd_keys)}
+
+        return r
+
 
     pb_path = build_pb_path(play_uuid)
 
@@ -163,7 +179,7 @@ def get_events(play_uuid, filter):
         event_path = os.path.join(event_dir, event_file)
         work_queue.put(event_path)
 
-    matched_events = {}
+
     threads = []
     for ctr in range(0, configuration.settings.event_threads):
         _t = threading.Thread(target=scan_event_data,
