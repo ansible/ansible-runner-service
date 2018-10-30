@@ -10,7 +10,7 @@ try:
 except ImportError:
     import queue
 
-from .utils import APIResponse
+from .utils import APIResponse, build_pb_path
 from ..utils import fread
 from runner_service import configuration
 
@@ -28,9 +28,7 @@ ignored_events = [
 # to reduce the I/O impact of physically reading from disk
 event_cache = {}
 
-
-def filter_event(event_path, filter):
-
+def get_event_info(event_path):
     event_fname = os.path.basename(event_path)
 
     if event_fname.endswith("-partial.json"):
@@ -40,10 +38,13 @@ def filter_event(event_path, filter):
     with open(event_path, 'r') as event_fd:
         try:
             event_info = json.loads(event_fd.read())
+            return event_info
         except json.JSONDecodeError as err:
             logger.warning("Invalid JSON within {}..."
                            "skipping".format(event_fname))
             return None
+
+def filter_event(event_info, filter):
 
     # if the filter is null, our work here is done!
     if not filter:
@@ -125,7 +126,8 @@ def scan_event_data(work_queue, filter, matched_events):
         else:
             event_filename = os.path.basename(event_path)
             logger.debug("[{}] Checking {}".format(tname, event_filename))
-            event_info = filter_event(event_path, filter)
+            event_info = get_event_info(event_path)
+            event_info = filter_event(event_info, filter)
             if event_info:
                 matched_events[event_filename] = event_summary(event_info)
             ctr += 1
@@ -135,9 +137,20 @@ def scan_event_data(work_queue, filter, matched_events):
                  "{} files".format(tname, ctr))
 
 
-def get_events(pb_path, filter):
+def get_events(play_uuid, filter):
 
     r = APIResponse()
+
+    print (play_uuid)
+    if play_uuid in event_cache:
+        print ("hey there")
+        print (len(event_cache[play_uuid].items()))
+
+    pb_path = build_pb_path(play_uuid)
+
+    if not os.path.exists(pb_path):
+        r.status, r.msg = "NOTFOUND", "playbook uuid given does not exist"
+        return r
 
     event_dir = os.path.join(pb_path, "job_events")
     play_uuid = os.path.basename(pb_path)
@@ -171,7 +184,7 @@ def get_events(pb_path, filter):
     return r
 
 
-def get_event(pb_path, play_uuid, event_uuid):
+def get_event(play_uuid, event_uuid):
     r = APIResponse()
 
     #  try to use cache first
@@ -182,6 +195,8 @@ def get_event(pb_path, play_uuid, event_uuid):
             r.status, r.data = "OK", event_cache[play_uuid][cut_event_uuid]
             return r
 
+    #  revert to io
+    pb_path = build_pb_path(play_uuid)
     event_path = glob.glob(os.path.join(pb_path,
                                         "job_events",
                                         "{}.json".format(event_uuid)))

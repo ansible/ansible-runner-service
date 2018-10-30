@@ -134,10 +134,8 @@ def cb_event_handler(event_data):
             runner_cache[ident]['current_task'] = event_data['event_data'].get('task', None)    # noqa
         runner_cache[ident]['last_task_num'] = event_data['counter']
 
-
-    
+    #  fill event cache with data
     event_cache[ident].update({event_data['uuid']: event_data})
-
 
     # regardless return true to ensure the data is written to artifacts dir
     return True
@@ -223,6 +221,7 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
                                "current_task": None,
                                "last_task_num": None}
 
+    #  add uuid to cache so it can be filled with its events
     event_cache[play_uuid] = {}
 
     return r
