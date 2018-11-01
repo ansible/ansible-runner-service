@@ -3,6 +3,7 @@ import os
 import glob
 import json
 import threading
+import datetime
 
 # conditional import for python 2.7 and python3.6 support
 try:
@@ -13,6 +14,7 @@ except ImportError:
 from .utils import APIResponse, build_pb_path
 from ..utils import fread
 from runner_service import configuration
+from ..cache import event_cache
 
 import logging
 logger = logging.getLogger(__name__)
@@ -24,9 +26,6 @@ ignored_events = [
     'playbook_on_stats'
 ]
 
-# Placeholder to use as a means of caching events from recent playbook runs
-# to reduce the I/O impact of physically reading from disk
-event_cache = {}
 
 def get_event_info(event_path):
     event_fname = os.path.basename(event_path)
@@ -44,6 +43,7 @@ def get_event_info(event_path):
                            "skipping".format(event_fname))
             return None
 
+
 def filter_event(event_info, filter):
 
     # if the filter is null, our work here is done!
@@ -51,6 +51,7 @@ def filter_event(event_info, filter):
         return event_info
 
     tname = threading.current_thread().name
+    event_fname = str(event_info['counter']) + '-' + event_info['uuid']
 
     if event_info.get('event') in ignored_events:
         logger.debug('[{}] Skipping start/stats event: {}'.format(tname,
@@ -125,7 +126,6 @@ def scan_event_data(work_queue, filter, matched_events):
             break
         else:
             event_filename = os.path.basename(event_path)
-            print (event_filename)
             logger.debug("[{}] Checking {}".format(tname, event_filename))
             event_info = get_event_info(event_path)
             event_info = filter_event(event_info, filter)
@@ -143,25 +143,29 @@ def get_events(play_uuid, filter):
     r = APIResponse()
     matched_events = {}
 
-    print (play_uuid)
+    #  use cache if possible
     if play_uuid in event_cache:
-        print ("cache used")
         events = event_cache[play_uuid].values()
+        logger.debug("Job events for play {}: {}".format(play_uuid,
+                                                         len(events) - 1))
+        logger.debug("Active filter is :{}".format(filter))
+
         for event_info in events:
-            event_info = filter_event(event_info, filter)
-            if event_info:
-                 event_filename = str(event_info['counter']) + '-' + event_info['uuid']
-                 matched_events[event_filename] = event_summary(event_info)
+            if type(event_info) is not datetime.datetime:
+                event_info = filter_event(event_info, filter)
+                if event_info:
+                    event_filename = str(event_info['counter']) + '-' + event_info['uuid']
+                    matched_events[event_filename] = event_summary(event_info)
 
         # sort the keys into numeric order
         srtd_keys = sorted(matched_events, key=lambda x: int(x.split('-')[0]))
-        r.status, r.data = "OK", {"events": {k[:-5]: matched_events[k]
+        r.status, r.data = "OK", {"events": {k: matched_events[k]
                                              for k in srtd_keys},
                                   "total_events": len(srtd_keys)}
 
         return r
 
-
+    #  revert to io
     pb_path = build_pb_path(play_uuid)
 
     if not os.path.exists(pb_path):
@@ -178,7 +182,6 @@ def get_events(play_uuid, filter):
     for event_file in _events:
         event_path = os.path.join(event_dir, event_file)
         work_queue.put(event_path)
-
 
     threads = []
     for ctr in range(0, configuration.settings.event_threads):
@@ -207,7 +210,6 @@ def get_event(play_uuid, event_uuid):
     cut_event_uuid = event_uuid.split('-', 1)[1]
     if play_uuid in event_cache:
         if cut_event_uuid in event_cache[play_uuid]:
-            print ("cache used")
             r.status, r.data = "OK", event_cache[play_uuid][cut_event_uuid]
             return r
 

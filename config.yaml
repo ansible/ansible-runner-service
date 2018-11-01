@@ -21,3 +21,5 @@ token_hours: 24
 
 # ip_whitelist:
 #   - '127.0.0.1'
+
+#event_cache_size: 3

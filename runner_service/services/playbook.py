@@ -3,7 +3,7 @@ import os
 import glob
 import uuid
 import time
-
+import datetime
 
 from ansible_runner import run_async
 from ansible_runner.exceptions import AnsibleRunnerException
@@ -12,7 +12,7 @@ from runner_service.cache import runner_cache, runner_stats
 from .utils import cleanup_dir, APIResponse
 from ..utils import fread
 
-from .jobs import event_cache
+from ..cache import event_cache
 
 import logging
 logger = logging.getLogger(__name__)
@@ -135,7 +135,8 @@ def cb_event_handler(event_data):
         runner_cache[ident]['last_task_num'] = event_data['counter']
 
     #  fill event cache with data
-    event_cache[ident].update({event_data['uuid']: event_data})
+    if 'runner_ident' in event_data and 'uuid' in event_data and ident in event_cache:
+        event_cache[ident].update({event_data['uuid']: event_data})
 
     # regardless return true to ensure the data is written to artifacts dir
     return True
@@ -222,6 +223,13 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
                                "last_task_num": None}
 
     #  add uuid to cache so it can be filled with its events
-    event_cache[play_uuid] = {}
+    event_cache[play_uuid] = {'time': datetime.datetime.now()}
+    #  limit event cache size
+    if len(event_cache) > configuration.settings.event_cache_size:
+        oldest = play_uuid
+        for ident in event_cache:
+            if event_cache[ident]['time'] < event_cache[oldest]['time']:
+                oldest = ident
+        del event_cache[oldest]
 
     return r
