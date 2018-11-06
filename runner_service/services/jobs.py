@@ -3,6 +3,7 @@ import os
 import glob
 import json
 import threading
+import datetime
 
 # conditional import for python 2.7 and python3.6 support
 try:
@@ -10,9 +11,10 @@ try:
 except ImportError:
     import queue
 
-from .utils import APIResponse
+from .utils import APIResponse, build_pb_path
 from ..utils import fread
 from runner_service import configuration
+from ..cache import event_cache
 
 import logging
 logger = logging.getLogger(__name__)
@@ -24,13 +26,8 @@ ignored_events = [
     'playbook_on_stats'
 ]
 
-# Placeholder to use as a means of caching events from recent playbook runs
-# to reduce the I/O impact of physically reading from disk
-event_cache = {}
 
-
-def filter_event(event_path, filter):
-
+def get_event_info(event_path):
     event_fname = os.path.basename(event_path)
 
     if event_fname.endswith("-partial.json"):
@@ -40,16 +37,21 @@ def filter_event(event_path, filter):
     with open(event_path, 'r') as event_fd:
         try:
             event_info = json.loads(event_fd.read())
+            return event_info
         except json.JSONDecodeError as err:
             logger.warning("Invalid JSON within {}..."
                            "skipping".format(event_fname))
             return None
+
+
+def filter_event(event_info, filter):
 
     # if the filter is null, our work here is done!
     if not filter:
         return event_info
 
     tname = threading.current_thread().name
+    event_fname = str(event_info['counter']) + '-' + event_info['uuid']
 
     if event_info.get('event') in ignored_events:
         logger.debug('[{}] Skipping start/stats event: {}'.format(tname,
@@ -125,7 +127,8 @@ def scan_event_data(work_queue, filter, matched_events):
         else:
             event_filename = os.path.basename(event_path)
             logger.debug("[{}] Checking {}".format(tname, event_filename))
-            event_info = filter_event(event_path, filter)
+            event_info = get_event_info(event_path)
+            event_info = filter_event(event_info, filter)
             if event_info:
                 matched_events[event_filename] = event_summary(event_info)
             ctr += 1
@@ -135,9 +138,39 @@ def scan_event_data(work_queue, filter, matched_events):
                  "{} files".format(tname, ctr))
 
 
-def get_events(pb_path, filter):
+def get_events(play_uuid, filter):
 
     r = APIResponse()
+    matched_events = {}
+
+    #  use cache if possible
+    if play_uuid in event_cache:
+        events = event_cache[play_uuid].values()
+        logger.debug("Job events for play {}: {}".format(play_uuid,
+                                                         len(events) - 1))
+        logger.debug("Active filter is :{}".format(filter))
+
+        for event_info in events:
+            if type(event_info) is not datetime.datetime:
+                event_info = filter_event(event_info, filter)
+                if event_info:
+                    event_filename = str(event_info['counter']) + '-' + event_info['uuid']
+                    matched_events[event_filename] = event_summary(event_info)
+
+        # sort the keys into numeric order
+        srtd_keys = sorted(matched_events, key=lambda x: int(x.split('-')[0]))
+        r.status, r.data = "OK", {"events": {k: matched_events[k]
+                                             for k in srtd_keys},
+                                  "total_events": len(srtd_keys)}
+
+        return r
+
+    #  revert to io
+    pb_path = build_pb_path(play_uuid)
+
+    if not os.path.exists(pb_path):
+        r.status, r.msg = "NOTFOUND", "playbook uuid given does not exist"
+        return r
 
     event_dir = os.path.join(pb_path, "job_events")
     play_uuid = os.path.basename(pb_path)
@@ -150,7 +183,6 @@ def get_events(pb_path, filter):
         event_path = os.path.join(event_dir, event_file)
         work_queue.put(event_path)
 
-    matched_events = {}
     threads = []
     for ctr in range(0, configuration.settings.event_threads):
         _t = threading.Thread(target=scan_event_data,
@@ -171,8 +203,18 @@ def get_events(pb_path, filter):
     return r
 
 
-def get_event(pb_path, event_uuid):
+def get_event(play_uuid, event_uuid):
     r = APIResponse()
+
+    #  try to use cache first
+    cut_event_uuid = event_uuid.split('-', 1)[1]
+    if play_uuid in event_cache:
+        if cut_event_uuid in event_cache[play_uuid]:
+            r.status, r.data = "OK", event_cache[play_uuid][cut_event_uuid]
+            return r
+
+    #  revert to io
+    pb_path = build_pb_path(play_uuid)
     event_path = glob.glob(os.path.join(pb_path,
                                         "job_events",
                                         "{}.json".format(event_uuid)))

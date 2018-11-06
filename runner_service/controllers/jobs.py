@@ -1,4 +1,3 @@
-import os
 # from flask import request
 from flask_restful import request
 # import logging
@@ -6,7 +5,7 @@ from .utils import requires_auth, log_request
 from .base import BaseResource
 
 from ..services.jobs import get_events, get_event
-from ..services.utils import build_pb_path, APIResponse
+from ..services.utils import APIResponse
 
 import logging
 logger = logging.getLogger(__name__)
@@ -82,13 +81,7 @@ class ListEvents(BaseResource):
             _e.status, _e.msg = "INVALID", "playbook uuid missing"
             return _e.__dict__, self.state_to_http[_e.status]
 
-        pb_path = build_pb_path(play_uuid)
-
-        if not os.path.exists(pb_path):
-            _e.status, _e.msg = "NOTFOUND", "playbook uuid given does not exist"
-            return _e.__dict__, self.state_to_http[_e.status]
-
-        response = get_events(pb_path, filter)
+        response = get_events(play_uuid, filter)
 
         return response.__dict__, self.state_to_http[response.status]
 
@@ -135,8 +128,6 @@ class GetEvent(BaseResource):
         ```
         """
 
-        pb_path = build_pb_path(play_uuid)
-
-        response = get_event(pb_path, event_uuid)
+        response = get_event(play_uuid, event_uuid)
 
         return response.__dict__, self.state_to_http[response.status]

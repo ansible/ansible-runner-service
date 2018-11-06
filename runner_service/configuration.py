@@ -43,6 +43,7 @@ class Config(object):
         self.config_file = Config.MODES[mode].get('config_file', None)
         self.config_dir = os.path.dirname(self.config_file)
         self.passwords = {"admin": "admin"}
+        self.event_cache_size = 3
 
         # expiration period in years for the self-signed cert that we generate
         self.cert_expiration = 3
