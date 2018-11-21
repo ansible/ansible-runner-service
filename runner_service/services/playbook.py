@@ -4,6 +4,7 @@ import glob
 import uuid
 import time
 import datetime
+import getpass
 
 from ansible_runner import run_async
 from ansible_runner.exceptions import AnsibleRunnerException
@@ -142,14 +143,13 @@ def cb_event_handler(event_data):
     return True
 
 
-def add_tags(tags):
-
+def commit_cmdline(options):
     cmd_file = os.path.join(configuration.settings.playbooks_root_dir,
                             "env", "cmdline")
-    tags_param = " --tags {}".format(tags)
-    logger.debug("Creating env/cmdline file with tags: {}".format(tags_param))
+    runtime_overrides = ' '.join(options)
+    logger.debug("Creating env/cmdline file: {}".format(runtime_overrides))
     with open(cmd_file, "w") as cmdline:
-        cmdline.write(tags_param)
+        cmdline.write(runtime_overrides)
 
 
 def start_playbook(playbook_name, vars=None, filter=None, tags=None):
@@ -190,8 +190,17 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     cleanup_dir(os.path.join(configuration.settings.playbooks_root_dir,
                              "env"))
 
+    cmdline = []
     if tags:
-        add_tags(tags)
+        cmdline.append("--tags {}".format(tags))
+
+    if configuration.settings.target_user != getpass.getuser():
+        logger.debug("Run the playbook with a user override of "
+                     "{}".format(configuration.settings.target_user))
+        cmdline.append("--user {}".format(configuration.settings.target_user))
+
+    if cmdline:
+        commit_cmdline(cmdline)
 
     _thread, _runner = run_async(**parms)
 
