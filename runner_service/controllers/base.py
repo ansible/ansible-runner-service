@@ -12,6 +12,7 @@ class BaseResource(Resource):
         "NOTFOUND": 404,
         "UNKNOWN": 404,
         "LOCKED": 409,
+        "UNSUPPORTED": 415,
         "FAILED": 500,
         "TIMEOUT": 504
     }
