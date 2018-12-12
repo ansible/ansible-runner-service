@@ -29,7 +29,12 @@ def get_status(play_uuid):
 
         r.data = {
             "task": runner_cache[play_uuid]['current_task'],
-            "last_task_num": runner_cache[play_uuid]['last_task_num']
+            "role": runner_cache[play_uuid]['role'],
+            "last_task_num": runner_cache[play_uuid]['last_task_num'],
+            "skipped": runner_cache[play_uuid]['skipped'],
+            "failed": runner_cache[play_uuid]['failed'],
+            "ok": runner_cache[play_uuid]['ok'],
+            "failures": runner_cache[play_uuid]['failures']
         }
 
         logger.debug("runner_cache 'hit' for playbook status request")
@@ -90,7 +95,7 @@ def cb_playbook_finished(runner):
     """ Report on playbook end state
 
     This function is called at the end of the invoked playbook to perform
-    any tidy or or reporting tasks
+    any tidy or reporting tasks
 
     :param runner:  instance of ansible_runner.Runner for the playbook that has
                     just completed
@@ -112,11 +117,23 @@ def cb_playbook_finished(runner):
     else:
         runner_stats.playbook_status[runner.status] = 1
 
-    logger.debug("Dropping runner object from runner_cache")
-    del runner_cache[runner.config.ident]
+    runner_cache[runner.config.ident]['status'] = runner.status
+
+    prune_runner_cache(runner.config.ident)
 
 
-# Placeholder for populating the event_cache
+def prune_runner_cache(current_runner):
+    if len(runner_cache.keys()) >= configuration.settings.runner_cache_size:
+        logger.debug("Maintaining runner_cache entries")
+        oldest = current_runner
+        for ident in runner_cache:
+            if runner_cache[ident]['start_epoc'] < runner_cache[oldest]['start_epoc']:  # noqa
+                oldest = ident
+        logger.info("Dropping oldest runner object for play uuid {} from "
+                    "runner_cache".format(oldest))
+        del runner_cache[oldest]
+
+
 def cb_event_handler(event_data):
 
     # first look at the event to track overall stats in the runner_stats object
@@ -132,11 +149,24 @@ def cb_event_handler(event_data):
     ident = event_data.get('runner_ident', None)
     if ident:
         if event_type == "playbook_on_task_start":
-            runner_cache[ident]['current_task'] = event_data['event_data'].get('task', None)    # noqa
-        runner_cache[ident]['last_task_num'] = event_data['counter']
+            runner_cache[ident]['current_task'] = \
+              event_data['event_data'].get('task', "Unknown task")
 
-    #  fill event cache with data
-    if 'runner_ident' in event_data and 'uuid' in event_data and ident in event_cache:
+        runner_cache[ident]['last_task_num'] = event_data['counter']
+        runner_cache[ident]['role'] = event_data.get('role', '')
+        if event_type.startswith("runner_on_"):
+            event_shortname = event_type[10:]
+            if event_shortname in runner_cache[ident]:
+                runner_cache[ident][event_shortname] += 1
+            else:
+                runner_cache[ident][event_shortname] = 1
+            if event_shortname == 'failed':
+                event_metadata = event_data['event_data']
+                runner_cache[ident]['failures'][event_metadata.get('host')] = event_data # noqa
+
+    # populate the event cache
+    if 'runner_ident' in event_data and \
+       'uuid' in event_data and ident in event_cache:
         event_cache[ident].update({event_data['uuid']: event_data})
 
     # regardless return true to ensure the data is written to artifacts dir
@@ -228,8 +258,16 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
                               "play_uuid": play_uuid}
 
     runner_cache[play_uuid] = {"runner": _runner,
+                               "status": _runner.status,
                                "current_task": None,
-                               "last_task_num": None}
+                               "role": "",
+                               "last_task_num": None,
+                               "start_epoc": time.time(),
+                               "skipped": 0,
+                               "failed": 0,
+                               "ok": 0,
+                               "failures": {}
+                               }
 
     #  add uuid to cache so it can be filled with its events
     event_cache[play_uuid] = {'time': datetime.datetime.now()}
