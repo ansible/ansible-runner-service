@@ -89,7 +89,7 @@ def filter_event(event_info, filter):
     return event_info
 
 
-def event_summary(event_info, summary_keys=['host', 'task', 'event']):
+def event_summary(event_info, summary_keys=['host', 'task', 'role', 'event']):
     """ Provide a quick overview of the event code_data
 
     :param event_info: dict/json of a job event
