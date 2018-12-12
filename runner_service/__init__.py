@@ -7,8 +7,9 @@ from .inventory import (AnsibleInventory,           # noqa: F401
                         InventoryGroupExists,
                         InventoryHostMissing,
                         InventoryGroupMissing,
+                        InventoryRequestInvalid,
                         InventoryreadError,
                         InventoryCorruptError,
                         InventoryOperationNotAllowed)
 
-__version__ = 0.8
+__version__ = 0.9
