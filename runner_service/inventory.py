@@ -185,9 +185,9 @@ class AnsibleInventory(object):
                 self.inventory = yaml.safe_load(raw)
             except yaml.YAMLError as ex:
                 raise \
-                  InventoryCorruptError("Unable to understand the inventory"
-                                        " yaml file at {}, error: "
-                                        "{}".format(self.filename, ex))
+                    InventoryCorruptError("Unable to understand the inventory"
+                                          " yaml file at {}, error: "
+                                          "{}".format(self.filename, ex))
 
     def _dump(self):
         return yaml.safe_dump(self.inventory, default_flow_style=False)
@@ -196,8 +196,8 @@ class AnsibleInventory(object):
         # Changes in inventory only allowed with exclusive lock
         if not self.exclusive_lock:
             raise \
-              InventoryOperationNotAllowed("Internal issue: Inventory "
-                                           "modification not allowed")
+                InventoryOperationNotAllowed("Internal issue: Inventory "
+                                             "modification not allowed")
 
         self.fd.seek(0)
         self.fd.write(self._dump())

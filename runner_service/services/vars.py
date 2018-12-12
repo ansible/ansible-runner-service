@@ -232,7 +232,7 @@ def add_groupvars(group_name, vars, store_type='file'):
             return r
         else:
             r.status, r.msg = "OK", \
-                      "Vars added to {}".format(group_name)
+                "Vars added to {}".format(group_name)
             return r
 
 

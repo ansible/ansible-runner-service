@@ -150,7 +150,7 @@ def cb_event_handler(event_data):
     if ident:
         if event_type == "playbook_on_task_start":
             runner_cache[ident]['current_task'] = \
-              event_data['event_data'].get('task', "Unknown task")
+                event_data['event_data'].get('task', "Unknown task")
 
         runner_cache[ident]['last_task_num'] = event_data['counter']
         runner_cache[ident]['role'] = event_data.get('role', '')
