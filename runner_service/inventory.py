@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# Ny default None is represented in YAML as a 'null' string, so we override
+# By default None is represented in YAML as a 'null' string, so we override
 # the representer for NONE type vars with a '' to make the config file more
 # human readable
 def represent_null(self, _):
@@ -32,6 +32,10 @@ class InventoryGroupMissing(Exception):
 
 
 class InventoryHostMissing(Exception):
+    pass
+
+
+class InventoryRequestInvalid(Exception):
     pass
 
 
@@ -77,7 +81,22 @@ def group_exists(func):
                          "the inventory".format(group))
             if obj.exclusive_lock:
                 obj.unlock()
-            raise InventoryGroupMissing("{} not found in the Inventory".format(group))
+            raise InventoryGroupMissing("{} not in Inventory".format(group))
+        else:
+            return func(*args)
+    return func_wrapper
+
+
+def host_exists(func):
+    def func_wrapper(*args):
+        obj, group, host = args[:3]
+        if host not in obj.group_show(group):
+            logger.debug("request for '{}' failed - it's not in "
+                         "the inventory".format(host))
+            if obj.exclusive_lock:
+                obj.unlock()
+            raise InventoryHostMissing("{} not in group '{}'".format(host,
+                                                                     group))
         else:
             return func(*args)
     return func_wrapper
@@ -89,7 +108,7 @@ class AnsibleInventory(object):
     def __init__(self, inventory_file=None, excl=False):
 
         if not inventory_file:
-            self.filename = os.path.join(configuration.settings.playbooks_root_dir,
+            self.filename = os.path.join(configuration.settings.playbooks_root_dir,     # noqa
                                          "inventory",
                                          "hosts")
         else:
@@ -165,8 +184,10 @@ class AnsibleInventory(object):
             try:
                 self.inventory = yaml.safe_load(raw)
             except yaml.YAMLError as ex:
-                raise InventoryCorruptError("Unable to understand the inventory"
-                                            " yaml file at {}, error: {}".format(self.filename, ex))
+                raise \
+                  InventoryCorruptError("Unable to understand the inventory"
+                                        " yaml file at {}, error: "
+                                        "{}".format(self.filename, ex))
 
     def _dump(self):
         return yaml.safe_dump(self.inventory, default_flow_style=False)
@@ -174,7 +195,9 @@ class AnsibleInventory(object):
     def save(self):
         # Changes in inventory only allowed with exclusive lock
         if not self.exclusive_lock:
-            raise InventoryOperationNotAllowed("Internal issue: Inventory modification not allowed")
+            raise \
+              InventoryOperationNotAllowed("Internal issue: Inventory "
+                                           "modification not allowed")
 
         self.fd.seek(0)
         self.fd.write(self._dump())
@@ -233,8 +256,8 @@ class AnsibleInventory(object):
     @group_exists
     def group_show(self, group):
         if isinstance(self.inventory['all']['children'][group], dict):
-            if isinstance(self.inventory['all']['children'][group]['hosts'], dict):
-                return list(self.inventory['all']['children'][group]['hosts'].keys())
+            if isinstance(self.inventory['all']['children'][group]['hosts'], dict):     # noqa
+                return list(self.inventory['all']['children'][group]['hosts'].keys())   # noqa
             else:
                 return []
         else:
@@ -276,3 +299,56 @@ class AnsibleInventory(object):
                 host_groups.append(group)
 
         return host_groups
+
+    @group_exists
+    @host_exists
+    def host_vars_add(self, group, host, vars):
+        if isinstance(vars, dict):
+            self.inventory['all']['children'][group]['hosts'][host] = vars
+            self.save()
+        else:
+            self.unlock()
+            logger.error("Invalid request to add vars to a host. "
+                         "Vars were:".format(vars))
+            raise InventoryRequestInvalid("VARS must be a dict object")
+
+    @group_exists
+    @host_exists
+    def host_vars_remove(self, group, host):
+        self.inventory['all']['children'][group]['hosts'][host] = None
+        self.save()
+
+    @group_exists
+    @host_exists
+    def host_vars_show(self, group, host):
+        if self.inventory['all']['children'][group]['hosts'][host]:
+            return self.inventory['all']['children'][group]['hosts'][host]
+        else:
+            return {}
+
+    @group_exists
+    def group_vars_show(self, group):
+        if 'vars' in self.inventory['all']['children'][group]:
+            return self.inventory['all']['children'][group]['vars']
+        else:
+            return {}
+
+    @group_exists
+    def group_vars_add(self, group, vars):
+        if isinstance(vars, dict):
+            self.inventory['all']['children'][group]['vars'] = vars
+            self.save()
+        else:
+            self.unlock()
+            logger.error("Invalid request to add vars to a group. "
+                         "Vars were:".format(vars))
+            raise InventoryRequestInvalid("VARS must be a dict object")
+
+    @group_exists
+    def group_vars_remove(self, group):
+        if 'vars' in self.inventory['all']['children'][group]:
+            del self.inventory['all']['children'][group]['vars']
+            self.save()
+        else:
+            self.unlock()
+            logger.error("Request to delete group vars that didn't exist")
