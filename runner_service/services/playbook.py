@@ -161,8 +161,13 @@ def cb_event_handler(event_data):
             else:
                 runner_cache[ident][event_shortname] = 1
             if event_shortname == 'failed':
-                event_metadata = event_data['event_data']
-                runner_cache[ident]['failures'][event_metadata.get('host')] = event_data # noqa
+                if event_data['event_data'].get('ignore_errors', False):
+                    # skip failures reporting if ignore_errors is set
+                    runner_cache[ident]['failed'] -= 1
+                else:
+                    # we have a valid failure to report
+                    event_metadata = event_data['event_data']
+                    runner_cache[ident]['failures'][event_metadata.get('host')] = event_data # noqa
 
     # populate the event cache
     if 'runner_ident' in event_data and \
