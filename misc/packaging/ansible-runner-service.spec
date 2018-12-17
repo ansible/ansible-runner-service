@@ -62,7 +62,7 @@ install -m 0644 ./LICENSE.md %{buildroot}%{_docdir}/ansible-runner-service
 
 %post
 /bin/systemctl --system daemon-reload &> /dev/null || :
-/bin/systemctl --system --now enable ansible-runner-service &> /dev/null || :
+/bin/systemctl --system enable --now ansible-runner-service &> /dev/null || :
 
 %postun
 /bin/systemctl --system daemon-reload &> /dev/null || :
