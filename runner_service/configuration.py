@@ -1,6 +1,7 @@
 import os
 import sys
 import yaml
+import getpass
 import logging
 
 logger = logging.getLogger()
@@ -66,7 +67,7 @@ class Config(object):
         self.ssh_checks = True
 
         # target user that the service will use for ssh connection
-        self.target_user = None
+        self.target_user = getpass.getuser()
 
         # flask config setting to hide the "production use" warning
         self.ENV = ''
