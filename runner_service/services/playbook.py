@@ -29,6 +29,7 @@ def get_status(play_uuid):
 
         r.data = {
             "task": runner_cache[play_uuid]['current_task'],
+            "task_metadata": runner_cache[play_uuid]['current_task_metadata'],
             "role": runner_cache[play_uuid]['role'],
             "last_task_num": runner_cache[play_uuid]['last_task_num'],
             "skipped": runner_cache[play_uuid]['skipped'],
@@ -151,6 +152,9 @@ def cb_event_handler(event_data):
         if event_type == "playbook_on_task_start":
             runner_cache[ident]['current_task'] = \
                 event_data['event_data'].get('task', "Unknown task")
+            metadata = event_data['event_data']
+            metadata['created'] = event_data['created']
+            runner_cache[ident]['current_task_metadata'] = metadata
 
         runner_cache[ident]['last_task_num'] = event_data['counter']
         runner_cache[ident]['role'] = event_data['event_data'].get('role', '')
@@ -265,6 +269,7 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     runner_cache[play_uuid] = {"runner": _runner,
                                "status": _runner.status,
                                "current_task": None,
+                               "current_task_metadata": None,
                                "role": "",
                                "last_task_num": None,
                                "start_epoc": time.time(),
