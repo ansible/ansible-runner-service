@@ -269,7 +269,12 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     runner_cache[play_uuid] = {"runner": _runner,
                                "status": _runner.status,
                                "current_task": None,
-                               "current_task_metadata": None,
+                               "current_task_metadata": {
+                                    "created": "",
+                                    "play_pattern": "",
+                                    "task_path": "",
+                                    "task_action": ""
+                                    },
                                "role": "",
                                "last_task_num": None,
                                "start_epoc": time.time(),
