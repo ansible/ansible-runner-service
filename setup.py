@@ -20,7 +20,7 @@ class StripExtension(distutils.command.install_scripts.install_scripts):
 
 setup(
     name="ansible-runner-service",
-    version=0.8,
+    version=0.9,
     description="Ansible runner based REST API",
     long_description="Ansible runner based light weight RESTful web service",
     author="Paul Cuzner",

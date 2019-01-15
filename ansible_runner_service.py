@@ -158,7 +158,7 @@ def main(test_mode=False):
             port=configuration.settings.port,
             threaded=True,
             ssl_context=ssl_context,
-            debug=True,
+            debug=configuration.settings.debug,
             use_reloader=False)
 
 

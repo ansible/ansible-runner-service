@@ -201,7 +201,7 @@ def setup_svc_token():
     """
     logger.debug("Checking svctoken")
     token_file = os.path.join(
-        os.path.basename(configuration.settings.config_dir),
+        configuration.settings.config_dir,
         'svctoken')
 
     if os.path.exists(token_file):

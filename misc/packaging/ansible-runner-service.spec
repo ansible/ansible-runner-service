@@ -16,9 +16,10 @@ BuildArch: noarch
 BuildRequires: python-setuptools
 BuildRequires: python-devel
 
-Requires: ansible
-Requires: python-flask
-Requires: python2-flask-restful
+Requires: ansible >= 2.6
+Requires: ansible-runner >= 1.1
+Requires: python-flask >= 1.0.2
+Requires: python2-flask-restful >= 0.3.5
 Requires: python2-crypto
 Requires: python-paramiko
 Requires: openssl
@@ -61,7 +62,7 @@ install -m 0644 ./LICENSE.md %{buildroot}%{_docdir}/ansible-runner-service
 
 %post
 /bin/systemctl --system daemon-reload &> /dev/null || :
-/bin/systemctl --system enable ansible-runner-service &> /dev/null || :
+/bin/systemctl --system enable --now ansible-runner-service &> /dev/null || :
 
 %postun
 /bin/systemctl --system daemon-reload &> /dev/null || :
@@ -75,5 +76,7 @@ install -m 0644 ./LICENSE.md %{buildroot}%{_docdir}/ansible-runner-service
 %{_docdir}/ansible-runner-service/*
 
 %changelog
+* Mon Dec 17 2018 Paul Cuzner <pcuzner@redhat.com> 0.9
+- Repackaged for 0.9, including more specific package dependencies
 * Mon Sep 24 2018 Paul Cuzner <pcuzner@redhat.com> 0.8
 - initial rpm packaging

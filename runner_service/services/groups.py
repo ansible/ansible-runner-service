@@ -11,6 +11,14 @@ logger = logging.getLogger(__name__)
 
 def add_group(group_name):
     r = APIResponse()
+
+    reserved_group_names = ['all']
+    if group_name in reserved_group_names:
+        r.status, r.msg = "INVALID", \
+                          "Group name '{}' is a reserved/system group " \
+                          "name".format(group_name)
+        return r
+
     inventory = AnsibleInventory(excl=True)
     if inventory.loaded:
         try:

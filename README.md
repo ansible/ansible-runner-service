@@ -36,11 +36,14 @@ The core of this project is ansible_runner, so first of all, a quick call out to
   - playbook state shows overall status, with current active task name
   - the caller can request all events associated with current or past playbook runs
   - events may be filtered for specific output e.g. ?task=RSEULTS to show events with a taskname of RESULTS
+  - playbook state is cached to improve API response times
 
 #### Inventory management
   - hosts and ansible groups are managed through the API ```/groups``` and ```/hosts``` endpoints
   - Before a host can be added to the inventory, it is checked for dns, and passwordless ssh
   - missing public keys on 'candidate' hosts, result in the instance's public key being returned to the caller. The requester can then arrange for this key to be installed on the candidate host.
+  - host and group vars supported either inside the 'hosts' file, or in the host_vars/group_vars sub-directories
+
 
 #### Developer Friendly
   - simple to use REST API allowing playbooks to be run, and results/state queried
@@ -107,9 +110,11 @@ Here's a quick 'cheat sheet' of the API endpoints.
 |/api | Show available API endpoints (this page)|
 |/api/v1/groups| List all the defined groups in the inventory|
 |/api/v1/groups/<group_name>| Manage groups within the inventory|
+|/api/v1/groupvars/<group_name>| Manage group variables|
 |/api/v1/hosts| Return a list of hosts from the inventory|
 |/api/v1/hosts/<host_name>| Show group membership for a given host|
 |/api/v1/hosts/<host_name>/groups/<group_name>| Manage ansible control of a given host|
+|/api/v1/hostvars/<host_name>/groups/<group_name>| Manage host variables for a specific group within the inventory|
 |/api/v1/jobs/<play_uuid>/events| Return a list of events within a given playbook run (job)|
 |/api/v1/jobs/<play_uuid>/events/<event_uuid>| Return the output of a specific task within a playbook|
 |/api/v1/login| Authenticate user and provide token|

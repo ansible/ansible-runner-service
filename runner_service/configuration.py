@@ -1,6 +1,7 @@
 import os
 import sys
 import yaml
+import getpass
 import logging
 
 logger = logging.getLogger()
@@ -23,13 +24,15 @@ class Config(object):
             "log_path": "/var/log",
             "config_file": "/etc/ansible-runner-service/config.yaml",
             "playbooks_root_dir": "/usr/share/ansible-runner-service",
-            "templates_dir": "/var/"
+            "templates_dir": "/var/",
+            "debug": False
         },
         "dev": {
             "logging_conf": "./logging.yaml",
             "log_path": "./",
             "config_file": "./config.yaml",
-            "playbooks_root_dir": "./samples"
+            "playbooks_root_dir": "./samples",
+            "debug": True
         }
     }
 
@@ -44,6 +47,8 @@ class Config(object):
         self.config_dir = os.path.dirname(self.config_file)
         self.passwords = {"admin": "admin"}
         self.event_cache_size = 3
+        self.runner_cache_size = 5
+        self.debug = Config.MODES[mode].get("debug", True)
 
         # expiration period in years for the self-signed cert that we generate
         self.cert_expiration = 3
@@ -62,7 +67,7 @@ class Config(object):
         self.ssh_checks = True
 
         # target user that the service will use for ssh connection
-        self.target_user = None
+        self.target_user = getpass.getuser()
 
         # flask config setting to hide the "production use" warning
         self.ENV = ''

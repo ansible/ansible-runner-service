@@ -14,6 +14,8 @@ from .controllers import (ListPlaybooks,
                           ManageGroups,
                           Hosts,
                           HostMgmt,
+                          HostVars,
+                          GroupVars,
                           HostDetails,
                           PrometheusMetrics,
                           Login
@@ -36,7 +38,7 @@ def create_app():
 
     api.add_resource(ListPlaybooks, "/api/v1/playbooks")
     api.add_resource(StartPlaybook, "/api/v1/playbooks/<playbook_name>")
-    api.add_resource(StartTaggedPlaybook, "/api/v1/playbooks/<playbook_name>/tags/<tags>")
+    api.add_resource(StartTaggedPlaybook, "/api/v1/playbooks/<playbook_name>/tags/<tags>")  # noqa: E501
     api.add_resource(PlaybookState, "/api/v1/playbooks/<play_uuid>")
 
     api.add_resource(ListEvents, "/api/v1/jobs/<play_uuid>/events")
@@ -48,6 +50,9 @@ def create_app():
     api.add_resource(Hosts, "/api/v1/hosts")
     api.add_resource(HostDetails, "/api/v1/hosts/<host_name>")
     api.add_resource(HostMgmt, "/api/v1/hosts/<host_name>/groups/<group_name>")
+
+    api.add_resource(HostVars, "/api/v1/hostvars/<host_name>/groups/<group_name>")   # noqa: E501
+    api.add_resource(GroupVars, "/api/v1/groupvars/<group_name>")   # noqa: E501
 
     api.add_resource(API, "/api")
     api.add_resource(PrometheusMetrics, "/metrics")

@@ -89,7 +89,7 @@ def filter_event(event_info, filter):
     return event_info
 
 
-def event_summary(event_info, summary_keys=['host', 'task', 'event']):
+def event_summary(event_info, summary_keys=['host', 'task', 'role', 'event']):
     """ Provide a quick overview of the event code_data
 
     :param event_info: dict/json of a job event
@@ -145,7 +145,8 @@ def get_events(play_uuid, filter):
 
     #  use cache if possible
     if play_uuid in event_cache:
-        events = event_cache[play_uuid].values()
+        local_cache = event_cache.copy()
+        events = local_cache[play_uuid].values()
         logger.debug("Job events for play {}: {}".format(play_uuid,
                                                          len(events) - 1))
         logger.debug("Active filter is :{}".format(filter))
