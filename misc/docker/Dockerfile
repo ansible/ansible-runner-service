@@ -14,16 +14,17 @@ RUN yum -y install epel-release  && \
            pexpect python-daemon  bubblewrap gcc \
            bzip2  openssh openssh-clients python2-psutil\
            python36 python36-devel python36-setuptools && \
-    localedef -c -i en_US -f UTF-8 en_US.UTF-8 && \
-    easy_install-3.6 pip && \
-    pip3 install crypto docutils psutil paramiko PyYAML \
+           localedef -c -i en_US -f UTF-8 en_US.UTF-8
+RUN easy_install-3.6 -d /usr/lib/python3.6/site-packages pip && \
+    ln -s /usr/lib/python3.6/site-packages/pip3 /usr/local/bin/pip3
+RUN /usr/local/bin/pip3 install crypto docutils psutil paramiko PyYAML \
                  pyOpenSSL flask flask-restful pyjwt && \
-    pip3 install --no-cache-dir ansible-runner && \
+    /usr/local/bin/pip3 install --no-cache-dir ansible-runner && \
     rm -rf /var/cache/yum
 
 RUN mkdir -p /etc/ansible-runner-service && \
     mkdir -p /root/.ssh && \
-    mkdir -p /usr/share/ansible-runner-service
+    mkdir -p /usr/share/ansible-runner-service/{artifacts,env,project,inventory}
 
 COPY ./ansible-runner-service.tar.gz /root/.
 WORKDIR /root
