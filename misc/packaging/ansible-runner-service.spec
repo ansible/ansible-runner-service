@@ -55,7 +55,7 @@ mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/artifacts
 mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/env
 mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/inventory
 mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/project
-install -m 0644 ./samples/project/test.yml %{buildroot}%{_prefix}/share/ansible-runner-service/project
+install -m 0644 ./samples/project/runnertest.yml %{buildroot}%{_prefix}/share/ansible-runner-service/project
 mkdir -p %{buildroot}%{_docdir}/ansible-runner-service/dashboards
 install -m 0644 ./misc/dashboards/ansible-runner-service-metrics.json  %{buildroot}%{_docdir}/ansible-runner-service/dashboards
 install -m 0644 ./LICENSE.md %{buildroot}%{_docdir}/ansible-runner-service
