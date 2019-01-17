@@ -7,7 +7,7 @@ Name: ansible-runner-service
 Version: %{_version}
 Release: %{_release}%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
-Source0: https://github.com/pcuzner/%{name}/archive/%{version}.%{_release}.tar.gz
+Source0: https://github.com/pcuzner/%{name}/archive/%{name}-%{version}-%{_release}.tar.gz
 Group:	 Applications/System
 License: ASL 2.0
 
@@ -35,7 +35,7 @@ The daemon (ansible-runner-service) listens on https://localhost:5001 by default
 In addition to the API endpoints, the daemon also provides a /metrics endpoint for prometheus integration. A sample Grafana dashboard is provided within /usr/share/doc/ansible-runner-service
 
 %prep
-%setup -q -n %{name}-%{version}.%{_release}
+%setup -q -n %{name}-%{version}-%{_release}
 
 %build
 # Disable debuginfo packages
@@ -55,7 +55,7 @@ mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/artifacts
 mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/env
 mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/inventory
 mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/project
-install -m 0644 ./samples/project/test.yml %{buildroot}%{_prefix}/share/ansible-runner-service/project
+install -m 0644 ./samples/project/runnertest.yml %{buildroot}%{_prefix}/share/ansible-runner-service/project
 mkdir -p %{buildroot}%{_docdir}/ansible-runner-service/dashboards
 install -m 0644 ./misc/dashboards/ansible-runner-service-metrics.json  %{buildroot}%{_docdir}/ansible-runner-service/dashboards
 install -m 0644 ./LICENSE.md %{buildroot}%{_docdir}/ansible-runner-service
