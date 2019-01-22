@@ -20,7 +20,7 @@ The core of this project is ansible_runner, so first of all, a quick call out to
 - supports ip whitelist to further lock down access to the API
 
 #### Monitoring
-  - /metrics endpoint provides key metrics for monitoring the instance with prometheus
+  - /metrics endpoint provides key metrics for monitoring the instance with [Prometheus](https://prometheus.io/)
   - a sample [Grafana](https://grafana.com/) dashboard is provided in the ```misc/dashboards``` directory to track activity
 
 #### Playbook Execution
