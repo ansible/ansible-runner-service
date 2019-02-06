@@ -153,6 +153,9 @@ def ssh_connect_ok(host, user=None):
     priv_key = os.path.join(configuration.settings.playbooks_root_dir,
                             "env/ssh_key")
 
+    if not os.path.exists(priv_key):
+        return False, "FAILED:SSH key(s) missing from ansible-runner-service"
+
     conn_args = {
         "hostname": host,
         "username": user,
