@@ -7,7 +7,7 @@ Name: ansible-runner-service
 Version: 0.9
 Release: 3%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
-Source0: https://github.com/pcuzner/%{name}/archive/%{name}-%{version}-%{_release}.tar.gz
+Source0: https://github.com/pcuzner/%{name}/archive/%{name}-%{version}.tar.gz
 Group:	 Applications/System
 License: ASL 2.0
 
@@ -35,7 +35,7 @@ The daemon (ansible-runner-service) listens on https://localhost:5001 by default
 In addition to the API endpoints, the daemon also provides a /metrics endpoint for prometheus integration. A sample Grafana dashboard is provided within /usr/share/doc/ansible-runner-service
 
 %prep
-%setup -q -n %{name}-%{version}-%{_release}
+%setup -q -n %{name}-%{version}
 
 %build
 # Disable debuginfo packages
