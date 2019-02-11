@@ -12,4 +12,4 @@ from .inventory import (AnsibleInventory,           # noqa: F401
                         InventoryCorruptError,
                         InventoryOperationNotAllowed)
 
-__version__ = 0.9
+__version__ = '0.9'
