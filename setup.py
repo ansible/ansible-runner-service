@@ -1,8 +1,13 @@
 #!/usr/bin/python
 
 from setuptools import setup
+
 import distutils.command.install_scripts
 import shutil
+import re
+
+module_file = open("runner_service/__init__.py").read()
+metadata = dict(re.findall(r"__([a-z]+)__\s*=\s*'([^']+)'", module_file))
 
 
 # idea from http://stackoverflow.com/a/11400431/2139420
@@ -20,7 +25,7 @@ class StripExtension(distutils.command.install_scripts.install_scripts):
 
 setup(
     name="ansible-runner-service",
-    version=0.9,
+    version=metadata['version'],
     description="Ansible runner based REST API",
     long_description="Ansible runner based light weight RESTful web service",
     author="Paul Cuzner",
