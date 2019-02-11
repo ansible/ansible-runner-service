@@ -4,8 +4,8 @@
 %endif
 
 Name: ansible-runner-service
-Version: %{_version}
-Release: %{_release}%{?dist}
+Version: 0.9
+Release: 3%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/pcuzner/%{name}/archive/%{name}-%{version}-%{_release}.tar.gz
 Group:	 Applications/System
@@ -76,6 +76,8 @@ install -m 0644 ./LICENSE.md %{buildroot}%{_docdir}/ansible-runner-service
 %{_docdir}/ansible-runner-service/*
 
 %changelog
+* Sun Feb 10 2019 Paul Cuzner <pcuzner@redhat.com> 0.9-3
+- minor updates to improve packaging workflow
 * Mon Dec 17 2018 Paul Cuzner <pcuzner@redhat.com> 0.9
 - Repackaged for 0.9, including more specific package dependencies
 * Mon Sep 24 2018 Paul Cuzner <pcuzner@redhat.com> 0.8
