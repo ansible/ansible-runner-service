@@ -1,7 +1,7 @@
 # from flask import request
 from flask_restful import request
 # import logging
-from .utils import requires_auth, log_request
+from .utils import log_request
 from .base import BaseResource
 
 from ..services.jobs import get_events, get_event
@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 class ListEvents(BaseResource):
     """Return a list of events within a given playbook run (job) """
 
-    @requires_auth
     @log_request(logger)
     def get(self, play_uuid=None):
         """
@@ -25,7 +24,7 @@ class ListEvents(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/jobs/9c1714aa-b534-11e8-8c14-aced5c652dd1/events -X GET
+        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/jobs/9c1714aa-b534-11e8-8c14-aced5c652dd1/events -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 1142
@@ -89,7 +88,6 @@ class ListEvents(BaseResource):
 class GetEvent(BaseResource):
     """Return the output of a specific task within a playbook"""
 
-    @requires_auth
     @log_request(logger)
     def get(self, play_uuid, event_uuid):
         """
@@ -99,7 +97,7 @@ class GetEvent(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/jobs/9c1714aa-b534-11e8-8c14-aced5c652dd1/events/2-0eaf70cd-0d86-4209-a3ca-73c0633afa27 -X GET
+        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/jobs/9c1714aa-b534-11e8-8c14-aced5c652dd1/events/2-0eaf70cd-0d86-4209-a3ca-73c0633afa27 -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 480

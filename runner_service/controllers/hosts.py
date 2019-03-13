@@ -1,7 +1,7 @@
 from flask_restful import request
 
 from .base import BaseResource
-from .utils import requires_auth, log_request
+from .utils import log_request
 from ..services.hosts import (get_hosts,
                               add_host,
                               remove_host,
@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 class Hosts(BaseResource):
     """Return a list of hosts from the inventory"""
 
-    @requires_auth
     @log_request(logger)
     def get(self):
         """
@@ -26,7 +25,7 @@ class Hosts(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/hosts -X get
+        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/hosts -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 150
@@ -55,7 +54,6 @@ class Hosts(BaseResource):
 class HostDetails(BaseResource):
     """For a given host either show group membership or remove the host"""
 
-    @requires_auth
     @log_request(logger)
     def get(self, host_name):
         """
@@ -65,7 +63,7 @@ class HostDetails(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/hosts/con-1 -X get
+        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/hosts/con-1 -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 108
@@ -88,7 +86,6 @@ class HostDetails(BaseResource):
 
         return response.__dict__, self.state_to_http[response.status]
 
-    @requires_auth
     @log_request(logger)
     def delete(self, host_name):
         """
@@ -98,7 +95,7 @@ class HostDetails(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/hosts/con-1 -X delete
+        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/hosts/con-1 -X DELETE
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 108
@@ -137,7 +134,6 @@ class HostDetails(BaseResource):
 class HostMgmt(BaseResource):
     """Manage ansible control of a given host"""
 
-    @requires_auth
     @log_request(logger)
     def post(self, host_name, group_name):
         """
@@ -148,7 +144,7 @@ class HostMgmt(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/hosts/con-1/groups/dummy -X post
+        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/hosts/con-1/groups/dummy -X POST
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 54
@@ -188,7 +184,6 @@ class HostMgmt(BaseResource):
 
         return response.__dict__, self.state_to_http[response.status]
 
-    @requires_auth
     @log_request(logger)
     def delete(self, host_name, group_name):
         """
@@ -198,7 +193,7 @@ class HostMgmt(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/hosts/con-1/groups/dummy -X delete
+        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/hosts/con-1/groups/dummy -X DELETE
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 54

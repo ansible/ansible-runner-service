@@ -14,6 +14,7 @@ cache: pip
 branches:
   only:
   - master
+  - nginx
 
 before_install:
     - sudo apt-add-repository --yes ppa:ansible/ansible
@@ -41,3 +42,5 @@ after_success:
 after_script:
   - ls -al ~/.ssh
   - cat ~/.ssh/authorized_keys
+
+# To trigger travis builds
