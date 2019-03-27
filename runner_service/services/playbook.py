@@ -101,10 +101,12 @@ def cb_playbook_finished(runner):
     :param runner:  instance of ansible_runner.Runner for the playbook that has
                     just completed
     """
+
     logger.info("Playbook {}, UUID={} ended, "
                 "status={}".format(runner.config.playbook,
                                    runner.config.ident,
                                    runner.status))
+
     try:
         stats = runner.stats
     except AnsibleRunnerException as err:
@@ -136,6 +138,7 @@ def prune_runner_cache(current_runner):
 
 
 def cb_event_handler(event_data):
+    logger.debug("cb_event_handler event_data={}".format(event_data))
 
     # first look at the event to track overall stats in the runner_stats object
     event_type = event_data.get('event', None)
@@ -157,7 +160,13 @@ def cb_event_handler(event_data):
             runner_cache[ident]['current_task_metadata'] = metadata
 
         runner_cache[ident]['last_task_num'] = event_data['counter']
-        runner_cache[ident]['role'] = event_data['event_data'].get('role', '')
+
+        # role is not a fixed attribute
+        role_value = ''
+        if 'role' in event_data:
+            role_value =  runner_cache[ident]['role'] = event_data['event_data'].get('role', '') # noqa
+        runner_cache[ident]['role'] = role_value
+
         if event_type.startswith("runner_on_"):
             event_shortname = event_type[10:]
             if event_shortname in runner_cache[ident]:
