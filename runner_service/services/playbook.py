@@ -137,6 +137,9 @@ def prune_runner_cache(current_runner):
 
 def cb_event_handler(event_data):
 
+    logger.info("JMO: cb_event_handler event_data{}".format(event_data))
+
+    """
     # first look at the event to track overall stats in the runner_stats object
     event_type = event_data.get('event', None)
     if event_type.startswith("runner_on_"):
@@ -173,10 +176,12 @@ def cb_event_handler(event_data):
                     event_metadata = event_data['event_data']
                     runner_cache[ident]['failures'][event_metadata.get('host')] = event_data # noqa
 
+
     # populate the event cache
     if 'runner_ident' in event_data and \
        'uuid' in event_data and ident in event_cache:
         event_cache[ident].update({event_data['uuid']: event_data})
+    """
 
     # regardless return true to ensure the data is written to artifacts dir
     return True
@@ -210,7 +215,9 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
         "event_handler": cb_event_handler,
         "quiet": False,
         "ident": play_uuid,
-        "playbook": playbook_name
+        "playbook": playbook_name,
+        "logfile": "ansible-runner.log",
+        "ignore_logging": False
     }
 
     if os.path.exists(local_modules):
