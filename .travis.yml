@@ -11,10 +11,6 @@ addons:
 
 cache: pip
 
-branches:
-  only:
-  - master
-
 before_install:
     - sudo apt-add-repository --yes ppa:ansible/ansible
     - sudo apt-get update
