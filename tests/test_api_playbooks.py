@@ -55,6 +55,95 @@ class TestPlaybooks(APITestCase):
         self.assertEqual(response.status_code,
                          404)
 
+    def test_run_playbook(self):
+        """- start a playbook"""
+        # create a playbook group and put localhost in it
+        """- Add a host to a group - 404 unless ssh_checks turned off"""
+
+        response = self.app.post('api/v1/groups/playbook')
+
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.post('api/v1/hosts/localhost/groups/playbook')
+        self.assertEqual(response.status_code,
+                         200)
+
+        response = self.app.post('api/v1/playbooks/testplaybook.yml',
+                                 data=json.dumps(dict()),
+                                 content_type="application/json")
+        self.assertEqual(response.status_code,
+                         202)     # it started OK
+
+        play_uuid = json.loads(response.data)['data']['play_uuid']
+
+        # wait for playbook completion
+        while True:
+            response = self.app.get('api/v1/playbooks/{}'.format(play_uuid))
+
+            self.assertIn(response.status_code, [200, 404])
+
+            if json.loads(response.data)['msg'] in ['failed', 'successful']:
+                break
+            time.sleep(0.5)
+
+    def test_run_playbook_tags(self):
+        """- run a playbook using tags"""
+        self.assertTrue(True)
+
+        response = self.app.post('api/v1/playbooks/testplaybook.yml/tags/solo',
+                                 data=json.dumps(dict()),
+                                 content_type="application/json")
+        self.assertEqual(response.status_code,
+                         202)     # it started OK
+
+        play_uuid = json.loads(response.data)['data']['play_uuid']
+
+        # wait for playbook completion
+        while True:
+            response = self.app.get('api/v1/playbooks/{}'.format(play_uuid))
+
+            self.assertIn(response.status_code, [200, 404])
+            if json.loads(response.data)['msg'] in ['successful', 'failed']:
+                break
+            time.sleep(0.5)
+
+    def test_run_playbook_limited(self):
+        """- run a playbook that uses limit"""
+
+        response = self.app.post('api/v1/playbooks/testplaybook.yml?limit=localhost',   # noqa
+                                 data=json.dumps(dict()),
+                                 content_type="application/json")
+        self.assertEqual(response.status_code,
+                         202)     # it started OK
+
+        play_uuid = json.loads(response.data)['data']['play_uuid']
+        # wait for playbook completion
+
+        while True:
+            response = self.app.get('api/v1/playbooks/{}'.format(play_uuid))
+
+            self.assertIn(response.status_code, [200, 404])
+            if json.loads(response.data)['msg'] in ['successful', 'failed']:
+                break
+
+            time.sleep(0.5)
+
+    def test_cancel_running_playbook(self):
+        """- Issue a cancel against a running playbook"""
+
+        response = self.app.post('api/v1/playbooks/testplaybook.yml',
+                                 data=json.dumps(dict()),
+                                 content_type="application/json")
+        self.assertEqual(response.status_code,
+                         202)     # it started OK
+
+        play_uuid = json.loads(response.data)['data']['play_uuid']
+        response = self.app.delete('api/v1/playbooks/{}'.format(play_uuid))
+        self.assertEqual(response.status_code,
+                         200)
+
+
 if __name__ == "__main__":
 
     unittest.main(verbosity=2)
