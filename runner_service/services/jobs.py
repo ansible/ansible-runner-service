@@ -101,8 +101,11 @@ def event_summary(event_info, summary_keys=['host', 'task', 'role', 'event']):
 
     if summary_keys:
         base = {k: event_info[k] for k in summary_keys if k in event_info}
-        event_data = {k: event_info['event_data'][k] for k in summary_keys
-                      if k in event_info.get('event_data')}
+
+        event_data = {}
+        if 'event_data' in event_info:
+            event_data = {k: event_info['event_data'][k] for k in summary_keys
+                          if k in event_info.get('event_data')}
 
         # python3.5 an above idiom
         # return {**base, **event_data}
