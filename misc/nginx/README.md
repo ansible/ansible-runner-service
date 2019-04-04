@@ -49,7 +49,7 @@ In order to make it work in the most simple way, it will be needed:
 It is possible to generate test certificates in order to setup the system and make tests, but it is encouraged to use real certificates signed by a real certificate authority in production environments.
 
 * The server certificates must be installed in */etc/ansible-runner-service/certs/server*
-* The client certificates must be installed in */etc/ansible-runner-service/certs/client*
+* The client certificates could be stored in */etc/ansible-runner-service/certs/client* (is optional to store the authorized client certificates)
 
 If no real certificates available, a test set of certificates can be generated executing the script provided:
 
@@ -63,12 +63,12 @@ If no real certificates available, a test set of certificates can be generated e
 The provided container provides a configuration example in the following files:
 ```
 nginx.conf: basic Nginx config file
-ars_site_nginx.conf: Basic configuration for provide mutualo TLS authentication in the service
+ars_site_nginx.conf: Basic configuration for provide mutual TLS authentication in the service
 ```
 
-- Use the client certificate in all the computers that need to access the Ansible Runner Service
+- Use the client certificate in all the computers that need to access the Ansible Runner Service, or generate and distribute individual client certificates ( see the <client> part in the 'generate_certs.sh' for an example)
 
-The client certificates must be provided to the client computers where the requests to the Ansible Runner Service are going to be executed. This means that the final user is responsible to copy the files in */etc/ansible-runner-service/certs/client* to the client computers.
+The client certificates must be provided to the client computers where the requests to the Ansible Runner Service are going to be executed. This means that the final user is responsible to copy the files in */etc/ansible-runner-service/certs/client* to the client computers. or generate and distribute the clien certificates.
 
 Double check that the rights for this files allow their utilization in the client computers!
 
@@ -104,35 +104,31 @@ At this point, the container persists the following content;
 > All the commands used in this example are issued from the same directory where resides the client certificate and key files.
 > Remember that client certificate and key files must be copied to the client computers!.
 
-1. Get token
+1. Get the list of available playbooks
 ```
-$ curl -k -i --key client.key --cert client.crt --user admin:admin https://localhost:5001/api/v1/login
-HTTP/1.1 200 OK
-Server: nginx/1.12.2
-Date: Wed, 20 Mar 2019 10:01:20 GMT
+$ curl -i -k --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/playbooks -X GET
+HTTP/1.0 200 OK
 Content-Type: application/json
-Content-Length: 170
-Connection: keep-alive
+Content-Length: 179
+Server: Werkzeug/0.12.2 Python/3.6.6
+Date: Sun, 09 Sep 2018 22:51:21 GMT
 
-{"status": "OK", "msg": "Token returned", "data": {"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTMxNjI0ODB9.14RgKAC1XFI-diYmW-64sfYONnfMW6hycWPF9EhbXsk"}}
+{
+    "status": "OK",
+    "msg": "",
+    "data": {
+        "playbooks": [
+            "osd-configure.yml",
+            "test.yml",
+            "probe-disks.yml"
+        ]
+    }
+}
 ```
 
-2. Use token to get groups
+2. Check that is not possible to use the API without using the client certificate
 ```
-$ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTMxNjI0ODB9.14RgKAC1XFI-diYmW-64sfYONnfMW6hycWPF9EhbXsk" --key client.key --cert client.crt https://localhost:5001/api/v1/groups
-HTTP/1.1 200 OK
-Server: nginx/1.12.2
-Date: Wed, 20 Mar 2019 10:02:32 GMT
-Content-Type: application/json
-Content-Length: 74
-Connection: keep-alive
-
-{"status": "OK", "msg": "", "data": {"groups": ["mgrs", "mons", "osds"]}}
-```
-
-3. Check that is not possible to use the API without using the client certificate
-```
-$ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTMxNjI0ODB9.14RgKAC1XFI-diYmW-64sfYONnfMW6hycWPF9EhbXsk"  https://localhost:5001/api/v1/groups
+$ curl -k -i  https://localhost:5001/api/v1/groups
 HTTP/1.1 400 Bad Request
 Server: nginx/1.12.2
 Date: Wed, 20 Mar 2019 10:02:48 GMT

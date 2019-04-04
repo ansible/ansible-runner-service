@@ -178,7 +178,12 @@ For more info, look at the ```.travis.yml``` file.
 - config.yaml
 - ansible-runner-service.crt (used only with the development Flask server)
 - ansible-runner-service.key (used only with the development Flask server)
-
+- certs
+    -  client (optional placement for store authorized client certificates)
+    -  server
+         -  server.crt (server certificate issued by <ca>)
+         -  server.key (server certificate key)
+         -  ca.crt     (certificate authority cert to validate client certificates)
 /usr/share/ansible-runner-service
 - artifacts
 - inventory

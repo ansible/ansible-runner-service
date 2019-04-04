@@ -32,7 +32,7 @@ class ListPlaybooks(BaseResource):
         Example.
 
         ```
-        $ curl -i -k --key client.key --cert client.crt https://localhost:5001/api/v1/playbooks -X GET
+        $ curl -i -k --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/playbooks -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 179
@@ -70,7 +70,7 @@ class PlaybookState(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/playbooks/1733c3ac-b483-11e8-ad05-c85b7671906d -X GET
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/playbooks/1733c3ac-b483-11e8-ad05-c85b7671906d -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 121
@@ -101,7 +101,7 @@ class PlaybookState(BaseResource):
         Example.
 
         ```
-        $ curl -i -k --key client.key --cert client.crt https://localhost:5001/api/v1/playbooks/b7ea3922-b481-11e8-a992-c85b7671906d -X DELETE
+        $ curl -i -k --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/playbooks/b7ea3922-b481-11e8-a992-c85b7671906d -X DELETE
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 75
@@ -213,7 +213,7 @@ class StartPlaybook(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml -X POST
+        $ curl -k -i --key ./client.key --cert ./client.crt -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml -X POST
         HTTP/1.0 202 ACCEPTED
         Content-Type: application/json
         Content-Length: 132
@@ -247,7 +247,7 @@ class StartTaggedPlaybook(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml/tags/onlyme -X POST
+        $ curl -k -i --key ./client.key --cert ./client.crt -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml/tags/onlyme -X POST
         HTTP/1.0 202 ACCEPTED
         Content-Type: application/json
         Content-Length: 132

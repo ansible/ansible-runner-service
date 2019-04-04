@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
 CERT_IDENTITY="/C=US/ST=North Carolina/L=Raleigh/O=Red Hat/OU=Automation/CN=AnsibleRunnerService"
+CERT_IDENTITY_CLIENT="/C=US/ST=North Carolina/L=Raleigh/O=TestOrg/OU=testOU/CN=testCN"
 CERT_PASSWORD="ansible"
 BASE_PATH="/etc/ansible-runner-service/certs"
 
@@ -36,7 +37,7 @@ openssl genrsa -des3 -out $BASE_PATH/client/client.key.org -passout pass:$CERT_P
 # Remove password (avoid https client claiming for it in each request)
 openssl rsa -in $BASE_PATH/client/client.key.org -out $BASE_PATH/client/client.key -passin pass:$CERT_PASSWORD
 # Generate client certificate
-openssl req -new -key $BASE_PATH/client/client.key -out $BASE_PATH/client/client.csr -passin pass:$CERT_PASSWORD -subj "$CERT_IDENTITY"
+openssl req -new -key $BASE_PATH/client/client.key -out $BASE_PATH/client/client.csr -passin pass:$CERT_PASSWORD -subj "$CERT_IDENTITY_CLIENT"
 
 echo "Sign the client certificate with our CA cert"
 openssl x509 -req -days 365 -in $BASE_PATH/client/client.csr -CA $BASE_PATH/server/ca.crt -CAkey $BASE_PATH/server/ca.key -set_serial 01 -out $BASE_PATH/client/client.crt -passin pass:$CERT_PASSWORD

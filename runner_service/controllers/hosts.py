@@ -25,7 +25,7 @@ class Hosts(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/hosts -X GET
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/hosts -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 150
@@ -63,7 +63,7 @@ class HostDetails(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/hosts/con-1 -X GET
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/hosts/con-1 -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 108
@@ -95,7 +95,7 @@ class HostDetails(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/hosts/con-1 -X DELETE
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/hosts/con-1 -X DELETE
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 108
@@ -144,7 +144,7 @@ class HostMgmt(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/hosts/con-1/groups/dummy -X POST
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/hosts/con-1/groups/dummy -X POST
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 54
@@ -193,7 +193,7 @@ class HostMgmt(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/hosts/con-1/groups/dummy -X DELETE
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/hosts/con-1/groups/dummy -X DELETE
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 54

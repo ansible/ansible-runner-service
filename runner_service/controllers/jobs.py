@@ -24,7 +24,7 @@ class ListEvents(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/jobs/9c1714aa-b534-11e8-8c14-aced5c652dd1/events -X GET
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/jobs/9c1714aa-b534-11e8-8c14-aced5c652dd1/events -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 1142
@@ -97,7 +97,7 @@ class GetEvent(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/jobs/9c1714aa-b534-11e8-8c14-aced5c652dd1/events/2-0eaf70cd-0d86-4209-a3ca-73c0633afa27 -X GET
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/jobs/9c1714aa-b534-11e8-8c14-aced5c652dd1/events/2-0eaf70cd-0d86-4209-a3ca-73c0633afa27 -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 480

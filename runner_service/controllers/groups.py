@@ -25,7 +25,7 @@ class ListGroups(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/groups -X GET
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/groups -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 108
@@ -63,7 +63,7 @@ class ManageGroups(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/groups/osds -X GET
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/groups/osds -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 152
@@ -97,7 +97,7 @@ class ManageGroups(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/groups/dummy -X POST
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/groups/dummy -X POST
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 71
@@ -126,7 +126,7 @@ class ManageGroups(BaseResource):
         Example.
 
         ```
-        $ curl -k -i --key client.key --cert client.crt https://localhost:5001/api/v1/groups/dummy -X DELETE
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/groups/dummy -X DELETE
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 73
