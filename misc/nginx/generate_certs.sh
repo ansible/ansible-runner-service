@@ -40,4 +40,4 @@ openssl rsa -in $BASE_PATH/client/client.key.org -out $BASE_PATH/client/client.k
 openssl req -new -key $BASE_PATH/client/client.key -out $BASE_PATH/client/client.csr -passin pass:$CERT_PASSWORD -subj "$CERT_IDENTITY_CLIENT"
 
 echo "Sign the client certificate with our CA cert"
-openssl x509 -req -days 365 -in $BASE_PATH/client/client.csr -CA $BASE_PATH/server/ca.crt -CAkey $BASE_PATH/server/ca.key -set_serial 01 -out $BASE_PATH/client/client.crt -passin pass:$CERT_PASSWORD
+openssl x509 -req -days 365 -in $BASE_PATH/client/client.csr -CA $BASE_PATH/server/ca.crt -CAkey $BASE_PATH/server/ca.key -CAcreateserial -out $BASE_PATH/client/client.crt -passin pass:$CERT_PASSWORD
