@@ -12,7 +12,7 @@ RUN easy_install-3.6 -d /usr/lib/python3.6/site-packages pip && \
     ln -s /usr/lib/python3.6/site-packages/pip3 /usr/local/bin/pip3
 RUN /usr/local/bin/pip3 install crypto docutils psutil paramiko PyYAML \
                  pyOpenSSL flask flask-restful uwsgi && \
-    /usr/local/bin/pip3 install --no-cache-dir ansible-runner==1.3.0 && \
+    /usr/local/bin/pip3 install --no-cache-dir ansible-runner==1.3.2 && \
     rm -rf /var/cache/yum
 
 # Prepare folders for shared access and ssh
