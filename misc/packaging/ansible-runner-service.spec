@@ -25,7 +25,8 @@ Requires: python-paramiko
 Requires: openssl
 Requires: pyOpenSSL
 Requires: PyYAML
-Requires: python-jwt
+Requires: uwsgi
+Requires: nginx
 
 %description
 This package provides a daemon that exposes a REST API interface on top of the functionality provided by ansible and ansible_runner.
@@ -55,10 +56,13 @@ mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/artifacts
 mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/env
 mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/inventory
 mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/project
+mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/client_cert
+mkdir -p %{buildroot}%{_prefix}/share/ansible-runner-service/misc
 install -m 0644 ./samples/project/runnertest.yml %{buildroot}%{_prefix}/share/ansible-runner-service/project
 mkdir -p %{buildroot}%{_docdir}/ansible-runner-service/dashboards
 install -m 0644 ./misc/dashboards/ansible-runner-service-metrics.json  %{buildroot}%{_docdir}/ansible-runner-service/dashboards
 install -m 0644 ./LICENSE.md %{buildroot}%{_docdir}/ansible-runner-service
+cp -r ./misc/nginx %{buildroot}%{_prefix}/share/ansible-runner-service/misc/
 
 %post
 /bin/systemctl --system daemon-reload &> /dev/null || :

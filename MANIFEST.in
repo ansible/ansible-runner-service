@@ -1,2 +1,3 @@
 recursive-include runner_service/templates *
 recursive-include runner_service/static *
+graft misc
