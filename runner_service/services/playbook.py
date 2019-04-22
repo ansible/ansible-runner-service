@@ -43,33 +43,33 @@ def get_status(play_uuid):
     else:
         logger.debug("runner_cache 'miss' for run {}".format(play_uuid))
 
-    # Status is against a playbook that has finished, so we need to look at
-    # the artifacts dir
-    pb_artifacts = os.path.join(configuration.settings.playbooks_root_dir,
-                                "artifacts",
-                                play_uuid)
+        # Status is against a playbook that has finished and has been removed
+        # from cache, so we need to look at the artifacts dir
+        pb_artifacts = os.path.join(configuration.settings.playbooks_root_dir,
+                                    "artifacts",
+                                    play_uuid)
 
-    if not os.path.exists(pb_artifacts):
-        r.status, r.msg = "NOTFOUND", \
-                          "Playbook with UUID {} not found".format(play_uuid)
-        logger.info("Request for playbook state had non-existent "
-                    "play_uuid '{}'".format(play_uuid))
-        return r
+        if not os.path.exists(pb_artifacts):
+            r.status, r.msg = "NOTFOUND", \
+                            "Playbook with UUID {} not found".format(play_uuid)
+            logger.info("Request for playbook state had non-existent "
+                        "play_uuid '{}'".format(play_uuid))
+            return r
 
-    pb_status = os.path.join(pb_artifacts,
-                             "status")
+        pb_status = os.path.join(pb_artifacts,
+                                "status")
 
-    if os.path.exists(pb_status):
-        # playbook execution has finished
-        r.status, r.msg = "OK", fread(pb_status)
-        return r
-    else:
-        r.status, r.msg = "UNKNOWN", \
-                          "The artifacts directory is incomplete!"
-        logger.warning("Status Request for Play uuid '{}', found an incomplete"
-                       " artifacts directory...Possible ansible_runner "
-                       " error?".format(play_uuid))
-        return r
+        if os.path.exists(pb_status):
+            # playbook execution has finished
+            r.status, r.msg = "OK", fread(pb_status)
+            return r
+        else:
+            r.status, r.msg = "UNKNOWN", \
+                            "The artifacts directory is incomplete!"
+            logger.warning("Status Request for Play uuid '{}', found an incomplete"
+                        " artifacts directory...Possible ansible_runner "
+                        " error?".format(play_uuid))
+            return r
 
 
 def list_playbooks():
