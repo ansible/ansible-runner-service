@@ -1,7 +1,5 @@
 # Running ansible-runner-service production container
 
-## WARNING: THIS IS A WORK IN PROGRESS!
-
 ## Goal:
 Provide a container version of the ansible runner service running in 'prod' mode.
 This version uses Nginx and uwsgi to provide a production environment for the
@@ -83,10 +81,20 @@ cd misc/nginx
 docker build -f Dockerfile -t runner-service .
 ```
 
+NOTE
+There are two Docker files available:
+Dockerfile: Use as base a "CentOS7" container image and runs the service using Python 3.6
+Dockerfile.python27: Use as base "Ansible runner 1.3.2" container image and runs the service using Python 2.7
+
+
 ## Running the container with persistence (only way to use the service with TLS mutual authentication)
 Here's an example of using the container that persists state to the host's filesystem.
 ```
 docker run -d --network=host -p 5001:5001/tcp -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service runner-service
+```
+**Note: Use the following command to use the Docker Hub image**
+```
+docker run -d --network=host -p 5001:5001/tcp -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service jolmomar/ansible_runner_service
 ```
 
 Be aware that the container will need access to these bind-mounted locations, so you may need to ensure file and selinux permissions are set correctly.
@@ -190,4 +198,72 @@ Note:
 If it is needed, the imported client certificate can be deleted using:
 ```
 $ sudo certutil -d sql:$HOME/.pki/nssdb -D -n "AnsibleRunnerService - Red Hat"
+```
+
+## Example: Installing Ansible Runner Service in a clean CentOS 7 server
+
+
+### Install docker in the host
+
+```
+# sudo yum install docker
+# sudo systemctl enable docker.service
+# sudo systemctl start docker.service
+```
+### Create in the host the needed folders
+
+```
+# sudo mkdir /etc/ansible-runner-service
+# sudo mkdir -p /usr/share/ansible-runner-service/{artifacts,env,inventory,project}
+
+# sudo chmod ug+wrx /usr/share/ansible-runner-service{artifacts,env,inventory,project}
+# sudo chmod ug+wrx /etc/ansible-runner-service
+```
+
+### To allow copy/modify files from inside the container
+
+```
+# cd /usr/share
+# sudo chcon -Rt container_file_t ansible-runner-service
+# cd /etc
+# sudo chcon -Rt container_file_t ansible-runner-service
+```
+
+### Instead of copy information from another external source , use the files in the container to configure the environment:
+
+In the CentOS 7 server:
+```
+# sudo docker run -d --network host -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service jolmomar/ansible_runner_service:latest
+# sudo docker ps -a
+# sudo docker logs runner-service  <----- It can't start ... needed to copy first config files, playbooks to execute and generate certs
+# sudo docker exec -it  runner-service bash
+```
+
+In the container:
+```
+# cd ansible-runner-service
+# cp {logging,config}.yaml /etc/ansible-runner-service/.
+# cp -r samples/project/* /usr/share/ansible-runner-service/project
+# cd misc/nginx/
+# ./generate_certs.sh
+# exit
+```
+
+### Restart the container to apply the new configuration
+
+In the CentOS 7 server, we have "extracted/generated" the config files/certificates/playbooks needed. We must restart the container in order to use the new settings
+
+```
+# sudo docker rm -f runner-service
+# sudo docker ps -a  <---- should appear empty
+# sudo docker run -d --network host -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service jolmomar/ansible_runner_service:latest
+# sudo docker ps -a  <--- should appear our container
+# sudo docker logs runner-service  <---- just check everything ok
+```
+
+### Check that it is working:
+
+```
+# cd /etc/ansible-runner-service/certs/client/
+# curl -i -k --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/playbooks -X GET
 ```
