@@ -48,8 +48,8 @@ In order to make it work in the most simple way, it will be needed:
 
 It is possible to generate test certificates in order to setup the system and make tests, but it is encouraged to use real certificates signed by a real certificate authority in production environments.
 
-* The server certificates must be installed in */etc/ansible-runner-service/certs/server*
-* The client certificates could be stored in */etc/ansible-runner-service/certs/client* (is optional to store the authorized client certificates, is in the client computer where they must be stored)
+* The server certificate and key must be installed in */etc/ansible-runner-service/certs/server*
+* The client certificates and keys could be stored in */etc/ansible-runner-service/certs/client* (is optional to store the authorized client certificates, is in the client computer where they must be stored)
 
 If no real certificates available, a test set of certificates can be generated executing the scripts provided:
 
@@ -126,11 +126,11 @@ Dockerfile.python27: Use as base "Ansible runner 1.3.2" container image and runs
 ## Running the container with persistence (only way to use the service with TLS mutual authentication)
 Here's an example of using the container that persists state to the host's filesystem.
 ```
-docker run -d --network=host -p 5001:5001/tcp -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service runner-service
+docker run --rm=true -d --network=host -p 5001:5001/tcp -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service runner-service
 ```
 **Note: Use the following command to use the Docker Hub image**
 ```
-docker run -d --network=host -p 5001:5001/tcp -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service jolmomar/ansible_runner_service
+docker run --rm=true -d --network=host -p 5001:5001/tcp -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service jolmomar/ansible_runner_service
 ```
 
 Be aware that the container will need access to these bind-mounted locations, so you may need to ensure file and selinux permissions are set correctly.
@@ -148,7 +148,11 @@ At this point, the container persists the following content;
 > All the commands used in this example are issued from the same directory where resides the client certificate and key files.
 > Remember that client certificate and key files must be copied to the client computers!.
 
+
 1. Get the list of available playbooks
+
+NOTE: Be sure to execute the command in the same folder where the client certificate and key are stored. And check that the user that is going to execute the command has the rights to read these files. In the example, the curl command is executed in the same folder where the certificate files are stored.
+
 ```
 $ curl -i -k --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/playbooks -X GET
 HTTP/1.0 200 OK
@@ -214,6 +218,8 @@ pk12util: no nickname for cert in PKCS12 file.
 pk12util: using nickname: AnsibleRunnerService - Red Hat
 pk12util: PKCS12 IMPORT SUCCESSFUL
 ```
+NOTE: ONCE GENERATED, BE SURE THAT THE "client.pfx" FILE CAN BE READED BY THE
+      THE USERS  (ESPECIFICALLY BY THE USER TAHT RUNS CHROME)
 
 3. Check that the certificate is imported:
 ```
@@ -230,11 +236,16 @@ AnsibleRunnerService - Red Hat                               u,u,u
 Check that you can see the API page typing the following url in chrome:
 https://localhost:5001/api
 
-Note:
+Is not needed to restart Chrome, if everything is ok, Chrome will ask the first
+time for the certificate to use.
+
+
+NOTE:
 If it is needed, the imported client certificate can be deleted using:
 ```
 $ sudo certutil -d sql:$HOME/.pki/nssdb -D -n "AnsibleRunnerService - Red Hat"
 ```
+
 
 ## Example: Installing Ansible Runner Service in a clean CentOS 7 server
 
@@ -269,7 +280,7 @@ $ sudo certutil -d sql:$HOME/.pki/nssdb -D -n "AnsibleRunnerService - Red Hat"
 
 In the CentOS 7 server:
 ```
-# sudo docker run -d --network host -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service jolmomar/ansible_runner_service:latest
+# sudo docker run --rm=true -d --network host -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service jolmomar/ansible_runner_service:latest
 # sudo docker ps -a
 # sudo docker logs runner-service  <----- It can't start ... needed to copy first config files, playbooks to execute and generate certs
 # sudo docker exec -it  runner-service bash
@@ -292,7 +303,7 @@ In the CentOS 7 server, we have "extracted/generated" the config files/certifica
 ```
 # sudo docker rm -f runner-service
 # sudo docker ps -a  <---- should appear empty
-# sudo docker run -d --network host -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service jolmomar/ansible_runner_service:latest
+# sudo docker run --rm=true -d --network host -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service jolmomar/ansible_runner_service:latest
 # sudo docker ps -a  <--- should appear our container
 # sudo docker logs runner-service  <---- just check everything ok
 ```
