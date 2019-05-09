@@ -25,6 +25,7 @@ store it in the misc/docker directory
 ```
  sudo mkdir /etc/ansible-runner-service
  sudo mkdir -p /usr/share/ansible-runner-service/{artifacts,env,inventory,project}
+ sudo mkdir -p /etc/ansible-runner-service/certs/{client,server}
 ```
 3.a. If you have selinux enabled you'll need to give the container permissions to these directories
 ```
@@ -35,6 +36,7 @@ chcon -Rt container_file_t ansible-runner-service
 ```
  cp {logging,config}.yaml /etc/ansible-runner-service/.
  cp -r samples/project/* /usr/share/ansible-runner-service/project
+
 ```
 
 5. Install certificates
@@ -42,17 +44,51 @@ chcon -Rt container_file_t ansible-runner-service
 The TLS mutual authentication mechanism is provided by the Nginx server used to deploy the Ansible Runner Service in production environments.
 In order to make it work in the most simple way, it will be needed:
 
-- A server certificate and a client certificate signed both for the same Certificate Authority.
+- A server certificate and a client certificate signed both by the same Certificate Authority.
 
 It is possible to generate test certificates in order to setup the system and make tests, but it is encouraged to use real certificates signed by a real certificate authority in production environments.
 
 * The server certificates must be installed in */etc/ansible-runner-service/certs/server*
-* The client certificates could be stored in */etc/ansible-runner-service/certs/client* (is optional to store the authorized client certificates)
+* The client certificates could be stored in */etc/ansible-runner-service/certs/client* (is optional to store the authorized client certificates, is in the client computer where they must be stored)
 
-If no real certificates available, a test set of certificates can be generated executing the script provided:
+If no real certificates available, a test set of certificates can be generated executing the scripts provided:
 
+Note:
+User can easily customize the certificates to satisfy his own prefernces, changing the contents of the file "certificates_data.custom".
+By default, the scripts generate wildcard TLS certificates (valid to be used in any computer), but it is also possible to specify a custom "CN" field for use the certificates only in the desired computers.
+
+e.g:
 ```
- ./generate_certs.sh
+# ./generate_certs.sh -h
+generate_certs.sh [-h] [-s string] [-c string] -- Generate self signed certificates for server and client
+
+where:
+    -h  show this help text
+    -s  <string> use <string> as CN parameter for the server certificate
+    -c  <string> use <string> as CN parameter for the client certificate
+
+ # ./generate_certs.sh
+ ...
+ Generate CA certificate, server and client wildcard certificates in /etc/ansible-runner-service/certs
+ ...
+
+ # ./generate_certs.sh -s myserver.com -c myclient.com
+ ...
+ Generate CA certificate, a server certificate for the server with hostname "myserver.com" and a client certificate for the computer with hostname "myclient.com"
+ ...
+
+# ./generate_client_cert.sh -h
+generate_client_cert.sh [-h] [-c string] -- Generate self signed certificates for client
+
+where:
+    -h  show this help text
+    -c  <string> use <string> as CN parameter for the client certificate
+
+
+ ./generate_client_cert.sh -c client2.com
+ ...
+ Generate a client certificate ( Signed by the CA ith certificate generated using generate_certs.sh) for the computer with hostname "client2.com"
+ ...
 
 ```
 
@@ -64,7 +100,7 @@ nginx.conf: basic Nginx config file
 ars_site_nginx.conf: Basic configuration for provide mutual TLS authentication in the service
 ```
 
-- Use the client certificate in all the computers that need to access the Ansible Runner Service, or generate and distribute individual client certificates ( see the <client> part in the 'generate_certs.sh' for an example)
+- Use the client certificate in all the computers that need to access the Ansible Runner Service, or generate and distribute individual client certificates (see the <client> part in the 'generate_certs.sh' for an example)
 
 The client certificates must be provided to the client computers where the requests to the Ansible Runner Service are going to be executed. This means that the final user is responsible to copy the files in */etc/ansible-runner-service/certs/client* to the client computers. or generate and distribute the clien certificates.
 

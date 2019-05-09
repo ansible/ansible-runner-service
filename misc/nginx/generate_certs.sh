@@ -1,9 +1,38 @@
 #!/usr/bin/env sh
 
-CERT_IDENTITY="/C=US/ST=North Carolina/L=Raleigh/O=Red Hat/OU=Automation/CN=AnsibleRunnerService"
-CERT_IDENTITY_CLIENT="/C=US/ST=North Carolina/L=Raleigh/O=TestOrg/OU=testOU/CN=testCN"
-CERT_PASSWORD="ansible"
-BASE_PATH="/etc/ansible-runner-service/certs"
+# Certificates data, password and placement are customizable in this file
+source ./certificates_data.custom
+
+usage="$(basename "$0") [-h] [-s string] [-c string] -- Generate self signed certificates for server and client
+
+where:
+    -h  show this help text
+    -s  <string> use <string> as CN parameter for the server certificate
+    -c  <string> use <string> as CN parameter for the client certificate"
+
+# Get user preferences for CN parameter in server/client certificates
+SERVER_CN="*"
+CLIENT_CN="*"
+
+while getopts hc:s: option
+do
+ case "${option}"
+ in
+ h) echo "$usage"
+    exit
+    ;;
+ s) SERVER_CN=${OPTARG};;
+ c) CLIENT_CN=${OPTARG};;
+ \?) echo "illegal option"
+     echo "$usage"
+     exit
+     ;;
+ esac
+done
+
+CERT_IDENTITY=$CERT_IDENTITY$SERVER_CN
+CERT_IDENTITY_CLIENT=$CERT_IDENTITY_CLIENT$CLIENT_CN
+
 
 # create folders
 mkdir -p $BASE_PATH/server

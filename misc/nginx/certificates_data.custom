@@ -1,0 +1,42 @@
+#!/usr/bin/env sh
+
+# Data to customize self-signed test certificates
+
+# Certificate Fields meaning:
+# ------------------------------------------------------------------------------
+# /C : Country Name (2 letter code) [XX]
+# /ST: State or Province Name (full name)
+# /L : Locality Name (eg, city)
+# /O : Organization Name (eg, company)
+# /OU: Organizational Unit Name (eg, section)
+# /CN: Common Name (eg, your name or your server's hostname)
+
+# NOTE: An SSL certificate must be associated with one or more host names.
+#       The CN field is used to identify the server/computer. If a certain name
+#       is used in this field , the certificate only will be valid/used to
+#       identify this computer.
+#       eg:
+#           /CN=client1.myorg.company
+#             The certificate only can be used in the computer with hostname:
+#             "client1.myorg.company"
+#          /CN=*.myorg.company
+#              This is a wildcard certificate, and can be used by any computer
+#              in the domain "myorg.company"
+
+
+# Data used for the server certificate
+# ------------------------------------------------------------------------------
+CERT_IDENTITY="/C=US/ST=North Carolina/L=Raleigh/O=Red Hat/OU=Automation/CN="
+
+# Data used for the client certificate
+# ------------------------------------------------------------------------------
+CERT_IDENTITY_CLIENT="/C=US/ST=North Carolina/L=Raleigh/O=TestOrg/OU=TestOU/CN="
+
+# Password used for the certificates
+# ------------------------------------------------------------------------------
+CERT_PASSWORD="ansible"
+
+
+# Folder to store the generated certificates
+# ------------------------------------------------------------------------------
+BASE_PATH="/etc/ansible-runner-service/certs"
