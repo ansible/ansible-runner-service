@@ -54,7 +54,7 @@ It is possible to generate test certificates in order to setup the system and ma
 If no real certificates available, a test set of certificates can be generated executing the scripts provided:
 
 Note:
-User can easily customize the certificates to satisfy his own prefernces, changing the contents of the file "certificates_data.custom".
+User can easily customize the certificates to satisfy his own preferences, changing the contents of the file "certificates_data.custom".
 By default, the scripts generate wildcard TLS certificates (valid to be used in any computer), but it is also possible to specify a custom "CN" field for use the certificates only in the desired computers.
 
 e.g:
@@ -87,7 +87,7 @@ where:
 
  ./generate_client_cert.sh -c client2.com
  ...
- Generate a client certificate ( Signed by the CA ith certificate generated using generate_certs.sh) for the computer with hostname "client2.com"
+ Generate a client certificate ( Signed by the CA with certificate generated using generate_certs.sh) for the computer with hostname "client2.com"
  ...
 
 ```
@@ -100,7 +100,7 @@ nginx.conf: basic Nginx config file
 ars_site_nginx.conf: Basic configuration for provide mutual TLS authentication in the service
 ```
 
-- Use the client certificate in all the computers that need to access the Ansible Runner Service, or generate and distribute individual client certificates (see the <client> part in the 'generate_certs.sh' for an example)
+- Use the client certificate in all the computers that need to access the Ansible Runner Service, or generate and distribute individual client certificates (if needed, the client certificates can be generated using the 'generate_client_cert.sh' script)
 
 The client certificates must be provided to the client computers where the requests to the Ansible Runner Service are going to be executed. This means that the final user is responsible to copy the files in */etc/ansible-runner-service/certs/client* to the client computers. or generate and distribute the clien certificates.
 
@@ -119,8 +119,9 @@ docker build -f Dockerfile -t runner-service .
 
 NOTE
 There are two Docker files available:
-Dockerfile: Use as base a "CentOS7" container image and runs the service using Python 3.6
-Dockerfile.python27: Use as base "Ansible runner 1.3.2" container image and runs the service using Python 2.7
+
+- Dockerfile: Use as base a "CentOS7" container image and runs the service using Python 3.6
+- Dockerfile.python27: Use as base "Ansible runner 1.3.2" container image and runs the service using Python 2.7
 
 
 ## Running the container with persistence (only way to use the service with TLS mutual authentication)
@@ -133,7 +134,13 @@ docker run --rm=true -d --network=host -p 5001:5001/tcp -v /usr/share/ansible-ru
 docker run --rm=true -d --network=host -p 5001:5001/tcp -v /usr/share/ansible-runner-service:/usr/share/ansible-runner-service -v /etc/ansible-runner-service:/etc/ansible-runner-service --name runner-service jolmomar/ansible_runner_service
 ```
 
-Be aware that the container will need access to these bind-mounted locations, so you may need to ensure file and selinux permissions are set correctly.
+Be aware because the container will need access to these bind-mounted locations, so you may need to ensure file and selinux permissions are set correctly.
+
+```
+cd /usr/share
+chcon -Rt container_file_t ansible-runner-service
+
+```
 
 At this point, the container persists the following content;
 - ssh keys
@@ -143,15 +150,13 @@ At this point, the container persists the following content;
 
 ## Using Ansible Runner Service
 
-### curl examples (TODO: this example will be moved to the API endpoint. token & identification are going to be removed)
+### curl examples
 
-> All the commands used in this example are issued from the same directory where resides the client certificate and key files.
-> Remember that client certificate and key files must be copied to the client computers!.
+NOTE: Be sure to execute the commands in the same folder where the client certificate and key are stored. And check that the user that is going to execute the command has the rights to read these files. In all the examples, the curl command is executed in the same folder where the certificate files are stored.
 
+Remember that the API endpoint (https://localhost:5001/api) presents <'curl'> command examples for every API endpoint.
 
 1. Get the list of available playbooks
-
-NOTE: Be sure to execute the command in the same folder where the client certificate and key are stored. And check that the user that is going to execute the command has the rights to read these files. In the example, the curl command is executed in the same folder where the certificate files are stored.
 
 ```
 $ curl -i -k --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/playbooks -X GET
@@ -219,7 +224,7 @@ pk12util: using nickname: AnsibleRunnerService - Red Hat
 pk12util: PKCS12 IMPORT SUCCESSFUL
 ```
 NOTE: ONCE GENERATED, BE SURE THAT THE "client.pfx" FILE CAN BE READED BY THE
-      THE USERS  (ESPECIFICALLY BY THE USER TAHT RUNS CHROME)
+      THE USERS  (SPECIFICALLY BY THE USER THAT RUNS CHROME)
 
 3. Check that the certificate is imported:
 ```
@@ -228,7 +233,7 @@ $ certutil -d sql:$HOME/.pki/nssdb -L
 Certificate Nickname                                         Trust Attributes
                                                              SSL,S/MIME,JAR/XPI
 
-AnsibleRunnerService - Red Hat                               u,u,u
+* - Red Hat                               u,u,u
 ```
 
 4. Now the Ansible Runner Service is accesible using Chrome:

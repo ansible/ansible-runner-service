@@ -90,6 +90,11 @@ Once this is installed, you may start the service with
 ```
 ansible_runner_service
 ```
+## Production ready container
+
+A container suitable for production systems can be build using the dockerfile present in <misc/nginx> folder. It uses nginx with mutual TLS authentication to provide the Ansible Runner Service API.
+
+Check documentation in <misc/nginx/README.md> folder for more information.
 
 ## API Endpoints
 
@@ -130,7 +135,7 @@ For example, with ceph the ```osd-configure.yml``` playbook has been tested succ
 ### Manual Testing
 The archive, downloaded from github, contains a simple playbook that just uses the bash sleep command - enabling you to quickly experiment with the API.
 
-Use the steps below (test mode/test container version), to quickly exercise the API
+Use the steps below (test mode/test container version <misc/docker>), to quickly exercise the API
 1. Get the list of available playbooks (should just be test.yml)
 ```curl -k -i https://localhost:5001/api/v1/playbooks  -X GET```
 2. Run the runnertest.yml playbook, passing the time_delay parameter (30 secs should be enough).
