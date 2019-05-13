@@ -13,7 +13,6 @@ import runner_service.configuration as configuration
 from runner_service.utils import (fread,
                                   create_self_signed_cert,
                                   ssh_create_key,
-                                  setup_svc_token,
                                   RunnerServiceError)
 from runner_service.app import create_app
 
@@ -132,18 +131,22 @@ def setup_localhost_ssh():
             pass
 
 
-def main(test_mode=False):
+def setup_common_environment():
 
     setup_logging()
-
     logging.info("Run mode is: {}".format(configuration.settings.mode))
-
-    setup_svc_token()
 
     setup_ssh()
 
     setup_localhost_ssh()
 
+
+def main(test_mode=False):
+
+    # Setup log and ssh and other things present in all the environments
+    setup_common_environment()
+
+    # setup ssl for the Flask http server
     ssl_context = get_ssl()
 
     app = create_app()

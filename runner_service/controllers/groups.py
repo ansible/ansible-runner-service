@@ -1,7 +1,7 @@
 
 
 from .base import BaseResource
-from .utils import requires_auth, log_request
+from .utils import log_request
 from ..services.groups import (get_groups,
                                add_group,
                                remove_group,
@@ -16,7 +16,6 @@ logger = logging.getLogger(__name__)
 class ListGroups(BaseResource):
     """List all the defined groups in the inventory"""
 
-    @requires_auth
     @log_request(logger)
     def get(self):
         """
@@ -26,7 +25,7 @@ class ListGroups(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/groups -X get
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/groups -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 108
@@ -55,7 +54,6 @@ class ManageGroups(BaseResource):
     Manage groups within the inventory
     """
 
-    @requires_auth
     @log_request(logger)
     def get(self, group_name):
         """
@@ -65,7 +63,7 @@ class ManageGroups(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/groups/osds -X get
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/groups/osds -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 152
@@ -89,7 +87,7 @@ class ManageGroups(BaseResource):
         response = get_group_members(group_name)
         return response.__dict__, self.state_to_http[response.status]
 
-    @requires_auth
+
     @log_request(logger)
     def post(self, group_name):
         """
@@ -99,7 +97,7 @@ class ManageGroups(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/groups/dummy -X post
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/groups/dummy -X POST
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 71
@@ -118,7 +116,7 @@ class ManageGroups(BaseResource):
 
         return response.__dict__, self.state_to_http[response.status]
 
-    @requires_auth
+
     @log_request(logger)
     def delete(self, group_name):
         """
@@ -128,7 +126,7 @@ class ManageGroups(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/groups/dummy -X delete
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/groups/dummy -X DELETE
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 73

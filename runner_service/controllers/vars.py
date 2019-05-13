@@ -2,7 +2,7 @@ from flask_restful import request
 import yaml
 
 from .base import BaseResource
-from .utils import requires_auth, log_request
+from .utils import log_request
 
 from ..services.vars import (add_hostvars,
                              remove_hostvars,
@@ -20,7 +20,6 @@ logger = logging.getLogger(__name__)
 class HostVars(BaseResource):
     """Manage host variables for a specific group within the inventory"""
 
-    @requires_auth
     @log_request(logger)
     def get(self, host_name, group_name):
         """
@@ -30,7 +29,7 @@ class HostVars(BaseResource):
         Example.
 
         ```
-        $ curl -i -k -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.e30.DMCAvRgzrcf5w0Z879BsqzcrnDFKBY_GN6c3qKOUFtQ" https://localhost:5001/api/v1/hostvars/ceph-1/groups/osds
+        $ curl -i -k --key client.key --cert client.crt https://localhost:5001/api/v1/hostvars/ceph-1/groups/osds -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 171
@@ -56,7 +55,6 @@ class HostVars(BaseResource):
 
         return response.__dict__, self.state_to_http[response.status]
 
-    @requires_auth
     @log_request(logger)
     def delete(self, host_name, group_name):
         """
@@ -66,7 +64,7 @@ class HostVars(BaseResource):
         Example.
 
         ```
-        $ curl -i -k -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.e30.DMCAvRgzrcf5w0Z879BsqzcrnDFKBY_GN6c3qKOUFtQ" https://localhost:5001/api/v1/hostvars/ceph-1/groups/osds -X delete
+        $ curl -i -k --key client.key --cert client.crt https://localhost:5001/api/v1/hostvars/ceph-1/groups/osds -X DELETE
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 129
@@ -87,7 +85,6 @@ class HostVars(BaseResource):
 
         return response.__dict__, self.state_to_http[response.status]
 
-    @requires_auth
     @log_request(logger)
     def post(self, host_name, group_name):
         """
@@ -98,7 +95,7 @@ class HostVars(BaseResource):
         Example.
 
         ```
-        $ curl -i -k -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.e30.DMCAvRgzrcf5w0Z879BsqzcrnDFKBY_GN6c3qKOUFtQ" -H "Content-Type: application/json" --data '{"devices": ["sda","sdb"]}' https://localhost:5001/api/v1/hostvars/ceph-1/groups/osds -X post
+        $ curl -i -k --key client.key --cert client.crt -H "Content-Type: application/json" --data '{"devices": ["sda","sdb"]}' https://localhost:5001/api/v1/hostvars/ceph-1/groups/osds -X POST
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 108
@@ -164,7 +161,6 @@ class HostVars(BaseResource):
 class GroupVars(BaseResource):
     """Manage group variables"""
 
-    @requires_auth
     @log_request(logger)
     def get(self, group_name):
         """
@@ -174,7 +170,7 @@ class GroupVars(BaseResource):
         Example.
 
         ```
-        $ curl -i -k -H "Authorization:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.e30.DMCAvRgzrcf5w0Z879BsqzcrnDFKBY_GN6c3qKOUFtQ" https://localhost:5001/api/v1/groupvars/osds
+        $ curl -i -k --key client.key --cert client.crt https://localhost:5001/api/v1/groupvars/osds -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 217
@@ -199,7 +195,6 @@ class GroupVars(BaseResource):
 
         return response.__dict__, self.state_to_http[response.status]
 
-    @requires_auth
     @log_request(logger)
     def delete(self, group_name):
         """
@@ -210,7 +205,7 @@ class GroupVars(BaseResource):
         Example.
 
         ```
-        $ curl -i -k -H "Authorization:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.e30.DMCAvRgzrcf5w0Z879BsqzcrnDFKBY_GN6c3qKOUFtQ" https://localhost:5001/api/v1/groupvars/osds -X delete
+        $ curl -i -k --key client.key --cert client.crt https://localhost:5001/api/v1/groupvars/osds -X DELETE
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 83
@@ -229,7 +224,6 @@ class GroupVars(BaseResource):
 
         return response.__dict__, self.state_to_http[response.status]
 
-    @requires_auth
     @log_request(logger)
     def post(self, group_name):
         """
@@ -240,7 +234,7 @@ class GroupVars(BaseResource):
         Example.
 
         ```
-        $ curl -i -k -H "Content-Type: application/json" -H "Authorization:eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.e30.DMCAvRgzrcf5w0Z879BsqzcrnDFKBY_GN6c3qKOUFtQ" --data '{"osd_auto_discovery": false, "osd_objectstore": "bluestore", "osd_scenario": "non-collocated"}' https://localhost:5001/api/v1/groupvars/osds -X post
+        $ curl -i -k --key client.key --cert client.crt -H "Content-Type: application/json" --data '{"osd_auto_discovery": false, "osd_objectstore": "bluestore", "osd_scenario": "non-collocated"}' https://localhost:5001/api/v1/groupvars/osds -X POST
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 125

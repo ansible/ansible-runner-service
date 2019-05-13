@@ -35,28 +35,8 @@ def seed_dirs(seed_list):
         else:
             shutil.copyfile(src, dest)
 
-
-def get_auth_header(username, password):
-
-    auth = "{}:{}".format(username, password)
-    encoded_credentials = b64encode(auth.encode())
-
-    # account for differences in python2 and python3 encoding
-    if isinstance(encoded_credentials, bytes):
-        encoded_credentials = encoded_credentials.decode('ascii')
-
-    return {'Authorization': 'Basic ' + encoded_credentials}  # noqa
-
-
 class APITestCase(unittest.TestCase):
     app = None
-    token = None
-
-    def token_header(self):
-        return {'Authorization': self.token}
-
-    def auth_header(self, username, password):
-        return get_auth_header(username, password)
 
     @classmethod
     def setUpClass(cls):
@@ -82,22 +62,6 @@ class APITestCase(unittest.TestCase):
         configuration.init("dev")
         cls.config = configuration.settings
         cls.app = main(test_mode=True)
-        response = cls.app.get('/api/v1/login',
-                               headers=get_auth_header('admin', 'admin'))
-
-        assert response.status_code == 200, "Unable to get login token"
-
-        cls.token = json.loads(response.data).get('data')['token']
-
-    @classmethod
-    def get_token(cls):
-        response = APITestCase.app.get('/api/v1/login',
-                                       headers=get_auth_header('admin', 'admin'))   # noqa
-
-        assert response.status_code == 200, "Unable to get login token"
-
-        response_data = json.loads(response.data)
-        return response_data.get('data')['token']
 
     @classmethod
     def tearDownClass(cls):

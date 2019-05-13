@@ -5,7 +5,7 @@ import logging
 import re
 
 from .base import BaseResource
-from .utils import requires_auth, log_request
+from .utils import log_request
 
 from ..services.playbook import (list_playbooks,
                                  get_status,
@@ -23,7 +23,6 @@ file_mutex = threading.Lock()
 class ListPlaybooks(BaseResource):
     """ Return the names of all available playbooks """
 
-    @requires_auth
     @log_request(logger)
     def get(self):
         """
@@ -33,7 +32,7 @@ class ListPlaybooks(BaseResource):
         Example.
 
         ```
-        $ curl -i -k -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks
+        $ curl -i -k --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/playbooks -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 179
@@ -62,7 +61,6 @@ class ListPlaybooks(BaseResource):
 class PlaybookState(BaseResource):
     """Query the state or cancel a playbook run (by uuid)"""
 
-    @requires_auth
     @log_request(logger)
     def get(self, play_uuid):
         """
@@ -72,7 +70,7 @@ class PlaybookState(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks/1733c3ac-b483-11e8-ad05-c85b7671906d -X get
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/playbooks/1733c3ac-b483-11e8-ad05-c85b7671906d -X GET
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 121
@@ -94,7 +92,6 @@ class PlaybookState(BaseResource):
 
         return response.__dict__, self.state_to_http[response.status]
 
-    @requires_auth
     @log_request(logger)
     def delete(self, play_uuid):
         """
@@ -104,7 +101,7 @@ class PlaybookState(BaseResource):
         Example.
 
         ```
-        $ curl -i -k -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" https://localhost:5001/api/v1/playbooks/b7ea3922-b481-11e8-a992-c85b7671906d -X delete
+        $ curl -i -k --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/playbooks/b7ea3922-b481-11e8-a992-c85b7671906d -X DELETE
         HTTP/1.0 200 OK
         Content-Type: application/json
         Content-Length: 75
@@ -206,7 +203,6 @@ def _run_playbook(playbook_name, tags=None):
 class StartPlaybook(BaseResource):
     """ Start a playbook by name, returning the play's uuid """
 
-    @requires_auth
     @log_request(logger)
     def post(self, playbook_name):
         """
@@ -217,7 +213,7 @@ class StartPlaybook(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml -X post
+        $ curl -k -i --key ./client.key --cert ./client.crt -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml -X POST
         HTTP/1.0 202 ACCEPTED
         Content-Type: application/json
         Content-Length: 132
@@ -241,7 +237,6 @@ class StartPlaybook(BaseResource):
 class StartTaggedPlaybook(BaseResource):
     """ Start a playbook using tags to control which tasks run """
 
-    @requires_auth
     @log_request(logger)
     def post(self, playbook_name, tags):
         """
@@ -252,7 +247,7 @@ class StartTaggedPlaybook(BaseResource):
         Example.
 
         ```
-        $ curl -k -i -H "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MzczODA3MTR9.CbTXvBum5mCq9s56wJNiMn8JLJ0UzzRdwdeOFctJtbI" -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml/tags/onlyme -X post
+        $ curl -k -i --key ./client.key --cert ./client.crt -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml/tags/onlyme -X POST
         HTTP/1.0 202 ACCEPTED
         Content-Type: application/json
         Content-Length: 132

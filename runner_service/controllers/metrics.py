@@ -15,7 +15,7 @@ class PrometheusMetrics(BaseResource):
 
         Example.
         ```
-        $ curl -k https://localhost:5001/metrics
+        $ curl -k --key ./client.key --cert ./client.crt https://localhost:5001/metrics
         #HELP: runner_service_duration_scrape_secs - time taken to gather the data
         #TYPE: runner_service_duration_scrape_secs - gauge
         runner_service_duration_scrape_secs{hostname="rh460p"} 0

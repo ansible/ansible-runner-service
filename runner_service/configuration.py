@@ -45,7 +45,6 @@ class Config(object):
         self.log_path = Config.MODES[mode].get('log_path', None)
         self.config_file = Config.MODES[mode].get('config_file', None)
         self.config_dir = os.path.dirname(self.config_file)
-        self.passwords = {"admin": "admin"}
         self.event_cache_size = 3
         self.runner_cache_size = 5
         self.debug = Config.MODES[mode].get("debug", True)
@@ -71,17 +70,6 @@ class Config(object):
 
         # flask config setting to hide the "production use" warning
         self.ENV = ''
-
-        # ip_whitelist
-        self.ip_whitelist = []
-
-        # token
-        self.token_secret = 'secret'
-        self.token_hours = 24
-
-        # service token used by daemons running on the same host
-        # to bypass the need for the login process
-        self.svctoken = None
 
         self._apply_overrides()
 

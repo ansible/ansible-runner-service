@@ -8,5 +8,4 @@ from .hosts import Hosts, HostMgmt, HostDetails     # noqa: F401
 from .jobs import ListEvents, GetEvent              # noqa: F401
 from .groups import ListGroups, ManageGroups        # noqa: F401
 from .metrics import PrometheusMetrics              # noqa: F401
-from .login import Login                            # noqa: F401
 from .vars import HostVars, GroupVars               # noqa: F401
