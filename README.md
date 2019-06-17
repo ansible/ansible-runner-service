@@ -92,7 +92,7 @@ ansible_runner_service
 ```
 ## Production ready container
 
-A container suitable for production systems can be build using the dockerfile present in <misc/nginx> folder. It uses nginx with mutual TLS authentication to provide the Ansible Runner Service API.
+A container suitable for production systems can be build using the 'Dockerfile' present in the project root folder. It uses nginx with mutual TLS authentication to provide the Ansible Runner Service API.
 
 Check documentation in <misc/nginx/README.md> folder for more information.
 
