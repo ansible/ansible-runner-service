@@ -26,3 +26,9 @@ CentOS7
 
 Resulting RPM Tested Against
 - CentOS 7.4, Python 2.7.5
+
+
+Container build
+
+The <ars_source.spec> file allows to produce an rpm to install Ansible Runner Service without any dependency.
+This is specially suited for use in containers where the dependencies are going to be especified directly in the Dockerfile.
