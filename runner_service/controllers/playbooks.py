@@ -293,7 +293,7 @@ class StartTaggedPlaybook(BaseResource):
             _e.status, _e.msg = "INVALID", "tag based run requested, but tags are missing?"
             return _e.__dict__, self.state_to_http[_e.status]
 
-        pattern = re.compile(r'[a-z0-9]+$')
+        pattern = re.compile(r'[a-zA-Z0-9\,]+$')
         if not pattern.match(tags) or tags[-1] == ',':
             _e.status, _e.msg = "INVALID", "Invalid tag syntax"
             return _e.__dict__, self.state_to_http[_e.status]
