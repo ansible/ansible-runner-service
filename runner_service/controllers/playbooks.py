@@ -269,6 +269,7 @@ class StartTaggedPlaybook(BaseResource):
         Start a given playbook using tags to control execution.
         The call is expected to be in json format and may contain json 'payload' to define the variables
         required by the playbook
+        The {tags} component is a list of one or more tags separated by comma
         Example.
 
         ```
