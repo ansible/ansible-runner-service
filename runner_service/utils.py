@@ -1,14 +1,18 @@
 import os
+import shlex
 import shutil
 import socket
 import getpass
 
+from subprocess import Popen, PIPE
+from threading import Timer
+
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+
 from OpenSSL import crypto
-from paramiko.rsakey import RSAKey
-from paramiko import SSHClient, AutoAddPolicy
-from paramiko.ssh_exception import (AuthenticationException,
-                                    NoValidConnectionsError,
-                                    SSHException)
+
 
 from runner_service import configuration
 
@@ -94,16 +98,42 @@ def ssh_create_key(ssh_dir, user=None):
     if not user:
         user = getpass.getuser()
 
-    key = RSAKey.generate(4096)
-    pub_file = os.path.join(ssh_dir, 'ssh_key.pub')
+    prv_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=4096,
+            backend=default_backend())
+    pub_key = prv_key.public_key()
+    
     prv_file = os.path.join(ssh_dir, 'ssh_key')
-    comment_str = '{}@{}'.format(user, socket.gethostname())
+    pub_file = os.path.join(ssh_dir, 'ssh_key.pub')
 
-    # Setup the public key file
+    # export the private key
     try:
-        with open(pub_file, "w") as pub:
-            pub.write("ssh-rsa {} {}\n".format(key.get_base64(),
-                                               comment_str))
+        with open(prv_file, "wb") as f:
+            f.write(prv_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.TraditionalOpenSSL,
+                    encryption_algorithm=serialization.NoEncryption()))
+
+    except (PermissionError, IOError) as err:
+        msg = "Unable to write to private key to '{}': {}".format(ssh_dir, err)
+        logger.critical(msg)
+        raise RunnerServiceError(msg)
+    except Exception as err:
+        logger.critical("Unknown error writing private key: {}".format(err))
+        raise
+    else:
+        # python3 syntax
+        os.chmod(prv_file, 0o600)
+        logger.info("Created SSH private key @ '{}'".format(prv_file))
+    
+    # export the public key
+    try:
+        with open(pub_file, "wb") as f:
+            f.write(pub_key.public_bytes(
+                    encoding=serialization.Encoding.OpenSSH,
+                    format=serialization.PublicFormat.OpenSSH))
+
     except (PermissionError, IOError) as err:
         msg = "Unable to write public ssh key to {}: {}".format(ssh_dir, err)
         logger.critical(msg)
@@ -117,26 +147,79 @@ def ssh_create_key(ssh_dir, user=None):
         os.chmod(pub_file, 0o600)
         logger.info("Created SSH public key @ '{}'".format(pub_file))
 
-    # setup the private key file
-    try:
-        with open(prv_file, "w") as prv:
-            key.write_private_key(prv)
-    except (PermissionError, IOError) as err:
-        msg = "Unable to write to private key to '{}': {}".format(ssh_dir, err)
-        logger.critical(msg)
-        raise RunnerServiceError(msg)
-    except SSHException as err:
-        msg = "SSH key generated is invalid: {}".format(err)
-        logger.critical(msg)
-        raise RunnerServiceError(msg)
-    except Exception as err:
-        logger.critical("Unknown error writing private key: {}".format(err))
-        raise
-    else:
-        # python3 syntax
-        os.chmod(prv_file, 0o600)
-        logger.info("Created SSH private key @ '{}'".format(prv_file))
 
+class HostNotFound(Exception):
+    pass
+
+
+class SSHNotAccessible(Exception):
+    pass
+
+
+class SSHTimeout(Exception):
+    pass
+
+
+class SSHIdentityFailure(Exception):
+    pass
+
+
+class SSHAuthFailure(Exception):
+    pass
+
+
+class SSHUnknownError(Exception):
+    pass
+
+
+class SSHClient(object):
+    def __init__(self, user, host, identity, timeout=1, port=22):
+        self.user = user
+        self.port = port
+        self.host = host
+        self.timeout = timeout
+        self.identity_file = identity
+    
+    def connect(self):
+
+        def timeout_handler():
+            proc.kill()
+            raise SSHTimeout
+
+        socket.setdefaulttimeout(self.timeout)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.connect((self.host, self.port))
+        except socket.gaierror:
+            raise HostNotFound
+        except ConnectionRefusedError:
+            raise SSHNotAccessible
+        except socket.timeout:
+            raise SSHTimeout
+        else:
+            s.shutdown(socket.SHUT_RDWR)
+            s.close()
+
+        # Now try and use the identity file to passwordless ssh        
+        cmd = ('ssh -o "StrictHostKeyChecking=no" '
+               '-o "IdentitiesOnly=yes" '
+               ' -o "PasswordAuthentication=no" '
+               ' -i {} '
+               '{}@{} python --version'.format(self.identity_file, self.user, self.host))
+
+        proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=PIPE)
+        timer = Timer(self.timeout, timeout_handler)
+        try:
+            timer.start()
+            stdout, stderr = proc.communicate()
+        except Exception as e:
+            raise SSHUnknownError(e)
+        else:
+            if 'permission denied' in stderr.lower():
+                raise SSHAuthFailure(stderr)
+        finally:
+            timer.cancel()
+        
 
 def ssh_connect_ok(host, user=None):
 
@@ -146,41 +229,32 @@ def ssh_connect_ok(host, user=None):
         else:
             user = getpass.getuser()
 
-    client = SSHClient()
-    client.set_missing_host_key_policy(AutoAddPolicy())
-
     priv_key = os.path.join(configuration.settings.playbooks_root_dir,
                             "env/ssh_key")
 
     if not os.path.exists(priv_key):
         return False, "FAILED:SSH key(s) missing from ansible-runner-service"
 
-    conn_args = {
-        "hostname": host,
-        "username": user,
-        "timeout": configuration.settings.ssh_timeout,
-        "key_filename": [priv_key]
-    }
-
+    target = SSHClient(
+        user=user, 
+        host=host,
+        identity=priv_key,
+        timeout=configuration.settings.ssh_timeout
+        )
+    
     try:
-        client.connect(**conn_args)
-
-    except socket.timeout:
-        return False, "TIMEOUT:SSH timeout waiting for response from " \
-                      "'{}'".format(host)
-
-    except (AuthenticationException, SSHException):
-        return False, "NOAUTH:SSH auth error - passwordless ssh not " \
-                      "configured for '{}'".format(host)
-
-    except NoValidConnectionsError:
+        target.connect()
+    except HostNotFound:
+        return False, "NOCONN:SSH error - '{}' not found; check DNS or " \
+                "/etc/hosts".format(host)
+    except SSHNotAccessible:
         return False, "NOCONN:SSH target '{}' not contactable; host offline" \
                       ", port 22 blocked, sshd running?".format(host)
-
-    except socket.gaierror:
-        return False, "NOCONN:SSH error - '{}' not found; check DNS or " \
-                      "/etc/hosts".format(host)
-
+    except SSHTimeout:
+        return False, "TIMEOUT:SSH timeout waiting for response from " \
+                      "'{}'".format(host)
+    except SSHAuthFailure:
+        return False, "NOAUTH:SSH auth error - passwordless ssh not " \
+            "configured for '{}'".format(host)
     else:
-        client.close()
         return True, "OK:SSH connection check to {} successful".format(host)
