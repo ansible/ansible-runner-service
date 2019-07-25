@@ -1,6 +1,5 @@
 ansible_runner==1.3.0
-crypto
-paramiko
+cryptography
 PyYAML
 pyOpenSSL
 flask

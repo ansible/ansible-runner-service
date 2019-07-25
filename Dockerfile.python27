@@ -5,7 +5,7 @@ RUN yum -y install bash wget unzip gcc \
            python-devel python-setuptools \
            nginx supervisor
 
-RUN pip install paramiko PyYAML netaddr notario\
+RUN pip install cryptography PyYAML netaddr notario\
     pyOpenSSL flask flask-restful uwsgi && \
     rm -rf /var/cache/yum
 

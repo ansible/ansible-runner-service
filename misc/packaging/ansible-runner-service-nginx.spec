@@ -21,8 +21,7 @@ Requires: ansible >= 2.6
 Requires: ansible-runner >= 1.3.2
 Requires: python-flask >= 1.0.2
 Requires: python2-flask-restful >= 0.3.5
-Requires: python2-crypto
-Requires: python-paramiko
+Requires: python2-cryptography
 Requires: openssl
 Requires: pyOpenSSL
 Requires: PyYAML

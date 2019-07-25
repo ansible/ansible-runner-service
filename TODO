@@ -13,8 +13,8 @@ Security on the Api
 - with expiring tokens the "exploit window" is reduced
 - use https as the api endpoint
 
-What to do about Hosts? (integrate with paramiko)
-- post - hostname and root password in the payload, use paramiko to establish
+What to do about Hosts?
+- post - hostname and root password in the payload, extend utils.py/SSHClient class?
                    passwordless ssh - return 200 if login successful
 - put request update a host to belong to a given groups
 

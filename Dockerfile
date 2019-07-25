@@ -11,7 +11,7 @@ RUN yum -y install epel-release  && \
 RUN easy_install-3.6 -d /usr/lib/python3.6/site-packages pip && \
     ln -s /usr/lib/python3.6/site-packages/pip3 /usr/local/bin/pip3
 
-RUN /usr/local/bin/pip3 install ansible crypto docutils psutil paramiko PyYAML \
+RUN /usr/local/bin/pip3 install ansible cryptography docutils psutil PyYAML \
                  pyOpenSSL flask flask-restful uwsgi netaddr notario && \
     /usr/local/bin/pip3 install --no-cache-dir ansible-runner==1.3.2 && \
     rm -rf /var/cache/yum
