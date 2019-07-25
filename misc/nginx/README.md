@@ -19,9 +19,8 @@ The provided container uses CentOS with Python 3.6 (most of the development work
 
 ## Local Preparation
 1. download the project to your home directory and untar/unzip
-2. create an archive of the project called ansible-runner-service.tar.gz and
-store it in the misc/docker directory
-3. set up you local environment to persist the config
+
+2. set up you local environment to persist the config
 ```
  sudo mkdir /etc/ansible-runner-service
  sudo mkdir -p /usr/share/ansible-runner-service/{artifacts,env,inventory,project}
@@ -108,11 +107,7 @@ Double check that the rights for this files allow their utilization in the clien
 
 
 ## Building (as root, or use sudo)
-1. from the ansible-runner-service directory
-```
-cd misc/nginx
-```
-2. Build the container
+1. From the ansible-runner-service directory build the container
 ```
 docker build -f Dockerfile -t runner-service .
 ```

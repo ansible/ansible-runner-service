@@ -22,20 +22,21 @@ RUN mkdir -p /etc/ansible-runner-service && \
     mkdir -p /usr/share/ansible-runner-service/{artifacts,env,project,inventory,client_cert}
 
 # Install Ansible Runner
-COPY ./ansible-runner-service.tar.gz /root/.
 WORKDIR /root
-RUN tar xvzf ansible-runner-service.tar.gz
-RUN rm ansible-runner-service.tar.gz
+COPY ./*.py ansible-runner-service/
+COPY ./*.yaml ansible-runner-service/
+COPY ./runner_service ansible-runner-service/runner_service
+COPY ./samples ansible-runner-service/samples
 
 # Put configuration files in the right places
 # Nginx configuration
-COPY ./nginx.conf /etc/nginx/
+COPY misc/nginx/nginx.conf /etc/nginx/
 # Ansible Runner Service nginx virtual server
-COPY ./ars_site_nginx.conf /etc/nginx/conf.d
+COPY misc/nginx/ars_site_nginx.conf /etc/nginx/conf.d
 # Ansible Runner Service uwsgi settings
-COPY ./uwsgi.ini /root/ansible-runner-service
+COPY misc/nginx/uwsgi.ini /root/ansible-runner-service
 # Supervisor start sequence
-COPY ./supervisord.conf /root/ansible-runner-service
+COPY misc/nginx/supervisord.conf /root/ansible-runner-service
 
 # Start services
 CMD ["/usr/bin/supervisord", "-c", "/root/ansible-runner-service/supervisord.conf"]

@@ -207,10 +207,11 @@ class StartPlaybook(BaseResource):
     def post(self, playbook_name):
         """
         POST {playbook, var1, var2...}
+
+        Example 1.
+
         Start a given playbook, passing a set of variables as json to use for
         the run
-
-        Example.
 
         ```
         $ curl -k -i --key ./client.key --cert ./client.crt -H "Content-Type: application/json" --data '{"time_delay":20}' https://localhost:5001/api/v1/playbooks/test.yml -X POST
@@ -228,6 +229,30 @@ class StartPlaybook(BaseResource):
             }
         }
         ```
+
+        Example 2:
+
+        Limiting the playbook execution to certain hosts.
+        (Note: Hosts must be included previously in inventory)
+
+        ```
+        $ curl -k -i --key ./client.key --cert ./client.crt -H "Content-Type: application/json" --data '{"time_delay":20}' https://192.168.121.1:5001/api/v1/playbooks/test.yml?limit=host0,host1 -X POST
+        HTTP/1.1 202 ACCEPTED
+        Server: nginx/1.12.2
+        Date: Wed, 12 Jun 2019 09:59:47 GMT
+        Content-Type: application/json
+        Content-Length: 104
+        Connection: keep-alive
+
+        {
+            "status": "STARTED",
+            "msg": "starting",
+            "data": {"play_uuid": "cfbdd41e-8cf8-11e9-9154-2016b900e38f"
+            }
+        }
+
+        ```
+
         """
 
         response = _run_playbook(playbook_name)
