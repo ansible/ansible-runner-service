@@ -1,4 +1,4 @@
-# ansible-runner-service    ![Build status](https://travis-ci.com/pcuzner/ansible-runner-service.svg?branch=master)[![codecov](https://codecov.io/gh/pcuzner/ansible-runner-service/branch/master/graph/badge.svg)](https://codecov.io/gh/pcuzner/ansible-runner-service)
+# ansible-runner-service  
 This project wraps the ansible_runner interface inside a REST API enabling ansible playbooks to be executed and queried from other platforms.
 
 The incentive for this is two-fold;
