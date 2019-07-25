@@ -215,7 +215,7 @@ class SSHClient(object):
         except Exception as e:
             raise SSHUnknownError(e)
         else:
-            if 'permission denied' in stderr.lower():
+            if 'permission denied' in stderr.decode().lower():
                 raise SSHAuthFailure(stderr)
         finally:
             timer.cancel()
