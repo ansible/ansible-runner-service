@@ -26,6 +26,7 @@ The core of this project is ansible_runner, so first of all, a quick call out to
   - supports Ansible environments that use private libraries (ie. the library directory is stored within the project folder)
   - playbooks can be run with tags to change execution behavior
   - playbooks can use limit to restrict actions to a specific host
+  - playbooks can use `hosts` parameter to override inventory hosts
   - running playbooks may be cancelled
   - supports execution of concurrent playbooks
 

@@ -243,6 +243,10 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     if tags:
         cmdline.append("--tags {}".format(tags))
 
+    hosts = filter.get('hosts', None)
+    if hosts:
+        cmdline.append("--hosts {}".format(tags))
+
     if configuration.settings.target_user != getpass.getuser():
         logger.debug("Run the playbook with a user override of "
                      "{}".format(configuration.settings.target_user))

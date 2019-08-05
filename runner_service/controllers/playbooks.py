@@ -134,7 +134,7 @@ def _run_playbook(playbook_name, tags=None):
     # TODO Move this function to the service package (services.playbook)
 
     # TODO We should use a list like this to restrict the query we support
-    valid_filter = ['limit']
+    valid_filter = ['limit', 'hosts']
 
     r = APIResponse()
 
@@ -237,6 +237,29 @@ class StartPlaybook(BaseResource):
 
         ```
         $ curl -k -i --key ./client.key --cert ./client.crt -H "Content-Type: application/json" --data '{"time_delay":20}' https://192.168.121.1:5001/api/v1/playbooks/test.yml?limit=host0,host1 -X POST
+        HTTP/1.1 202 ACCEPTED
+        Server: nginx/1.12.2
+        Date: Wed, 12 Jun 2019 09:59:47 GMT
+        Content-Type: application/json
+        Content-Length: 104
+        Connection: keep-alive
+
+        {
+            "status": "STARTED",
+            "msg": "starting",
+            "data": {"play_uuid": "cfbdd41e-8cf8-11e9-9154-2016b900e38f"
+            }
+        }
+
+        ```
+
+        Example 3:
+
+        Specify the hosts to be used to execute the playbook on,
+        override the hosts specified in the inventory. 
+
+        ```
+        $ curl -k -i --key ./client.key --cert ./client.crt -H "Content-Type: application/json" --data '{"time_delay":20}' 'https://192.168.121.1:5001/api/v1/playbooks/test.yml?hosts=host0.example.com,host1.example.com' -X POST
         HTTP/1.1 202 ACCEPTED
         Server: nginx/1.12.2
         Date: Wed, 12 Jun 2019 09:59:47 GMT
