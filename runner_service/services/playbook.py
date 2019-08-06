@@ -240,6 +240,9 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
                              "env"))
 
     cmdline = []
+    if filter.get('check', 'false').lower() == 'true':
+        cmdline.append('--check')
+
     if tags:
         cmdline.append("--tags {}".format(tags))
 
