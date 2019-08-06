@@ -23,6 +23,10 @@ logger = logging.getLogger(__name__)
 class RunnerServiceError(Exception):
     pass
 
+def create_directory(dir_path):
+    """ Create directory if it doesn't exist """
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
 
 def fread(file_path):
     """ return the contents of the given file """
@@ -73,6 +77,9 @@ def create_self_signed_cert(cert_dir, cert_pfx):
         cert.set_pubkey(k)
         cert.sign(k, 'sha512')
 
+        # create cert_dir if it doesn't exist
+        create_directory(cert_dir)
+
         logger.debug("Writing crt file to {}".format(cert_filename))
         with open(os.path.join(cert_dir, cert_filename), "wt") as cert_fd:
             cert_fd.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode('utf-8'))   # noqa
@@ -103,9 +110,12 @@ def ssh_create_key(ssh_dir, user=None):
             key_size=4096,
             backend=default_backend())
     pub_key = prv_key.public_key()
-    
+
     prv_file = os.path.join(ssh_dir, 'ssh_key')
     pub_file = os.path.join(ssh_dir, 'ssh_key.pub')
+
+    # create ssh_dir if it doesn't exist
+    create_directory(ssh_dir)
 
     # export the private key
     try:
@@ -126,7 +136,7 @@ def ssh_create_key(ssh_dir, user=None):
         # python3 syntax
         os.chmod(prv_file, 0o600)
         logger.info("Created SSH private key @ '{}'".format(prv_file))
-    
+
     # export the public key
     try:
         with open(pub_file, "wb") as f:
@@ -179,7 +189,7 @@ class SSHClient(object):
         self.host = host
         self.timeout = timeout
         self.identity_file = identity
-    
+
     def connect(self):
 
         def timeout_handler():
@@ -200,7 +210,7 @@ class SSHClient(object):
             s.shutdown(socket.SHUT_RDWR)
             s.close()
 
-        # Now try and use the identity file to passwordless ssh        
+        # Now try and use the identity file to passwordless ssh
         cmd = ('ssh -o "StrictHostKeyChecking=no" '
                '-o "IdentitiesOnly=yes" '
                ' -o "PasswordAuthentication=no" '
@@ -219,7 +229,7 @@ class SSHClient(object):
                 raise SSHAuthFailure(stderr)
         finally:
             timer.cancel()
-        
+
 
 def ssh_connect_ok(host, user=None):
 
@@ -236,12 +246,12 @@ def ssh_connect_ok(host, user=None):
         return False, "FAILED:SSH key(s) missing from ansible-runner-service"
 
     target = SSHClient(
-        user=user, 
+        user=user,
         host=host,
         identity=priv_key,
         timeout=configuration.settings.ssh_timeout
         )
-    
+
     try:
         target.connect()
     except HostNotFound:
