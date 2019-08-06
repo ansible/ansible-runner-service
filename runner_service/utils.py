@@ -125,7 +125,7 @@ def ssh_create_key(ssh_dir, user=None):
                     format=serialization.PrivateFormat.TraditionalOpenSSL,
                     encryption_algorithm=serialization.NoEncryption()))
 
-    except (PermissionError, IOError) as err:
+    except (OSError, IOError) as err:
         msg = "Unable to write to private key to '{}': {}".format(ssh_dir, err)
         logger.critical(msg)
         raise RunnerServiceError(msg)
@@ -144,7 +144,7 @@ def ssh_create_key(ssh_dir, user=None):
                     encoding=serialization.Encoding.OpenSSH,
                     format=serialization.PublicFormat.OpenSSH))
 
-    except (PermissionError, IOError) as err:
+    except (OSError, IOError) as err:
         msg = "Unable to write public ssh key to {}: {}".format(ssh_dir, err)
         logger.critical(msg)
         raise RunnerServiceError(msg)
