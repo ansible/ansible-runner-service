@@ -138,7 +138,7 @@ def _run_playbook(playbook_name, tags=None):
 
     r = APIResponse()
 
-    if request.content_type != 'application/json':
+    if not request.content_type.startswith('application/json'):
         logger.warning("Invalid request type. Playbook POST requests must be "
                        "in application/json format")
         r.status, r.msg = "UNSUPPORTED", \
