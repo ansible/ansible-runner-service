@@ -264,11 +264,16 @@ class AnsibleInventory(object):
             return []
 
     @group_exists
-    def host_add(self, group, host):
+    def host_add(self, group, host, port=None):
         node = self.inventory['all']['children'][group]['hosts']
         if not isinstance(node, dict):
             self.inventory['all']['children'][group]['hosts'] = {}
         self.inventory['all']['children'][group]['hosts'][host] = None
+        if port:
+            self.inventory['all']['children'][group]['hosts'][host] = {
+                'ansible_host': host,
+                'ansible_port': port,
+            }
         logger.info("Host '{}' added to the inventory group "
                     "'{}'".format(host, group))
         self.save()

@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def add_host(host_name, group_name):
+def add_host(host_name, group_name, ssh_port=None):
     r = APIResponse()
     r.data = {"hostname": host_name}
     inventory = AnsibleInventory(excl=True)
@@ -37,7 +37,7 @@ def add_host(host_name, group_name):
     # TODO is name an IP - if so is it valid?
     # TODO if it's a name, does it resolve with DNS?
     if configuration.settings.ssh_checks:
-        ssh_ok, msg = ssh_connect_ok(host_name)
+        ssh_ok, msg = ssh_connect_ok(host_name, port=ssh_port)
         if ssh_ok:
             logger.info("SSH - {}".format(msg))
         else:
@@ -56,7 +56,7 @@ def add_host(host_name, group_name):
         logger.warning("Skipped SSH connection test for {}".format(host_name))
         r.msg = 'skipped SSH checks due to ssh_checks disabled by config'
 
-    inventory.host_add(group_name, host_name)
+    inventory.host_add(group_name, host_name, ssh_port)
     r.status = "OK"
     r.msg = "{} added".format(host_name)
 

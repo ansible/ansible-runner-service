@@ -134,6 +134,17 @@ class HostDetails(BaseResource):
 class HostMgmt(BaseResource):
     """Manage ansible control of a given host"""
 
+    def __to_int(self, value):
+        """
+        Convert value to int, if it's not valid integer return None.
+        """ 
+        try:
+            return int(value)
+        except ValueError:
+            logger.warn("Port {} is not valid integer number, we will use default SSH port.".format(value))
+            return None
+
+
     @log_request(logger)
     def post(self, host_name, group_name):
         """
@@ -157,18 +168,38 @@ class HostMgmt(BaseResource):
             "data": {}
         }
         ```
+
+        Example add host with non-standard port:
+
+        ```
+        $ curl -k -i --key ./client.key --cert ./client.crt https://localhost:5001/api/v1/hosts/con-1/groups/dummy?port=3333 -X POST
+        HTTP/1.0 200 OK
+        Content-Type: application/json
+        Content-Length: 54
+        Server: Werkzeug/0.14.1 Python/3.6.6
+        Date: Wed, 05 Sep 2018 05:00:33 GMT
+
+        {
+            "status": "OK",
+            "msg": "",
+            "data": {}
+        }
+        ```
         """ # noqa
 
-        valid_parms = ['others']
+        valid_parms = ['others', 'port']
         group_list = []
         group_list.append(group_name)
+        ssh_port = None
 
         args = request.args.to_dict()
+
         if args:
             logger.debug("additional args received")
             if all(p in valid_parms for p in args.keys()):
                 if 'others' in args:
                     group_list.extend(args['others'].split(','))
+                ssh_port = self.__to_int(args.get('port', None))
             else:
                 r = APIResponse()
                 r.status = 'INVALID'
@@ -178,7 +209,7 @@ class HostMgmt(BaseResource):
 
         for group in group_list:
             logger.debug("Adding host {} to group {}".format(host_name, group))
-            response = add_host(host_name, group)
+            response = add_host(host_name, group, ssh_port)
             if response.status != 'OK':
                 break
 
