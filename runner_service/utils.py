@@ -2,6 +2,7 @@ import os
 import shlex
 import shutil
 import socket
+import sys
 import getpass
 
 from subprocess import Popen, PIPE
@@ -156,6 +157,14 @@ def ssh_create_key(ssh_dir, user=None):
         # python3 syntax
         os.chmod(pub_file, 0o600)
         logger.info("Created SSH public key @ '{}'".format(pub_file))
+
+
+if sys.version_info[0] == 2:
+    class ConnectionError(OSError):
+        pass
+
+    class ConnectionRefusedError(ConnectionError):
+        pass
 
 
 class HostNotFound(Exception):
