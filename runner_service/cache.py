@@ -1,4 +1,4 @@
-
+from collections import defaultdict
 
 # define dict based variables to act as caches across other modules
 
@@ -24,6 +24,6 @@ class RunnerStats(object):
 
 event_cache = {}
 
-runner_cache = {}
+runner_cache = defaultdict(dict)
 
 runner_stats = RunnerStats()
