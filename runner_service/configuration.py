@@ -49,6 +49,12 @@ class Config(object):
         self.runner_cache_size = 5
         self.debug = Config.MODES[mode].get("debug", True)
 
+        # Path to custom ssh key, by default project/env/ssh_key is used
+        self.ssh_private_key = os.path.join(
+            self.playbooks_root_dir,
+            "env/ssh_key"
+        )
+
         # expiration period in years for the self-signed cert that we generate
         self.cert_expiration = 3
 
