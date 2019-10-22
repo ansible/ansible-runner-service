@@ -240,7 +240,7 @@ class SSHClient(object):
             timer.cancel()
 
 
-def ssh_connect_ok(host, user=None):
+def ssh_connect_ok(host, user=None, port=None):
 
     if not user:
         if configuration.settings.target_user:
@@ -257,8 +257,9 @@ def ssh_connect_ok(host, user=None):
         user=user,
         host=host,
         identity=priv_key,
-        timeout=configuration.settings.ssh_timeout
-        )
+        timeout=configuration.settings.ssh_timeout,
+        port=22 if port is None else port,
+    )
 
     try:
         target.connect()
