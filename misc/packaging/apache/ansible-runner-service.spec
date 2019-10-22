@@ -1,7 +1,7 @@
 %global srcname ansible-runner-service
 
 Name: %{srcname}
-Version: 1.0.0
+Version: 1.0.1
 Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz

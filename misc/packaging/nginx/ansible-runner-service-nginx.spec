@@ -4,8 +4,8 @@
 %endif
 
 Name: ansible-runner-service
-Version: 0.94
-Release: 3%{?dist}
+Version: 1.0.1
+Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
 Group:	 Applications/System
@@ -93,11 +93,24 @@ install -m 0644 ./misc/nginx/uwsgi.ini %{buildroot}%{_sysconfdir}/ansible-runner
 
 
 %changelog
+* Tue Oct 22 2019 Ondra Machacek <omachace@redhat.com> 1.0.1-1
+- Set runner_cache as defaultdict of dict.
+- Define ConnectionRefusedError for Python2.
+- Add ssh_private_key configuration option.
+- Add support to specify host port.
+- Add spec files.
+
+* Tue Aug 6 2019 Paul Cuzner <pcuzner@redhat.com> 1.0.0-1
+- minor bug fixes
+
 * Fri Mar 29 2019 Juan Migul Olmo <jolmomar@redhat.com> 0.9-4
 - Provide functionality using Nginx service with TLS mutual authentication
+
 * Sun Feb 10 2019 Paul Cuzner <pcuzner@redhat.com> 0.9-3
 - minor updates to improve packaging workflow
+
 * Mon Dec 17 2018 Paul Cuzner <pcuzner@redhat.com> 0.9
 - Repackaged for 0.9, including more specific package dependencies
+
 * Mon Sep 24 2018 Paul Cuzner <pcuzner@redhat.com> 0.8
 - initial rpm packaging

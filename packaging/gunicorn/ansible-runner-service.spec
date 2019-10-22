@@ -1,7 +1,7 @@
 %global srcname ansible-runner-service
 
 Name: %{srcname}
-Version: 1.0.0
+Version: 1.0.1
 Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
@@ -107,5 +107,12 @@ cp -r ./packaging/ansible-runner-service.service %{buildroot}%{_unitdir}
 %doc README.md
 
 %changelog
+* Tue Oct 22 2019 Ondra Machacek <omachace@redhat.com> 1.0.1-1
+- Set runner_cache as defaultdict of dict.
+- Define ConnectionRefusedError for Python2.
+- Add ssh_private_key configuration option.
+- Add support to specify host port.
+- Add spec files.
+
 * Mon Sep 2 2019 Ondra Machacek <omachace@redhat.com> 1.0.0-1
 - Release 1.0.0-1.
