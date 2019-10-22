@@ -73,15 +73,18 @@ def get_status(play_uuid):
 
 
 def list_playbooks():
-
     r = APIResponse()
-    pb_dir = os.path.join(configuration.settings.playbooks_root_dir,
-                          "project")
+    pb_dir = os.path.join("./samples", "project")
     playbook_names = [os.path.basename(pb_path) for pb_path in
-                      glob.glob(os.path.join(pb_dir,
-                                             "*.yml"))]
-    r.status, r.data = "OK", {"playbooks": playbook_names}
-
+                      glob.glob(os.path.join(pb_dir, "*.yml"))]
+    if len(playbook_names) < 1:
+        r.msg = "No playbooks found"
+    elif len(playbook_names) == 1:
+        r.msg = "{} playbook found".format(len(playbook_names))
+    else:
+        r.msg = "{} playbooks found".format(len(playbook_names))
+    r.status = "OK"
+    r.data = {"playbooks": playbook_names}
     return r
 
 
