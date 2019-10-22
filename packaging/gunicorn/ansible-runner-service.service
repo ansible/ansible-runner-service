@@ -1,0 +1,10 @@
+[Unit]
+Description=Ansible Runner Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/gunicorn -b localhost:5001 -w 2 runner_service.wsgi:application
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
