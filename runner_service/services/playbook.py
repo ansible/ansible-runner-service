@@ -80,6 +80,7 @@ def list_playbooks():
     playbook_names = [os.path.basename(pb_path) for pb_path in
                       glob.glob(os.path.join(pb_dir,
                                              "*.yml"))]
+    r.msg = "{} playbook found".format(len(playbook_names))
     r.status, r.data = "OK", {"playbooks": playbook_names}
 
     return r
