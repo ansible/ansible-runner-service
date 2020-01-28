@@ -240,6 +240,21 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     cleanup_dir(os.path.join(configuration.settings.playbooks_root_dir,
                              "env"))
 
+    # If explicit_extravars is set, create empty extrvars file, which will
+    # cause, that extravars file won't be loaded with our extravars, but those
+    # extravars will be passed as command line argument, which is usefull to
+    # not hit race when two proccess are using same extravars file.
+    explicitvars = filter.get('explicitvars', True)
+    if explicitvars:
+        with open(
+            os.path.join(
+                configuration.settings.playbooks_root_dir,
+                'env',
+                'extravars'
+            ), 'w'
+        ) as f:
+            f.write('{}')
+
     cmdline = []
     if filter.get('check', 'false').lower() == 'true':
         cmdline.append('--check')

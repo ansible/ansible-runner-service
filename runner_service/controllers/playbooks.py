@@ -134,7 +134,7 @@ def _run_playbook(playbook_name, tags=None):
     # TODO Move this function to the service package (services.playbook)
 
     # TODO We should use a list like this to restrict the query we support
-    valid_filter = ['limit', 'check']
+    valid_filter = ['limit', 'check', 'explicitvars']
 
     r = APIResponse()
 
