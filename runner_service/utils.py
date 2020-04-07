@@ -206,18 +206,20 @@ class SSHClient(object):
             raise SSHTimeout
 
         socket.setdefaulttimeout(self.timeout)
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            s.connect((self.host, self.port))
+            family, *_, sockaddr = socket.getaddrinfo(self.host, self.port, 0, socket.SOCK_STREAM, socket.SOL_TCP)[0]
         except socket.gaierror:
             raise HostNotFound
-        except ConnectionRefusedError:
-            raise SSHNotAccessible
-        except socket.timeout:
-            raise SSHTimeout
-        else:
-            s.shutdown(socket.SHUT_RDWR)
-            s.close()
+
+        with socket.socket(family, socket.SOCK_STREAM, socket.SOL_TCP) as s:
+            try:
+                s.connect(sockaddr)
+            except ConnectionRefusedError:
+                raise SSHNotAccessible
+            except socket.timeout:
+                raise SSHTimeout
+            else:
+                s.shutdown(socket.SHUT_RDWR)
 
         # Now try and use the identity file to passwordless ssh
         cmd = ('ssh -o "StrictHostKeyChecking=no" '
