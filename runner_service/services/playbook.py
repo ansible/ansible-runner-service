@@ -215,7 +215,8 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     # this should just be run_async, using 'run' hangs the root logger output
     # even when backgrounded
     parms = {
-        "private_data_dir": configuration.settings.playbooks_root_dir,
+        "project_dir": os.path.join(configuration.settings.playbooks_root_dir, 'project'),
+        "inventory": filter.get('limit'),
         "settings": settings,
         "finished_callback": cb_playbook_finished,
         "event_handler": cb_event_handler,
@@ -258,7 +259,7 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
         cmdline.append("--private-key {}".format(configuration.settings.ssh_private_key))
 
     if cmdline:
-        commit_cmdline(cmdline)
+        parms['cmdline'] = ' '.join(cmdline)
 
     _thread, _runner = run_async(**parms)
 
