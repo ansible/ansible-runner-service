@@ -231,7 +231,8 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
         "event_handler": cb_event_handler,
         "quiet": False,
         "ident": play_uuid,
-        "playbook": playbook_name
+        "playbook": playbook_name,
+        "inventory": filter.get('limit'),
     }
 
     if os.path.exists(local_modules):
