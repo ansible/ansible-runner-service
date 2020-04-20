@@ -217,7 +217,7 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     # even when backgrounded
 
     artifacts_dir = os.path.join(configuration.settings.playbooks_root_dir, "artifacts")
-    if configuration.settings.max_artifacts is not None and len(os.listdir(artifacts_dir)) >= configuration.settings.max_artifacts:
+    if configuration.settings.max_artifacts is not None:
         remove_oldest_artifacts(artifacts_dir)
 
     private_data_dir = os.path.join(artifacts_dir, play_uuid)
