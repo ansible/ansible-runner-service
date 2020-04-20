@@ -10,7 +10,6 @@ from ansible_runner import run_async
 from ansible_runner.exceptions import AnsibleRunnerException
 from runner_service import configuration
 from runner_service.cache import runner_cache, runner_stats
-from runner_service.utils import rm_r
 from .utils import APIResponse
 from ..utils import fread
 
@@ -194,15 +193,6 @@ def cb_event_handler(event_data):
     return True
 
 
-def remove_oldest_artifacts(artifacts_dir):
-    # Get list of artifacts sorted from oldest to newest.
-    files = sorted(os.listdir(artifacts_dir), key=lambda f: os.path.getctime("{}/{}".format(artifacts_dir, f)))
-
-    # If user has more artifacts than specified it will remove until it has proper number of artifacts.
-    for i in range(len(files) - configuration.settings.max_artifacts + 1):
-        rm_r(os.path.join(artifacts_dir, files[i]))
-
-
 def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     """ Initiate a playbook run """
 
@@ -217,9 +207,6 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     # even when backgrounded
 
     artifacts_dir = os.path.join(configuration.settings.playbooks_root_dir, "artifacts")
-    if configuration.settings.max_artifacts is not None:
-        remove_oldest_artifacts(artifacts_dir)
-
     private_data_dir = os.path.join(artifacts_dir, play_uuid)
     os.mkdir(private_data_dir)
     parms = {

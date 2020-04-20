@@ -77,8 +77,6 @@ class Config(object):
         # flask config setting to hide the "production use" warning
         self.ENV = ''
 
-        self.max_artifacts = None
-
         self._apply_overrides()
 
     def _apply_local(self):
