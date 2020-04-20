@@ -5,6 +5,7 @@ import uuid
 import time
 import datetime
 import getpass
+import shutil
 
 from ansible_runner import run_async
 from ansible_runner.exceptions import AnsibleRunnerException
@@ -166,7 +167,7 @@ def cb_event_handler(event_data):
         # role is not a fixed attribute
         role_value = ''
         if 'role' in event_data:
-            role_value =  runner_cache[ident]['role'] = event_data['event_data'].get('role', '') # noqa
+            role_value = runner_cache[ident]['role'] = event_data['event_data'].get('role', '')  # noqa
         runner_cache[ident]['role'] = role_value
 
         if event_type.startswith("runner_on_"):
@@ -182,15 +183,21 @@ def cb_event_handler(event_data):
                 else:
                     # we have a valid failure to report
                     event_metadata = event_data['event_data']
-                    runner_cache[ident]['failures'][event_metadata.get('host')] = event_data # noqa
+                    runner_cache[ident]['failures'][event_metadata.get('host')] = event_data  # noqa
 
     # populate the event cache
     if 'runner_ident' in event_data and \
-       'uuid' in event_data and ident in event_cache:
+            'uuid' in event_data and ident in event_cache:
         event_cache[ident].update({event_data['uuid']: event_data})
 
     # regardless return true to ensure the data is written to artifacts dir
     return True
+
+
+def remove_oldest_artifacts(artifacts_dir):
+    file = min(os.listdir(artifacts_dir), key=lambda f: os.path.getctime("{}/{}".format(artifacts_dir, f)))
+    if file:
+        shutil.rmtree(os.path.join(artifacts_dir, file))
 
 
 def start_playbook(playbook_name, vars=None, filter=None, tags=None):
@@ -206,14 +213,16 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     # this should just be run_async, using 'run' hangs the root logger output
     # even when backgrounded
 
-    pb_data_dir = os.path.join(configuration.settings.playbooks_root_dir,
-                                "artifacts",
-                                play_uuid)
-    os.mkdir(pb_data_dir)
+    artifacts_dir = os.path.join(configuration.settings.playbooks_root_dir, "artifacts")
+    if configuration.settings.max_artifacts is not None and len(os.listdir(artifacts_dir)) >= configuration.settings.max_artifacts:
+        remove_oldest_artifacts(artifacts_dir)
+
+    private_data_dir = os.path.join(artifacts_dir, play_uuid)
+    os.mkdir(private_data_dir)
     parms = {
-        "private_data_dir": pb_data_dir,
+        "private_data_dir": private_data_dir,
         "project_dir": os.path.join(configuration.settings.playbooks_root_dir, 'project'),
-        "artifact_dir": os.path.join(configuration.settings.playbooks_root_dir, "artifacts"),
+        "artifact_dir": artifacts_dir,
         "settings": settings,
         "finished_callback": cb_playbook_finished,
         "event_handler": cb_event_handler,
