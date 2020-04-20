@@ -195,9 +195,12 @@ def cb_event_handler(event_data):
 
 
 def remove_oldest_artifacts(artifacts_dir):
-    file = min(os.listdir(artifacts_dir), key=lambda f: os.path.getctime("{}/{}".format(artifacts_dir, f)))
-    if file:
-        shutil.rmtree(os.path.join(artifacts_dir, file))
+    # Get list of artifacts sorted from oldest to newest.
+    files = sorted(os.listdir(artifacts_dir), key=lambda f: os.path.getctime("{}/{}".format(artifacts_dir, f)))
+
+    # If user has more artifacts than specified it will remove until it has proper number of artifacts.
+    for i in range(len(files) - configuration.settings.max_artifacts + 1):
+        shutil.rmtree(os.path.join(artifacts_dir, files[i]))
 
 
 def start_playbook(playbook_name, vars=None, filter=None, tags=None):
