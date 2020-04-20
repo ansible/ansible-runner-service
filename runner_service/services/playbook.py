@@ -11,7 +11,7 @@ from ansible_runner import run_async
 from ansible_runner.exceptions import AnsibleRunnerException
 from runner_service import configuration
 from runner_service.cache import runner_cache, runner_stats
-from .utils import cleanup_dir, APIResponse
+from .utils import APIResponse
 from ..utils import fread
 
 from ..cache import event_cache

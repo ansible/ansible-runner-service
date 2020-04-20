@@ -19,12 +19,6 @@ def build_pb_path(play_uuid):
                         play_uuid)
 
 
-def cleanup_dir(dir_name, exclude=['ssh_key', 'ssh_key.pub']):
-    for _path_name in glob.glob("{}/*".format(dir_name)):
-        if os.path.basename(_path_name) not in exclude:
-            rm_r(_path_name)
-
-
 def writeYAML(data, path_name):
     try:
         with open(path_name, "w") as yaml_file:
