@@ -167,7 +167,7 @@ def cb_event_handler(event_data):
         # role is not a fixed attribute
         role_value = ''
         if 'role' in event_data:
-            role_value = runner_cache[ident]['role'] = event_data['event_data'].get('role', '')  # noqa
+            role_value = runner_cache[ident]['role'] = event_data['event_data'].get('role', '') # noqa
         runner_cache[ident]['role'] = role_value
 
         if event_type.startswith("runner_on_"):
@@ -183,11 +183,11 @@ def cb_event_handler(event_data):
                 else:
                     # we have a valid failure to report
                     event_metadata = event_data['event_data']
-                    runner_cache[ident]['failures'][event_metadata.get('host')] = event_data  # noqa
+                    runner_cache[ident]['failures'][event_metadata.get('host')] = event_data # noqa
 
     # populate the event cache
     if 'runner_ident' in event_data and \
-            'uuid' in event_data and ident in event_cache:
+        'uuid' in event_data and ident in event_cache:
         event_cache[ident].update({event_data['uuid']: event_data})
 
     # regardless return true to ensure the data is written to artifacts dir
