@@ -3,7 +3,6 @@ import glob
 import yaml
 
 import runner_service.configuration as configuration
-from runner_service.utils import rm_r
 
 
 def playbook_exists(playbook_name):

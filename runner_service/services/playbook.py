@@ -11,6 +11,7 @@ from ansible_runner import run_async
 from ansible_runner.exceptions import AnsibleRunnerException
 from runner_service import configuration
 from runner_service.cache import runner_cache, runner_stats
+from runner_service.utils import rm_r
 from .utils import APIResponse
 from ..utils import fread
 
@@ -200,7 +201,7 @@ def remove_oldest_artifacts(artifacts_dir):
 
     # If user has more artifacts than specified it will remove until it has proper number of artifacts.
     for i in range(len(files) - configuration.settings.max_artifacts + 1):
-        shutil.rmtree(os.path.join(artifacts_dir, files[i]))
+        rm_r(os.path.join(artifacts_dir, files[i]))
 
 
 def start_playbook(playbook_name, vars=None, filter=None, tags=None):
