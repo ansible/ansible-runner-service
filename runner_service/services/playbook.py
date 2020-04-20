@@ -193,15 +193,6 @@ def cb_event_handler(event_data):
     return True
 
 
-def commit_cmdline(options):
-    cmd_file = os.path.join(configuration.settings.playbooks_root_dir,
-                            "env", "cmdline")
-    runtime_overrides = ' '.join(options)
-    logger.debug("Creating env/cmdline file: {}".format(runtime_overrides))
-    with open(cmd_file, "w") as cmdline:
-        cmdline.write(runtime_overrides)
-
-
 def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     """ Initiate a playbook run """
 
@@ -214,8 +205,15 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
 
     # this should just be run_async, using 'run' hangs the root logger output
     # even when backgrounded
+
+    pb_data_dir = os.path.join(configuration.settings.playbooks_root_dir,
+                                "artifacts",
+                                play_uuid)
+    os.mkdir(pb_data_dir)
     parms = {
-        "private_data_dir": configuration.settings.playbooks_root_dir,
+        "private_data_dir": pb_data_dir,
+        "project_dir": os.path.join(configuration.settings.playbooks_root_dir, 'project'),
+        "artifact_dir": os.path.join(configuration.settings.playbooks_root_dir, "artifacts"),
         "settings": settings,
         "finished_callback": cb_playbook_finished,
         "event_handler": cb_event_handler,
@@ -236,10 +234,6 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     if limit_hosts:
         parms['limit'] = limit_hosts
 
-    logger.debug("Clearing up old env directory")
-    cleanup_dir(os.path.join(configuration.settings.playbooks_root_dir,
-                             "env"))
-
     cmdline = []
     if filter.get('check', 'false').lower() == 'true':
         cmdline.append('--check')
@@ -258,7 +252,7 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
         cmdline.append("--private-key {}".format(configuration.settings.ssh_private_key))
 
     if cmdline:
-        commit_cmdline(cmdline)
+        parms['cmdline'] = ' '.join(cmdline)
 
     _thread, _runner = run_async(**parms)
 
