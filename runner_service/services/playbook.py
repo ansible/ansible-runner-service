@@ -1,11 +1,9 @@
-
 import os
 import glob
 import uuid
 import time
 import datetime
 import getpass
-import shutil
 
 from ansible_runner import run_async
 from ansible_runner.exceptions import AnsibleRunnerException
