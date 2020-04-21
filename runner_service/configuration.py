@@ -164,5 +164,5 @@ class Config(object):
             time_difference = datetime.timedelta(seconds=time_now - date)
             if time_difference.days >= self.artifacts_remove_age:
                 shutil.rmtree(os.path.join(artifacts_dir, artifacts))
-        time.sleep(self.artifacts_remove_age * 60 * 24)
+        time.sleep(self.artifacts_remove_age * 60 * 60 * 24)
         self.artifacts_remove()
