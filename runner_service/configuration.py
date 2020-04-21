@@ -86,7 +86,7 @@ class Config(object):
         self._apply_overrides()
 
         if self.mode == "prod":
-            self.init_schedule()
+            self.init_artifacts_remove()
 
     def _apply_local(self):
 
@@ -151,7 +151,7 @@ class Config(object):
 
         self._apply_runtime()
 
-    def init_schedule(self):
+    def init_artifacts_remove(self):
         t = threading.Thread(target=self.artifacts_remove)
         t.start()
 
