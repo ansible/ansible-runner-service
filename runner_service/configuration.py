@@ -56,7 +56,7 @@ class Config(object):
         )
 
         self.artifacts_remove_frequency = 1
-        self.artifacts_remove_age = 300
+        self.artifacts_remove_age = 30
         if self.mode == "prod":
             self.init_crone()
         # expiration period in years for the self-signed cert that we generate
