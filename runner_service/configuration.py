@@ -55,6 +55,10 @@ class Config(object):
             "env/ssh_key"
         )
 
+        self.artifacts_remove_frequency = 1
+        self.artifacts_remove_age = 300
+        if self.mode == "prod":
+            self.init_crone()
         # expiration period in years for the self-signed cert that we generate
         self.cert_expiration = 3
 
@@ -141,3 +145,32 @@ class Config(object):
             self._apply_local()
 
         self._apply_runtime()
+
+    def init_crone(self):
+        script_name = "artifacts_remove.py"
+        script_path = os.path.join(os.path.abspath(os.getcwd()), "runner_service", script_name)
+        cron_file = "/var/spool/cron/root"
+        script = "python3 {} --playbooks_root_dir {} --artifacts_remove_age {}".format(
+            script_path, self.playbooks_root_dir, self.artifacts_remove_age)
+        execution = "0 0 */{} * * {}\n".format(self.artifacts_remove_frequency, script)
+
+        if os.path.exists(cron_file):
+            with open(cron_file, "r") as file:
+                previous_cron = file.readlines()
+            write_cron = ""
+            for line in previous_cron:
+                # Edit existing script job
+                if script_name in line:
+                    write_cron += execution
+                else:
+                    write_cron += line
+            # If this is first run it will initialize the job
+            if script_name not in write_cron:
+                write_cron += execution
+            with open(cron_file, "w+") as file:
+                file.writelines(write_cron)
+        else:
+            # If file does not exist create it with proper mode
+            with open(cron_file, "w+") as file:
+                file.write(execution)
+            os.chmod(cron_file, 0o600)
