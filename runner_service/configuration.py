@@ -59,7 +59,6 @@ class Config(object):
             "env/ssh_key"
         )
 
-        self.artifacts_remove_frequency = 1
         self.artifacts_remove_age = 30
         # expiration period in years for the self-signed cert that we generate
         self.cert_expiration = 3
