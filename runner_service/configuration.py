@@ -85,7 +85,6 @@ class Config(object):
 
         self._apply_overrides()
 
-
     def _apply_local(self):
 
         # apply overrides from configuration settings in /etc/?

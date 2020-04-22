@@ -185,13 +185,32 @@ def main(test_mode=False):
         app.config['WTF_CSRF_ENABLED'] = False
         return app.test_client()
 
-    # Start the API server
-    app.run(host=configuration.settings.ip_address,
-            port=configuration.settings.port,
-            threaded=True,
-            ssl_context=ssl_context,
-            debug=configuration.settings.debug,
-            use_reloader=False)
+    cancel = threading.Event()
+    cancel.clear()
+
+    t = threading.Thread(
+        target=cleanup_thread,
+        args=(cancel,
+              configuration.settings.artifacts_remove_frequency * 60 * 60 * 24,
+              configuration.settings.artifacts_remove_age
+              )
+    )
+    if configuration.settings.mode == 'prod':
+        t.start()
+
+    try:
+        # Start the API server
+        app.run(host=configuration.settings.ip_address,
+                port=configuration.settings.port,
+                threaded=True,
+                ssl_context=ssl_context,
+                debug=configuration.settings.debug,
+                use_reloader=False)
+    finally:
+        if configuration.settings.mode == 'prod':
+            # application is shutting down, so let's break the loop and join
+            cancel.set()
+            t.join()
 
 
 if __name__ == "__main__":
