@@ -17,8 +17,10 @@ import yaml
 
 import runner_service.configuration as configuration
 from runner_service.app import create_app
-from runner_service.utils import (create_self_signed_cert, fread, RunnerServiceError, ssh_create_key)
-
+from runner_service.utils import (fread,
+                                  create_self_signed_cert,
+                                  ssh_create_key,
+                                  RunnerServiceError)
 
 def signal_stop(*args):
     '''
