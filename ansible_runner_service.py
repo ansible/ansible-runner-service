@@ -190,9 +190,7 @@ def main(test_mode=False):
 
     t = threading.Thread(
         target=cleanup_thread,
-        args=(cancel,
-              configuration.settings.artifacts_remove_frequency * 60 * 60 * 24
-              )
+        args=(cancel, configuration.settings.artifacts_remove_frequency * 60 * 60 * 24)
     )
     if configuration.settings.mode == 'prod':
         t.start()
