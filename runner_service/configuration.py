@@ -3,10 +3,6 @@ import sys
 import yaml
 import getpass
 import logging
-import time
-import datetime
-import shutil
-import threading
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -59,7 +55,12 @@ class Config(object):
             "env/ssh_key"
         )
 
+        # number of maximum age of the artifact folder in days
         self.artifacts_remove_age = 30
+
+        # number of how frequently the old artifacts should be removed in days
+        self.artifacts_remove_frequency = 1
+
         # expiration period in years for the self-signed cert that we generate
         self.cert_expiration = 3
 
@@ -84,8 +85,6 @@ class Config(object):
 
         self._apply_overrides()
 
-        if self.mode == "prod":
-            self.init_artifacts_remove()
 
     def _apply_local(self):
 
@@ -149,19 +148,3 @@ class Config(object):
             self._apply_local()
 
         self._apply_runtime()
-
-    def init_artifacts_remove(self):
-        t = threading.Thread(target=self.artifacts_remove)
-        t.start()
-
-    def artifacts_remove(self):
-        artifacts_dir = os.path.join(self.playbooks_root_dir, "artifacts")
-        dir_list = os.listdir(artifacts_dir)
-        time_now = time.mktime(time.localtime())
-        for artifacts in dir_list:
-            date = os.path.getmtime("{}/{}".format(artifacts_dir, artifacts))
-            time_difference = datetime.timedelta(seconds=time_now - date)
-            if time_difference.days >= self.artifacts_remove_age:
-                shutil.rmtree(os.path.join(artifacts_dir, artifacts))
-        time.sleep(self.artifacts_remove_age * 60 * 60 * 24)
-        self.artifacts_remove()

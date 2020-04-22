@@ -3,11 +3,16 @@
 # python2 or python3 compatible
 
 import os
+import sched
 import sys
 import yaml
 import signal
 import logging
 import logging.config
+import threading
+import shutil
+import time
+import datetime
 
 import runner_service.configuration as configuration
 from runner_service.utils import (fread,
@@ -141,8 +146,32 @@ def setup_common_environment():
     setup_localhost_ssh()
 
 
-def main(test_mode=False):
+def cleanup(scheduler, check_period, cleanup_period):
+    # Clean artifacts older than cleanup_period days.
+    artifacts_dir = os.path.join(configuration.settings.playbooks_root_dir, "artifacts")
+    dir_list = os.listdir(artifacts_dir)
+    time_now = time.mktime(time.localtime())
+    for artifacts in dir_list:
+        date = os.path.getmtime(os.path.join(artifacts_dir, artifacts))
+        time_difference = datetime.timedelta(seconds=time_now - date)
+        if time_difference.days >= cleanup_period:
+            shutil.rmtree(os.path.join(artifacts_dir, artifacts))
 
+    # Reschedule next self-execution:
+    scheduler.enter(check_period, 0, cleanup, (scheduler, check_period, cleanup_period))
+
+
+def cleanup_thread(cancel, check_period, cleanup_period):
+    scheduler = sched.scheduler()
+    # Schedule first execution immediately.
+    scheduler.enter(0, 0, cleanup, (scheduler, check_period, cleanup_period))
+    scheduler.run(blocking=False)
+    # Wait max check_period secs for next execution, but break immediately if necessary.
+    while not cancel.wait(check_period):
+        scheduler.run(blocking=False)
+
+
+def main(test_mode=False):
     # Setup log and ssh and other things present in all the environments
     setup_common_environment()
 
