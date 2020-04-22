@@ -55,10 +55,10 @@ class Config(object):
             "env/ssh_key"
         )
 
-        # number of maximum age of the artifact folder in days
+        # maximum age of an artifact folder in days
         self.artifacts_remove_age = 30
 
-        # number of how frequently the old artifacts should be removed in days
+        # how frequently the old artifacts should be removed in days
         self.artifacts_remove_frequency = 1
 
         # expiration period in years for the self-signed cert that we generate

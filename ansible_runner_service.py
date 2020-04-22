@@ -2,24 +2,22 @@
 
 # python2 or python3 compatible
 
-import os
-import sched
-import sys
-import yaml
-import signal
+import datetime
 import logging
 import logging.config
-import threading
+import os
+import sched
 import shutil
+import signal
+import sys
+import threading
 import time
-import datetime
+
+import yaml
 
 import runner_service.configuration as configuration
-from runner_service.utils import (fread,
-                                  create_self_signed_cert,
-                                  ssh_create_key,
-                                  RunnerServiceError)
 from runner_service.app import create_app
+from runner_service.utils import (create_self_signed_cert, fread, RunnerServiceError, ssh_create_key)
 
 
 def signal_stop(*args):
@@ -152,8 +150,8 @@ def cleanup(scheduler, check_period):
     dir_list = os.listdir(artifacts_dir)
     time_now = time.mktime(time.localtime())
     for artifacts in dir_list:
-        date = os.path.getmtime(os.path.join(artifacts_dir, artifacts))
-        time_difference = datetime.timedelta(seconds=time_now - date)
+        mtime = os.path.getmtime(os.path.join(artifacts_dir, artifacts))
+        time_difference = datetime.timedelta(seconds=time_now - mtime)
         if time_difference.days >= configuration.settings.artifacts_remove_age:
             shutil.rmtree(os.path.join(artifacts_dir, artifacts))
 
@@ -185,14 +183,14 @@ def main(test_mode=False):
         app.config['WTF_CSRF_ENABLED'] = False
         return app.test_client()
 
-    cancel = threading.Event()
-    cancel.clear()
-
-    t = threading.Thread(
-        target=cleanup_thread,
-        args=(cancel, configuration.settings.artifacts_remove_frequency * 60 * 60 * 24)
-    )
     if configuration.settings.mode == 'prod':
+        cancel = threading.Event()
+        cancel.clear()
+
+        t = threading.Thread(
+            target=cleanup_thread,
+            args=(cancel, datetime.timedelta(days=configuration.settings.artifacts_remove_frequency).total_seconds())
+        )
         t.start()
 
     try:
