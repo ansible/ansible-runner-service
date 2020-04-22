@@ -147,7 +147,7 @@ def setup_common_environment():
 
 
 def cleanup(scheduler, check_period):
-    # Clean artifacts older than cleanup_period days.
+    # Clean artifacts older than artifacts_remove_age days.
     artifacts_dir = os.path.join(configuration.settings.playbooks_root_dir, "artifacts")
     dir_list = os.listdir(artifacts_dir)
     time_now = time.mktime(time.localtime())
