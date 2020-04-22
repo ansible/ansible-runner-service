@@ -208,7 +208,7 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
 
     artifacts_dir = os.path.abspath(os.path.join(configuration.settings.playbooks_root_dir, "artifacts"))
     private_data_dir = os.path.join(artifacts_dir, play_uuid)
-    os.mkdir(private_data_dir)
+    os.makedirs(private_data_dir)
     parms = {
         "private_data_dir": private_data_dir,
         "project_dir": os.path.abspath(os.path.join(configuration.settings.playbooks_root_dir, 'project')),
