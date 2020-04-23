@@ -3,6 +3,7 @@ import sys
 import yaml
 import getpass
 import logging
+import logging.config
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -80,6 +81,17 @@ class Config(object):
         self._apply_overrides()
 
     def _apply_local(self):
+        # apply logging configurations
+        if os.path.isfile(self.logging_conf):
+            try:
+                with open(self.logging_conf, "r") as _cfg:
+                    local_config = yaml.safe_load(_cfg.read())
+                    logging.config.dictConfig(local_config)
+                    global logger
+                    logger = logging.getLogger()
+            except yaml.YAMLError as exc:
+                logger.error("ERROR: YAML error in logging configuration "
+                             "file: {}".format(exc))
 
         # apply overrides from configuration settings in /etc/?
         logger.info("Analysing local configuration options from "
