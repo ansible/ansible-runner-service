@@ -191,7 +191,8 @@ def main(test_mode=False):
 
         remove_artifacts_thread = threading.Thread(
             target=remove_artifacts_thread_proc,
-            args=(cancel_remove_artifacts_thread, datetime.timedelta(days=configuration.settings.artifacts_remove_frequency).total_seconds())
+            args=(cancel_remove_artifacts_thread,
+                  datetime.timedelta(days=configuration.settings.artifacts_remove_frequency).total_seconds())
         )
         remove_artifacts_thread.start()
 
