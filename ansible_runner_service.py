@@ -146,7 +146,7 @@ def setup_common_environment():
     setup_localhost_ssh()
 
 
-def cleanup(scheduler, check_period):
+def remove_artifacts(scheduler, frequency):
     # Clean artifacts older than artifacts_remove_age days.
     artifacts_dir = os.path.join(configuration.settings.playbooks_root_dir, "artifacts")
     dir_list = os.listdir(artifacts_dir)
@@ -158,16 +158,16 @@ def cleanup(scheduler, check_period):
             shutil.rmtree(os.path.join(artifacts_dir, artifacts))
 
     # Reschedule next self-execution:
-    scheduler.enter(check_period, 0, cleanup, (scheduler, check_period))
+    scheduler.enter(frequency, 0, remove_artifacts, (scheduler, frequency))
 
 
-def cleanup_thread(cancel, check_period):
+def remove_artifacts_thread_proc(cancel, frequency):
     scheduler = sched.scheduler()
     # Schedule first execution immediately.
-    scheduler.enter(0, 0, cleanup, (scheduler, check_period))
+    scheduler.enter(0, 0, remove_artifacts, (scheduler, frequency))
     scheduler.run(blocking=False)
-    # Wait max check_period secs for next execution, but break immediately if necessary.
-    while not cancel.wait(check_period):
+    # Wait max frequency secs for next execution, but break immediately if necessary.
+    while not cancel.wait(frequency):
         scheduler.run(blocking=False)
 
 
@@ -186,14 +186,14 @@ def main(test_mode=False):
         return app.test_client()
 
     if configuration.settings.mode == 'prod':
-        cancel = threading.Event()
-        cancel.clear()
+        cancel_remove_artifacts_thread = threading.Event()
+        cancel_remove_artifacts_thread.clear()
 
-        t = threading.Thread(
-            target=cleanup_thread,
-            args=(cancel, datetime.timedelta(days=configuration.settings.artifacts_remove_frequency).total_seconds())
+        remove_artifacts_thread = threading.Thread(
+            target=remove_artifacts_thread_proc,
+            args=(cancel_remove_artifacts_thread, datetime.timedelta(days=configuration.settings.artifacts_remove_frequency).total_seconds())
         )
-        t.start()
+        remove_artifacts_thread.start()
 
     try:
         # Start the API server
@@ -206,8 +206,8 @@ def main(test_mode=False):
     finally:
         if configuration.settings.mode == 'prod':
             # application is shutting down, so let's break the loop and join
-            cancel.set()
-            t.join()
+            cancel_remove_artifacts_thread.set()
+            remove_artifacts_thread.join()
 
 
 if __name__ == "__main__":
