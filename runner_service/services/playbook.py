@@ -246,13 +246,11 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
                      "{}".format(configuration.settings.target_user))
         cmdline.append("--user {}".format(configuration.settings.target_user))
 
-    if not configuration.settings.ssh_private_key.endswith('env/ssh_key'):
-        logger.debug("Run the playbook with a private key override of "
-                     "{}".format(configuration.settings.ssh_private_key))
-        cmdline.append("--private-key {}".format(configuration.settings.ssh_private_key))
+    logger.debug("Run the playbook with a private key override of "
+                 "{}".format(configuration.settings.ssh_private_key))
+    cmdline.append("--private-key {}".format(configuration.settings.ssh_private_key))
 
-    if cmdline:
-        parms['cmdline'] = ' '.join(cmdline)
+    parms['cmdline'] = ' '.join(cmdline)
 
     _thread, _runner = run_async(**parms)
 
