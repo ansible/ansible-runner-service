@@ -28,10 +28,10 @@ class Config(object):
             "debug": False
         },
         "dev": {
-            "logging_conf": "./logging.yaml",
-            "log_path": "./",
-            "config_file": "./config.yaml",
-            "playbooks_root_dir": "./samples",
+            "logging_conf": os.path.abspath("./logging.yaml"),
+            "log_path": os.path.abspath("./"),
+            "config_file": os.path.abspath("./config.yaml"),
+            "playbooks_root_dir": os.path.abspath("./samples"),
             "debug": True
         }
     }
@@ -50,9 +50,7 @@ class Config(object):
         self.debug = Config.MODES[mode].get("debug", True)
 
         # Path to custom ssh key, by default project/env/ssh_key is used
-        self.ssh_private_key = os.path.abspath(
-            os.path.join(self.playbooks_root_dir, "env/ssh_key")
-        )
+        self.ssh_private_key = os.path.join(self.playbooks_root_dir, "env/ssh_key")
 
         # expiration period in years for the self-signed cert that we generate
         self.cert_expiration = 3

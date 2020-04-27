@@ -206,20 +206,20 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     # this should just be run_async, using 'run' hangs the root logger output
     # even when backgrounded
 
-    artifacts_dir = os.path.abspath(os.path.join(configuration.settings.playbooks_root_dir, "artifacts"))
+    artifacts_dir = os.path.join(configuration.settings.playbooks_root_dir, "artifacts")
     private_data_dir = os.path.join(artifacts_dir, play_uuid)
     os.makedirs(private_data_dir)
     parms = {
         "private_data_dir": private_data_dir,
-        "project_dir": os.path.abspath(os.path.join(configuration.settings.playbooks_root_dir, 'project')),
+        "project_dir": os.path.join(configuration.settings.playbooks_root_dir, 'project'),
+        "inventory": os.path.join(configuration.settings.playbooks_root_dir, 'inventory'),
         "artifact_dir": artifacts_dir,
         "settings": settings,
         "finished_callback": cb_playbook_finished,
         "event_handler": cb_event_handler,
         "quiet": False,
         "ident": play_uuid,
-        "playbook": playbook_name,
-        "inventory": os.path.abspath(os.path.join(configuration.settings.playbooks_root_dir, 'inventory')),
+        "playbook": playbook_name
     }
 
     if os.path.exists(local_modules):
