@@ -56,6 +56,7 @@ class Config(object):
         )
 
         # maximum age of an artifact folder in days
+        # set to 0 to disable the automatic removal of old artifact folders
         self.artifacts_remove_age = 30
 
         # how frequently the old artifacts should be removed in days

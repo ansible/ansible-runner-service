@@ -159,16 +159,23 @@ def remove_artifacts(scheduler, frequency):
 
     # Reschedule next self-execution:
     scheduler.enter(frequency, 0, remove_artifacts, (scheduler, frequency))
+    scheduler.run()
 
 
-def remove_artifacts_thread_proc(cancel, frequency):
+def remove_artifacts_thread_proc(frequency):
     scheduler = sched.scheduler()
     # Schedule first execution immediately.
     scheduler.enter(0, 0, remove_artifacts, (scheduler, frequency))
-    scheduler.run(blocking=False)
-    # Wait max frequency secs for next execution, but break immediately if necessary.
-    while not cancel.wait(frequency):
-        scheduler.run(blocking=False)
+    scheduler.run()
+
+
+def remove_artifacts_init():
+    remove_artifacts_thread = threading.Thread(
+        target=remove_artifacts_thread_proc,
+        args=(datetime.timedelta(days=configuration.settings.artifacts_remove_frequency).total_seconds(),),
+        daemon=True
+    )
+    remove_artifacts_thread.start()
 
 
 def main(test_mode=False):
@@ -185,34 +192,19 @@ def main(test_mode=False):
         app.config['WTF_CSRF_ENABLED'] = False
         return app.test_client()
 
-    if configuration.settings.mode == 'prod':
-        cancel_remove_artifacts_thread = threading.Event()
-        cancel_remove_artifacts_thread.clear()
+    if configuration.settings.mode == 'prod' and configuration.settings.artifacts_remove_age > 0:
+        remove_artifacts_init()
 
-        remove_artifacts_thread = threading.Thread(
-            target=remove_artifacts_thread_proc,
-            args=(cancel_remove_artifacts_thread,
-                  datetime.timedelta(days=configuration.settings.artifacts_remove_frequency).total_seconds())
-        )
-        remove_artifacts_thread.start()
-
-    try:
-        # Start the API server
-        app.run(host=configuration.settings.ip_address,
-                port=configuration.settings.port,
-                threaded=True,
-                ssl_context=ssl_context,
-                debug=configuration.settings.debug,
-                use_reloader=False)
-    finally:
-        if configuration.settings.mode == 'prod':
-            # application is shutting down, so let's break the loop and join
-            cancel_remove_artifacts_thread.set()
-            remove_artifacts_thread.join()
+    # Start the API server
+    app.run(host=configuration.settings.ip_address,
+            port=configuration.settings.port,
+            threaded=True,
+            ssl_context=ssl_context,
+            debug=configuration.settings.debug,
+            use_reloader=False)
 
 
 if __name__ == "__main__":
-
     # setup signal handler for a kill/sigterm request (background mode)
     signal.signal(signal.SIGTERM, signal_stop)
 
