@@ -205,6 +205,7 @@ def main(test_mode=False):
 
 
 if __name__ == "__main__":
+
     # setup signal handler for a kill/sigterm request (background mode)
     signal.signal(signal.SIGTERM, signal_stop)
 
