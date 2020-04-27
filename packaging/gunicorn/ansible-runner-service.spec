@@ -5,6 +5,7 @@ Version: 1.0.1
 Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
+Patch0:  wsgi.patch
 Group:	 Applications/System
 License: ASL 2.0
 
@@ -63,6 +64,7 @@ Requires: python3-gunicorn
 
 %prep
 %setup -q -n %{name}-%{version}
+%patch0 -p0
 
 %build
 # Disable debuginfo packages
