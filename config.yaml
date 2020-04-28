@@ -15,3 +15,10 @@ version: 1
 target_user: root
 
 #event_cache_size: 3
+
+# maximum age of an artifact folder in days
+# set to 0 to disable the automatic removal of old artifact folders
+# artifacts_remove_age = 30
+
+# how frequently the old artifacts should be removed in days
+# artifacts_remove_frequency = 1

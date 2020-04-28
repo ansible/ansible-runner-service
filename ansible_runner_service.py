@@ -2,20 +2,25 @@
 
 # python2 or python3 compatible
 
-import os
-import sys
-import yaml
-import signal
+import datetime
 import logging
 import logging.config
+import os
+import sched
+import shutil
+import signal
+import sys
+import threading
+import time
+
+import yaml
 
 import runner_service.configuration as configuration
+from runner_service.app import create_app
 from runner_service.utils import (fread,
                                   create_self_signed_cert,
                                   ssh_create_key,
                                   RunnerServiceError)
-from runner_service.app import create_app
-
 
 def signal_stop(*args):
     '''
@@ -141,8 +146,40 @@ def setup_common_environment():
     setup_localhost_ssh()
 
 
-def main(test_mode=False):
+def remove_artifacts(scheduler, frequency):
+    # Clean artifacts older than artifacts_remove_age days.
+    artifacts_dir = os.path.join(configuration.settings.playbooks_root_dir, "artifacts")
+    if os.path.exists(artifacts_dir):
+        dir_list = os.listdir(artifacts_dir)
+        time_now = time.mktime(time.localtime())
+        for artifacts in dir_list:
+            mtime = os.path.getmtime(os.path.join(artifacts_dir, artifacts))
+            time_difference = datetime.timedelta(seconds=time_now - mtime)
+            if time_difference.days >= configuration.settings.artifacts_remove_age:
+                shutil.rmtree(os.path.join(artifacts_dir, artifacts))
 
+    # Reschedule next self-execution:
+    scheduler.enter(frequency, 0, remove_artifacts, (scheduler, frequency))
+    scheduler.run()
+
+
+def remove_artifacts_thread_proc(frequency):
+    scheduler = sched.scheduler()
+    # Schedule first execution immediately.
+    scheduler.enter(0, 0, remove_artifacts, (scheduler, frequency))
+    scheduler.run()
+
+
+def remove_artifacts_init():
+    remove_artifacts_thread = threading.Thread(
+        target=remove_artifacts_thread_proc,
+        args=(datetime.timedelta(days=configuration.settings.artifacts_remove_frequency).total_seconds(),),
+        daemon=True
+    )
+    remove_artifacts_thread.start()
+
+
+def main(test_mode=False):
     # Setup log and ssh and other things present in all the environments
     setup_common_environment()
 
@@ -155,6 +192,9 @@ def main(test_mode=False):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
         return app.test_client()
+
+    if configuration.settings.mode == 'prod' and configuration.settings.artifacts_remove_age > 0:
+        remove_artifacts_init()
 
     # Start the API server
     app.run(host=configuration.settings.ip_address,
