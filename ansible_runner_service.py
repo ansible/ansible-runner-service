@@ -149,13 +149,14 @@ def setup_common_environment():
 def remove_artifacts(scheduler, frequency):
     # Clean artifacts older than artifacts_remove_age days.
     artifacts_dir = os.path.join(configuration.settings.playbooks_root_dir, "artifacts")
-    dir_list = os.listdir(artifacts_dir)
-    time_now = time.mktime(time.localtime())
-    for artifacts in dir_list:
-        mtime = os.path.getmtime(os.path.join(artifacts_dir, artifacts))
-        time_difference = datetime.timedelta(seconds=time_now - mtime)
-        if time_difference.days >= configuration.settings.artifacts_remove_age:
-            shutil.rmtree(os.path.join(artifacts_dir, artifacts))
+    if os.path.exists(artifacts_dir):
+        dir_list = os.listdir(artifacts_dir)
+        time_now = time.mktime(time.localtime())
+        for artifacts in dir_list:
+            mtime = os.path.getmtime(os.path.join(artifacts_dir, artifacts))
+            time_difference = datetime.timedelta(seconds=time_now - mtime)
+            if time_difference.days >= configuration.settings.artifacts_remove_age:
+                shutil.rmtree(os.path.join(artifacts_dir, artifacts))
 
     # Reschedule next self-execution:
     scheduler.enter(frequency, 0, remove_artifacts, (scheduler, frequency))
