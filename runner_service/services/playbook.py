@@ -10,7 +10,7 @@ from ansible_runner import run_async
 from ansible_runner.exceptions import AnsibleRunnerException
 from runner_service import configuration
 from runner_service.cache import runner_cache, runner_stats
-from .utils import cleanup_dir, APIResponse
+from .utils import APIResponse
 from ..utils import fread
 
 from ..cache import event_cache
@@ -193,15 +193,6 @@ def cb_event_handler(event_data):
     return True
 
 
-def commit_cmdline(options):
-    cmd_file = os.path.join(configuration.settings.playbooks_root_dir,
-                            "env", "cmdline")
-    runtime_overrides = ' '.join(options)
-    logger.debug("Creating env/cmdline file: {}".format(runtime_overrides))
-    with open(cmd_file, "w") as cmdline:
-        cmdline.write(runtime_overrides)
-
-
 def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     """ Initiate a playbook run """
 
@@ -214,8 +205,15 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
 
     # this should just be run_async, using 'run' hangs the root logger output
     # even when backgrounded
+
+    artifacts_dir = os.path.join(configuration.settings.playbooks_root_dir, "artifacts")
+    private_data_dir = os.path.join(artifacts_dir, play_uuid)
+    os.makedirs(private_data_dir)
     parms = {
-        "private_data_dir": configuration.settings.playbooks_root_dir,
+        "private_data_dir": private_data_dir,
+        "project_dir": os.path.join(configuration.settings.playbooks_root_dir, 'project'),
+        "inventory": os.path.join(configuration.settings.playbooks_root_dir, 'inventory'),
+        "artifact_dir": artifacts_dir,
         "settings": settings,
         "finished_callback": cb_playbook_finished,
         "event_handler": cb_event_handler,
@@ -236,10 +234,6 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
     if limit_hosts:
         parms['limit'] = limit_hosts
 
-    logger.debug("Clearing up old env directory")
-    cleanup_dir(os.path.join(configuration.settings.playbooks_root_dir,
-                             "env"))
-
     cmdline = []
     if filter.get('check', 'false').lower() == 'true':
         cmdline.append('--check')
@@ -252,13 +246,11 @@ def start_playbook(playbook_name, vars=None, filter=None, tags=None):
                      "{}".format(configuration.settings.target_user))
         cmdline.append("--user {}".format(configuration.settings.target_user))
 
-    if not configuration.settings.ssh_private_key.endswith('env/ssh_key'):
-        logger.debug("Run the playbook with a private key override of "
-                     "{}".format(configuration.settings.ssh_private_key))
-        cmdline.append("--private-key {}".format(configuration.settings.ssh_private_key))
+    logger.debug("Run the playbook with a private key override of "
+                 "{}".format(configuration.settings.ssh_private_key))
+    cmdline.append("--private-key {}".format(configuration.settings.ssh_private_key))
 
-    if cmdline:
-        commit_cmdline(cmdline)
+    parms['cmdline'] = ' '.join(cmdline)
 
     _thread, _runner = run_async(**parms)
 

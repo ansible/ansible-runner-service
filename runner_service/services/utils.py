@@ -3,7 +3,6 @@ import glob
 import yaml
 
 import runner_service.configuration as configuration
-from runner_service.utils import rm_r
 
 
 def playbook_exists(playbook_name):
@@ -17,12 +16,6 @@ def build_pb_path(play_uuid):
     return os.path.join(configuration.settings.playbooks_root_dir,
                         "artifacts",
                         play_uuid)
-
-
-def cleanup_dir(dir_name, exclude=['ssh_key', 'ssh_key.pub']):
-    for _path_name in glob.glob("{}/*".format(dir_name)):
-        if os.path.basename(_path_name) not in exclude:
-            rm_r(_path_name)
 
 
 def writeYAML(data, path_name):

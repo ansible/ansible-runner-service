@@ -29,10 +29,10 @@ class Config(object):
             "debug": False
         },
         "dev": {
-            "logging_conf": "./logging.yaml",
-            "log_path": "./",
-            "config_file": "./config.yaml",
-            "playbooks_root_dir": "./samples",
+            "logging_conf": os.path.abspath("./logging.yaml"),
+            "log_path": os.path.abspath("./"),
+            "config_file": os.path.abspath("./config.yaml"),
+            "playbooks_root_dir": os.path.abspath("./samples"),
             "debug": True
         }
     }
