@@ -87,7 +87,7 @@ install -m 0644 ./misc/nginx/uwsgi.ini %{buildroot}%{_sysconfdir}/ansible-runner
 %{_bindir}/ansible_runner_service
 %{python_sitelib}/*
 %{_prefix}/share/ansible-runner-service/*
-%{_sysconfdir}/ansible-runner-service/*
+%config(noreplace) %{_sysconfdir}/ansible-runner-service/*
 %{_sysconfdir}/nginx/conf.d/*
 %{_docdir}/ansible-runner-service/*
 

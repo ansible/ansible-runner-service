@@ -91,7 +91,7 @@ cp -r ./packaging/ansible-runner-service.service %{buildroot}%{_unitdir}
 %files -n python2-%{srcname}
 %{_bindir}/ansible_runner_service
 %{python2_sitelib}/*
-%{_sysconfdir}/ansible-runner-service/*
+%config(noreplace) %{_sysconfdir}/ansible-runner-service/*
 %{_unitdir}/ansible-runner-service.service
 
 %license LICENSE.md
