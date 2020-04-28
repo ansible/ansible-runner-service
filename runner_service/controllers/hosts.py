@@ -199,7 +199,7 @@ class HostMgmt(BaseResource):
             if all(p in valid_parms for p in args.keys()):
                 if 'others' in args:
                     group_list.extend(args['others'].split(','))
-                ssh_port = self.__to_int(args.get('port', None))
+                ssh_port = self.__to_int(args.get('port', 22))
             else:
                 r = APIResponse()
                 r.status = 'INVALID'
