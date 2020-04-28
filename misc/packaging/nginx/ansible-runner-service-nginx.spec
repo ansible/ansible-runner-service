@@ -4,7 +4,7 @@
 %endif
 
 Name: ansible-runner-service
-Version: 1.0.1
+Version: 1.0.2
 Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
@@ -93,6 +93,12 @@ install -m 0644 ./misc/nginx/uwsgi.ini %{buildroot}%{_sysconfdir}/ansible-runner
 
 
 %changelog
+* Tue Apr 28 2020 Martin Necas <mnecas@redhat.com> 1.0.2-1
+- Allow playbook parallel execution.
+- Add artifacts removal.
+- Apply logging configurations.
+- Handle connection to IPv6 hosts.
+
 * Tue Oct 22 2019 Ondra Machacek <omachace@redhat.com> 1.0.1-1
 - Set runner_cache as defaultdict of dict.
 - Define ConnectionRefusedError for Python2.
