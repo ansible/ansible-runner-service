@@ -82,7 +82,7 @@ install -m 644 ./logging.yaml %{buildroot}%{_sysconfdir}/ansible-runner-service
 %files -n python2-%{srcname}
 %{_bindir}/ansible_runner_service
 %{python2_sitelib}/*
-%{_sysconfdir}/ansible-runner-service/*
+%config(noreplace) %{_sysconfdir}/ansible-runner-service/*
 
 %license LICENSE.md
 
