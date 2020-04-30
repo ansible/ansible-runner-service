@@ -155,7 +155,7 @@ def ssh_create_key(ssh_dir, user=None):
         raise
     else:
         # python3 syntax
-        os.chmod(pub_file, 0o600)
+        os.chmod(pub_file, 0o644)
         logger.info("Created SSH public key @ '{}'".format(pub_file))
 
 
