@@ -85,7 +85,7 @@ install -m 644 ./logging.yaml %{buildroot}%{_sysconfdir}/ansible-runner-service
 
 install -m 644 ./wsgi.py %{buildroot}%{_sysconfdir}/ansible-runner-service
 
-install -m 644 ./ansible-runner-service-logrotate /etc/logrotate.d/ansible-runner-service
+install -m 644 ./misc/packaging/logrotate/ansible-runner-service /etc/logrotate.d/ansible-runner-service
 
 mkdir -p %{buildroot}%{_unitdir}
 cp -r ./packaging/gunicorn/ansible-runner-service.service %{buildroot}%{_unitdir}
