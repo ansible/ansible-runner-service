@@ -44,6 +44,7 @@ Requires: python2-notario
 Requires: python2-flask
 Requires: python2-flask-restful
 Requires: python2-gunicorn
+Requires: python2-psutil
 
 %description -n python2-%{srcname} %_description
 
@@ -59,6 +60,7 @@ Requires: python3-notario
 Requires: python3-flask
 Requires: python3-flask-restful
 Requires: python3-gunicorn
+Requires: python3-psutil
 
 %description -n python3-%{srcname} %_description
 
