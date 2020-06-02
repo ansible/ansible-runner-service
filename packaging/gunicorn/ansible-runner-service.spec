@@ -91,6 +91,8 @@ cp -r ./packaging/gunicorn/ansible-runner-service.service %{buildroot}%{_unitdir
 mkdir -p %{buildroot}/var/log/ovirt-engine
 touch %{buildroot}/var/log/ovirt-engine/ansible-runner-service.log
 
+install -m 644 ./packaging/gunicorn/ansible-runner-service /etc/logrotate.d/ansible-runner-service
+
 %files -n python2-%{srcname}
 %{_bindir}/ansible_runner_service
 %{python2_sitelib}/*
