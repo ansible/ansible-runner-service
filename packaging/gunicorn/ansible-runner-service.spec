@@ -93,11 +93,15 @@ touch %{buildroot}/var/log/ovirt-engine/ansible-runner-service.log
 
 install -m 644 ./packaging/gunicorn/ansible-runner-service /etc/logrotate.d/ansible-runner-service
 
+mkdir -p %{buildroot}%{_sysconfdir}/logrotate.d
+install -m 644 ./packaging/gunicorn/ansible-runner-service %{buildroot}%{_sysconfdir}/logrotate.d/ansible-runner-service
+
 %files -n python2-%{srcname}
 %{_bindir}/ansible_runner_service
 %{python2_sitelib}/*
 %config(noreplace) %{_sysconfdir}/ansible-runner-service/*
 %{_unitdir}/ansible-runner-service.service
+%{_sysconfdir}/logrotate.d/ansible-runner-service
 /var/log/ovirt-engine/ansible-runner-service.log
 
 %license LICENSE.md
@@ -109,6 +113,8 @@ install -m 644 ./packaging/gunicorn/ansible-runner-service /etc/logrotate.d/ansi
 %{python3_sitelib}/*
 %{_sysconfdir}/ansible-runner-service/*
 %{_unitdir}/ansible-runner-service.service
+%{_sysconfdir}/logrotate.d/ansible-runner-service
+/var/log/ovirt-engine/ansible-runner-service.log
 
 %license LICENSE.md
 
