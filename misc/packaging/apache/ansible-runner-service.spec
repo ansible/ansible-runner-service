@@ -79,12 +79,14 @@ mkdir -p %{buildroot}%{_sysconfdir}/ansible-runner-service
 install -m 644 ./config.yaml %{buildroot}%{_sysconfdir}/ansible-runner-service
 install -m 644 ./logging.yaml %{buildroot}%{_sysconfdir}/ansible-runner-service
 
-install -m 644 ./misc/packaging/logrotate/ansible-runner-service /etc/logrotate.d/ansible-runner-service
+mkdir -p %{buildroot}%{_sysconfdir}/logrotate.d
+install -m 644 ./misc/packaging/logrotate/ansible-runner-service %{buildroot}%{_sysconfdir}/logrotate.d/ansible-runner-service
 
 %files -n python2-%{srcname}
 %{_bindir}/ansible_runner_service
 %{python2_sitelib}/*
 %config(noreplace) %{_sysconfdir}/ansible-runner-service/*
+%{_sysconfdir}/logrotate.d/ansible-runner-service
 
 %license LICENSE.md
 
@@ -94,6 +96,7 @@ install -m 644 ./misc/packaging/logrotate/ansible-runner-service /etc/logrotate.
 %{_bindir}/ansible_runner_service
 %{python3_sitelib}/*
 %{_sysconfdir}/ansible-runner-service/*
+%{_sysconfdir}/logrotate.d/ansible-runner-service
 
 %license LICENSE.md
 
