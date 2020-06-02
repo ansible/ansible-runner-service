@@ -88,11 +88,15 @@ install -m 644 ./wsgi.py %{buildroot}%{_sysconfdir}/ansible-runner-service
 mkdir -p %{buildroot}%{_unitdir}
 cp -r ./packaging/gunicorn/ansible-runner-service.service %{buildroot}%{_unitdir}
 
+mkdir -p %{buildroot}/var/log/ovirt-engine
+touch %{buildroot}/var/log/ovirt-engine/ansible-runner-service.log
+
 %files -n python2-%{srcname}
 %{_bindir}/ansible_runner_service
 %{python2_sitelib}/*
 %config(noreplace) %{_sysconfdir}/ansible-runner-service/*
 %{_unitdir}/ansible-runner-service.service
+/var/log/ovirt-engine/ansible-runner-service.log
 
 %license LICENSE.md
 
