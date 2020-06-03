@@ -58,7 +58,7 @@ install -m 644 ./logging.yaml %{buildroot}%{_sysconfdir}/ansible-runner-service
 
 install -m 644 ./ansible_runner_service.py %{buildroot}%{python3_sitelib}/runner_service
 
-%files -n python3-%{srcname}
+%files -n %{srcname}
 %{_bindir}/ansible_runner_service
 %{python3_sitelib}/*
 %config(noreplace) %{_sysconfdir}/ansible-runner-service/*

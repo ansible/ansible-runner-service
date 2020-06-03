@@ -56,9 +56,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/ansible-runner-service
 install -m 644 ./config.yaml %{buildroot}%{_sysconfdir}/ansible-runner-service
 install -m 644 ./logging.yaml %{buildroot}%{_sysconfdir}/ansible-runner-service
 
-install -m 644 ./ansible_runner_service.py %{buildroot}%{python3_sitelib}/runner_service
+install -m 644 ./ansible_runner_service.py %{buildroot}%{python2_sitelib}/runner_service
 
-%files -n python2-%{srcname}
+%files -n %{srcname}
 %{_bindir}/ansible_runner_service
 %{python2_sitelib}/*
 %config(noreplace) %{_sysconfdir}/ansible-runner-service/*

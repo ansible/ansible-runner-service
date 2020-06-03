@@ -66,17 +66,11 @@ install -m 644 ./ansible_runner_service.py %{buildroot}%{python2_sitelib}/runner
 mkdir -p %{buildroot}%{_unitdir}
 cp -r ./packaging/gunicorn/ansible-runner-service.service %{buildroot}%{_unitdir}
 
-mkdir -p %{buildroot}/var/log/ovirt-engine
-touch %{buildroot}/var/log/ovirt-engine/ansible-runner-service.log
-
 %files -n %{srcname}
 %{_bindir}/ansible_runner_service
 %{python2_sitelib}/*
-%config(noreplace) %{_sysconfdir}/ansible-runner-service/config.yaml
-%config %{_sysconfdir}/ansible-runner-service/logging.yaml
+%config(noreplace) %{_sysconfdir}/ansible-runner-service/*
 %{_unitdir}/ansible-runner-service.service
-%{_sysconfdir}/logrotate.d/ansible-runner-service
-/var/log/ovirt-engine/ansible-runner-service.log
 
 %license LICENSE.md
 
