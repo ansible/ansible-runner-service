@@ -6,6 +6,7 @@ Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
 Patch0:  wsgi.patch
+Patch1:  ovirt_log.patch
 Group:	 Applications/System
 License: ASL 2.0
 
@@ -65,6 +66,7 @@ Requires: python3-gunicorn
 %prep
 %setup -q -n %{name}-%{version}
 %patch0 -p0
+%patch1 -p1
 
 %build
 # Disable debuginfo packages
@@ -109,7 +111,8 @@ install -m 644 ./packaging/gunicorn/ansible-runner-service %{buildroot}%{_syscon
 %files -n python3-%{srcname}
 %{_bindir}/ansible_runner_service
 %{python3_sitelib}/*
-%{_sysconfdir}/ansible-runner-service/*
+%config(noreplace) %{_sysconfdir}/ansible-runner-service/config.yaml
+%config %{_sysconfdir}/ansible-runner-service/logging.yaml
 %{_unitdir}/ansible-runner-service.service
 %{_sysconfdir}/logrotate.d/ansible-runner-service
 /var/log/ovirt-engine/ansible-runner-service.log
