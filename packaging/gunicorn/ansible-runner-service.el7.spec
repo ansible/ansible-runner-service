@@ -13,22 +13,22 @@ License: ASL 2.0
 BuildArch: noarch
 
 BuildRequires: systemd
-BuildRequires: python3-devel
-BuildRequires: python3-setuptools
+BuildRequires: python2-devel
+BuildRequires: python2-setuptools
 
 Requires: ansible
 Requires: openssl
 Requires: openssh
 Requires: openssh-clients
-Requires: python3
-Requires: python3-ansible-runner
-Requires: python3-gunicorn
-Requires: python3-pyOpenSSL
-Requires: python3-netaddr
-Requires: python3-notario
-Requires: python3-flask
-Requires: python3-flask-restful
-Requires: python3-psutil
+Requires: python-gunicorn
+Requires: python2
+Requires: python2-ansible-runner
+Requires: python2-pyOpenSSL
+Requires: python2-netaddr
+Requires: python2-notario
+Requires: python2-flask
+Requires: python2-flask-restful
+Requires: python2-psutil
 
 %global _description %{expand:
 This package provides the Ansible Runner Service source files. Ansible runner service exposes a REST API interface on top of the functionality provided by ansible and ansible_runner.
@@ -52,27 +52,36 @@ In addition to the API endpoints, the daemon also provides a /metrics endpoint f
 %define _enable_debug_package 0
 %define debug_package %{nil}
 
-%{__python3} setup.py build
+%{__python2} setup.py build
 
 %install
 
-%{__python3} setup.py install -O1 --skip-build --root %{buildroot}
+%{__python2} setup.py install -O1 --skip-build --root %{buildroot}
 
 mkdir -p %{buildroot}%{_sysconfdir}/ansible-runner-service
 install -m 644 ./config.yaml %{buildroot}%{_sysconfdir}/ansible-runner-service
 install -m 644 ./logging.yaml %{buildroot}%{_sysconfdir}/ansible-runner-service
 
-install -m 644 ./wsgi.py %{buildroot}%{python3_sitelib}/runner_service/
-install -m 644 ./ansible_runner_service.py %{buildroot}%{python3_sitelib}/runner_service
+install -m 644 ./wsgi.py %{buildroot}%{python2_sitelib}/runner_service/
+install -m 644 ./ansible_runner_service.py %{buildroot}%{python2_sitelib}/runner_service
 
 mkdir -p %{buildroot}%{_unitdir}
 cp -r ./packaging/gunicorn/ansible-runner-service.service %{buildroot}%{_unitdir}
 
+mkdir -p %{buildroot}/var/log/ovirt-engine
+touch %{buildroot}/var/log/ovirt-engine/ansible-runner-service.log
+
+mkdir -p %{buildroot}%{_sysconfdir}/logrotate.d
+install -m 644 ./packaging/gunicorn/ansible-runner-service %{buildroot}%{_sysconfdir}/logrotate.d/ansible-runner-service
+
 %files -n %{srcname}
 %{_bindir}/ansible_runner_service
-%{python3_sitelib}/*
-%config(noreplace) %{_sysconfdir}/ansible-runner-service/*
+%{python2_sitelib}/*
+%config(noreplace) %{_sysconfdir}/ansible-runner-service/config.yaml
+%config %{_sysconfdir}/ansible-runner-service/logging.yaml
 %{_unitdir}/ansible-runner-service.service
+%{_sysconfdir}/logrotate.d/ansible-runner-service
+/var/log/ovirt-engine/ansible-runner-service.log
 
 %license LICENSE.md
 
