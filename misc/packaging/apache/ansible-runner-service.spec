@@ -15,6 +15,7 @@ BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 
 Requires: ansible
+Requires: logrotate
 Requires: openssl
 Requires: openssh
 Requires: openssh-clients
@@ -57,11 +58,15 @@ mkdir -p %{buildroot}%{_sysconfdir}/ansible-runner-service
 install -m 644 ./config.yaml %{buildroot}%{_sysconfdir}/ansible-runner-service
 install -m 644 ./logging.yaml %{buildroot}%{_sysconfdir}/ansible-runner-service
 
+mkdir -p %{buildroot}%{_sysconfdir}/logrotate.d
+install -m 644 ./misc/packaging/logrotate/ansible-runner-service %{buildroot}%{_sysconfdir}/logrotate.d/ansible-runner-service
+
 install -m 644 ./ansible_runner_service.py %{buildroot}%{python3_sitelib}/runner_service
 
 %files -n %{srcname}
 %{_bindir}/ansible_runner_service
 %{python3_sitelib}/*
+%{_sysconfdir}/logrotate.d/ansible-runner-service
 %config(noreplace) %{_sysconfdir}/ansible-runner-service/*
 
 %license LICENSE.md
