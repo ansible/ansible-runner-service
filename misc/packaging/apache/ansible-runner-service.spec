@@ -75,7 +75,7 @@ install -m 644 ./ansible_runner_service.py %{buildroot}%{python3_sitelib}/runner
 
 %changelog
 * Thu Jun 4 2020 Martin Necas <mnecas@redhat.com> 1.0.3-1
-- Add logrotate
+- Add logrotate configuration to purge old log files
 - Add psutil to dependencies
 
 * Tue Apr 28 2020 Martin Necas <mnecas@redhat.com> 1.0.2-1

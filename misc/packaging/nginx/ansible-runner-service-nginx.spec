@@ -94,8 +94,7 @@ install -m 0644 ./misc/nginx/uwsgi.ini %{buildroot}%{_sysconfdir}/ansible-runner
 
 %changelog
 * Thu Jun 4 2020 Martin Necas <mnecas@redhat.com> 1.0.3-1
-- Add logrotate
-- Add psutil to dependencies
+- No change in this RPM
 
 * Tue Apr 28 2020 Martin Necas <mnecas@redhat.com> 1.0.2-1
 - Allow playbook parallel execution.

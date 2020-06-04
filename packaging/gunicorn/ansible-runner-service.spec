@@ -90,7 +90,7 @@ install -m 644 ./packaging/gunicorn/ansible-runner-service %{buildroot}%{_syscon
 
 %changelog
 * Thu Jun 4 2020 Martin Necas <mnecas@redhat.com> 1.0.3-1
-- Add logrotate
+- Add logrotate configuration to purge old log files
 - Add psutil to dependencies
 
 * Tue Apr 28 2020 Martin Necas <mnecas@redhat.com> 1.0.2-1
