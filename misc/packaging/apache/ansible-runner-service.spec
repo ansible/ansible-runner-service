@@ -65,7 +65,6 @@ install -m 644 ./ansible_runner_service.py %{buildroot}%{python3_sitelib}/runner
 %files -n %{srcname}
 %{_bindir}/ansible_runner_service
 %{python3_sitelib}/*
-%{_sysconfdir}/ansible-runner-service/*
 %{_sysconfdir}/logrotate.d/ansible-runner-service
 %config(noreplace) %{_sysconfdir}/ansible-runner-service/*
 
