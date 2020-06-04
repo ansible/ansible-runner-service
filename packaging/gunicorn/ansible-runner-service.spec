@@ -73,7 +73,6 @@ cp -r ./packaging/gunicorn/ansible-runner-service.service %{buildroot}%{_unitdir
 %{_bindir}/ansible_runner_service
 %{python3_sitelib}/*
 %config(noreplace) %{_sysconfdir}/ansible-runner-service/*
-
 %{_unitdir}/ansible-runner-service.service
 %{_sysconfdir}/logrotate.d/ansible-runner-service
 /var/log/ovirt-engine/ansible-runner-service.log
