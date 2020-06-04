@@ -44,7 +44,7 @@ In addition to the API endpoints, the daemon also provides a /metrics endpoint f
 %description %_description
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q -n ansible-runner-service-%{version}
 %patch0 -p1
 %patch1 -p1
 
