@@ -1,7 +1,7 @@
 %global srcname ansible-runner-service-dev
 
 Name: %{srcname}
-Version: 1.0.2
+Version: 1.0.3
 Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
@@ -89,6 +89,10 @@ install -m 644 ./packaging/gunicorn/ansible-runner-service %{buildroot}%{_syscon
 %doc README.md
 
 %changelog
+* Thu Jun 4 2020 Martin Necas <mnecas@redhat.com> 1.0.3-1
+- Add logrotate
+- Add psutil to dependencies
+
 * Tue Apr 28 2020 Martin Necas <mnecas@redhat.com> 1.0.2-1
 - Allow playbook parallel execution.
 - Add artifacts removal.
