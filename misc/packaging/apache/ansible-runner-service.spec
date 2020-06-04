@@ -11,13 +11,21 @@ License: ASL 2.0
 BuildArch: noarch
 
 BuildRequires: systemd
+BuildRequires: python3-devel
+BuildRequires: python3-setuptools
 
 Requires: ansible
-Requires: ansible-runner
-Requires: bubblewrap
 Requires: openssl
 Requires: openssh
 Requires: openssh-clients
+Requires: python3
+Requires: python3-ansible-runner
+Requires: python3-pyOpenSSL
+Requires: python3-netaddr
+Requires: python3-notario
+Requires: python3-flask
+Requires: python3-flask-restful
+Requires: python3-psutil
 
 %global _description %{expand:
 This package provides the Ansible Runner Service source files. Ansible runner service exposes a REST API interface on top of the functionality provided by ansible and ansible_runner.
@@ -31,36 +39,6 @@ In addition to the API endpoints, the daemon also provides a /metrics endpoint f
 
 %description %_description
 
-%package -n python2-%{srcname}
-Summary:        %{summary}
-BuildRequires: python2-devel
-BuildRequires: python2-setuptools
-Requires: python2
-Requires: python2-netaddr
-Requires: python2-pyOpenSSL
-Requires: python2-netaddr
-Requires: python2-notario
-Requires: python2-flask
-Requires: python2-flask-restful
-Requires: python2-psutil
-
-%description -n python2-%{srcname} %_description
-
-%package -n python3-%{srcname}
-Summary:        %{summary}
-BuildRequires: python3-devel
-BuildRequires: python3-setuptools
-Requires: python3
-Requires: python3-netaddr
-Requires: python3-pyOpenSSL
-Requires: python3-netaddr
-Requires: python3-notario
-Requires: python3-flask
-Requires: python3-flask-restful
-Requires: python3-psutil
-
-%description -n python3-%{srcname} %_description
-
 %prep
 %setup -q -n %{name}-%{version}
 
@@ -69,31 +47,22 @@ Requires: python3-psutil
 %define _enable_debug_package 0
 %define debug_package %{nil}
 
-%{__python2} setup.py build
 %{__python3} setup.py build
 
 %install
 
-%{__python2} setup.py install -O1 --skip-build --root %{buildroot}
 %{__python3} setup.py install -O1 --skip-build --root %{buildroot}
 
 mkdir -p %{buildroot}%{_sysconfdir}/ansible-runner-service
 install -m 644 ./config.yaml %{buildroot}%{_sysconfdir}/ansible-runner-service
 install -m 644 ./logging.yaml %{buildroot}%{_sysconfdir}/ansible-runner-service
 
-%files -n python2-%{srcname}
-%{_bindir}/ansible_runner_service
-%{python2_sitelib}/*
-%config(noreplace) %{_sysconfdir}/ansible-runner-service/*
+install -m 644 ./ansible_runner_service.py %{buildroot}%{python3_sitelib}/runner_service
 
-%license LICENSE.md
-
-%doc README.md
-
-%files -n python3-%{srcname}
+%files -n %{srcname}
 %{_bindir}/ansible_runner_service
 %{python3_sitelib}/*
-%{_sysconfdir}/ansible-runner-service/*
+%config(noreplace) %{_sysconfdir}/ansible-runner-service/*
 
 %license LICENSE.md
 
