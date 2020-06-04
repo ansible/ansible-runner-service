@@ -28,7 +28,6 @@ Requires: python3-notario
 Requires: python3-flask
 Requires: python3-flask-restful
 Requires: python3-psutil
-Requires: python3-psutil
 
 %global _description %{expand:
 This package provides the Ansible Runner Service source files. Ansible runner service exposes a REST API interface on top of the functionality provided by ansible and ansible_runner.
