@@ -17,6 +17,7 @@ BuildRequires: python3-devel
 BuildRequires: python3-setuptools
 
 Requires: ansible
+Requires: logrotate
 Requires: openssl
 Requires: openssh
 Requires: openssh-clients
