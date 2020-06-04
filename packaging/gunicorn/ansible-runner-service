@@ -1,0 +1,7 @@
+/var/log/ovirt-engine/ansible-runner-service.log {
+	monthly
+	missingok
+	compress
+	nocreate
+	rotate 1
+}
