@@ -4,7 +4,7 @@
 %endif
 
 Name: ansible-runner-service
-Version: 1.0.2
+Version: 1.0.3
 Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/pcuzner/%{name}/archive/%{name}-%{version}.tar.gz
@@ -75,6 +75,9 @@ install -m 0644 ./LICENSE.md %{buildroot}%{_docdir}/ansible-runner-service
 %{_docdir}/ansible-runner-service/*
 
 %changelog
+* Thu Jun 4 2020 Martin Necas <mnecas@redhat.com> 1.0.3-1
+- No change in this RPM
+
 * Tue Apr 28 2020 Martin Necas <mnecas@redhat.com> 1.0.2-1
 - Allow playbook parallel execution.
 - Add artifacts removal.

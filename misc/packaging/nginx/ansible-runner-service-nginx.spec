@@ -4,7 +4,7 @@
 %endif
 
 Name: ansible-runner-service
-Version: 1.0.2
+Version: 1.0.3
 Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
@@ -22,6 +22,7 @@ Requires: ansible-runner >= 1.3.2
 Requires: python-flask >= 1.0.2
 Requires: python2-flask-restful >= 0.3.5
 Requires: python2-cryptography
+Requires: python2-psutil
 Requires: openssl
 Requires: pyOpenSSL
 Requires: PyYAML
@@ -93,6 +94,9 @@ install -m 0644 ./misc/nginx/uwsgi.ini %{buildroot}%{_sysconfdir}/ansible-runner
 
 
 %changelog
+* Thu Jun 4 2020 Martin Necas <mnecas@redhat.com> 1.0.3-1
+- Add psutil to dependencies
+
 * Tue Apr 28 2020 Martin Necas <mnecas@redhat.com> 1.0.2-1
 - Allow playbook parallel execution.
 - Add artifacts removal.

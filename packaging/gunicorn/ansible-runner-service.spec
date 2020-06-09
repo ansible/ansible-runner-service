@@ -1,7 +1,7 @@
 %global srcname ansible-runner-service-dev
 
 Name: %{srcname}
-Version: 1.0.2
+Version: 1.0.3
 Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
@@ -69,6 +69,12 @@ install -m 644 ./ansible_runner_service.py %{buildroot}%{python3_sitelib}/runner
 mkdir -p %{buildroot}%{_unitdir}
 cp -r ./packaging/gunicorn/ansible-runner-service.service %{buildroot}%{_unitdir}
 
+mkdir -p %{buildroot}/var/log/ovirt-engine
+touch %{buildroot}/var/log/ovirt-engine/ansible-runner-service.log
+
+mkdir -p %{buildroot}%{_sysconfdir}/logrotate.d
+install -m 644 ./packaging/gunicorn/ansible-runner-service %{buildroot}%{_sysconfdir}/logrotate.d/ansible-runner-service
+
 %files -n %{srcname}
 %{_bindir}/ansible_runner_service
 %{python3_sitelib}/*
@@ -83,6 +89,10 @@ cp -r ./packaging/gunicorn/ansible-runner-service.service %{buildroot}%{_unitdir
 %doc README.md
 
 %changelog
+* Thu Jun 4 2020 Martin Necas <mnecas@redhat.com> 1.0.3-1
+- Add logrotate configuration to purge old log files
+- Add psutil to dependencies
+
 * Tue Apr 28 2020 Martin Necas <mnecas@redhat.com> 1.0.2-1
 - Allow playbook parallel execution.
 - Add artifacts removal.
