@@ -1,10 +1,17 @@
 diff --git a/logging.yaml b/logging.yaml
-index 8357727..80b2494 100644
+index 8357727..16a0c1c 100644
 --- a/logging.yaml
 +++ b/logging.yaml
-@@ -14,12 +14,10 @@ handlers:
-         stream: ext://sys.stdout
+@@ -7,21 +7,13 @@ formatters:
+         format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
  
+ handlers:
+-    console:
+-        class: logging.StreamHandler
+-        level: DEBUG
+-        formatter: simple
+-        stream: ext://sys.stdout
+-
      file_handler:
 -        class: logging.handlers.RotatingFileHandler
 +        class: logging.handlers.WatchedFileHandler
@@ -16,6 +23,9 @@ index 8357727..80b2494 100644
          encoding: utf8
  
  root:
+     level: DEBUG
+-    handlers: [console, file_handler]
++    handlers: [file_handler]
 diff --git a/misc/packaging/logrotate/ansible-runner-service b/misc/packaging/logrotate/ansible-runner-service
 index 8dcf86b..66082b7 100644
 --- a/misc/packaging/logrotate/ansible-runner-service
