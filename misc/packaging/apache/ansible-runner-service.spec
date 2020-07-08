@@ -5,6 +5,7 @@ Version: 1.0.3
 Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
+Patch0:  ovirt_log.patch
 Group:	 Applications/System
 License: ASL 2.0
 
@@ -42,6 +43,7 @@ In addition to the API endpoints, the daemon also provides a /metrics endpoint f
 
 %prep
 %setup -q -n %{name}-%{version}
+%patch0 -p1
 
 %build
 # Disable debuginfo packages

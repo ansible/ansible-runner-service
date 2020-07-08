@@ -17,7 +17,8 @@ index 8357727..16a0c1c 100644
 +        class: logging.handlers.WatchedFileHandler
          level: DEBUG
          formatter: simple
-         filename: ansible-runner-service.log
+-        filename: ansible-runner-service.log
++        filename: /var/log/ovirt-engine/ansible-runner-service.log
 -        maxBytes: 10485760 # 10MB
 -        backupCount: 20
          encoding: utf8
