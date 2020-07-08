@@ -1,0 +1,32 @@
+diff --git a/logging.yaml b/logging.yaml
+index 8357727..80b2494 100644
+--- a/logging.yaml
++++ b/logging.yaml
+@@ -14,12 +14,10 @@ handlers:
+         stream: ext://sys.stdout
+ 
+     file_handler:
+-        class: logging.handlers.RotatingFileHandler
++        class: logging.handlers.WatchedFileHandler
+         level: DEBUG
+         formatter: simple
+         filename: ansible-runner-service.log
+-        maxBytes: 10485760 # 10MB
+-        backupCount: 20
+         encoding: utf8
+ 
+ root:
+diff --git a/misc/packaging/logrotate/ansible-runner-service b/misc/packaging/logrotate/ansible-runner-service
+index 8dcf86b..66082b7 100644
+--- a/misc/packaging/logrotate/ansible-runner-service
++++ b/misc/packaging/logrotate/ansible-runner-service
+@@ -1,7 +1,7 @@
+-/var/log/ansible-runner-service.log {
++/var/log/ovirt-engine/ansible-runner-service.log {
+ 	monthly
+ 	missingok
+ 	compress
+-	nocreate
++	create
+ 	rotate 1
+ }
