@@ -27,17 +27,3 @@ index 8357727..16a0c1c 100644
      level: DEBUG
 -    handlers: [console, file_handler]
 +    handlers: [file_handler]
-diff --git a/misc/packaging/logrotate/ansible-runner-service b/misc/packaging/logrotate/ansible-runner-service
-index 8dcf86b..66082b7 100644
---- a/misc/packaging/logrotate/ansible-runner-service
-+++ b/misc/packaging/logrotate/ansible-runner-service
-@@ -1,7 +1,7 @@
--/var/log/ansible-runner-service.log {
-+/var/log/ovirt-engine/ansible-runner-service.log {
- 	monthly
- 	missingok
- 	compress
--	nocreate
-+	create
- 	rotate 1
- }

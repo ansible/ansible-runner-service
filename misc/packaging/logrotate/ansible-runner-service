@@ -1,7 +1,7 @@
 /var/log/ansible-runner-service.log {
-	monthly
+	weekly
 	missingok
 	compress
-	nocreate
-	rotate 1
+	create
+	rotate 4
 }
