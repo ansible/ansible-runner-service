@@ -7,8 +7,8 @@ import logging
 import unittest
 
 sys.path.extend(["../", "./"])
-from common import APITestCase              # noqa
-from runner_service.utils import fread      # noqa
+from common import APITestCase, fake_ssh_client  # noqa
+from runner_service.utils import fread           # noqa
 
 # turn of normal logging that the ansible_runner_service will generate
 nh = logging.NullHandler()
@@ -102,6 +102,7 @@ class TestInventory(APITestCase):
             payload = json.loads(response.data)
             self.assertTrue(payload['msg'].upper().startswith('SKIPPED'))
 
+    @fake_ssh_client
     def test_host_add_localhost(self):
         """- Add a localhost to a group"""
 
@@ -124,6 +125,7 @@ class TestInventory(APITestCase):
         self.assertEqual(response.status_code,
                          400)
 
+    @fake_ssh_client
     def test_host_add_duplicate(self):
         """- Attempt to add a host multiple times to a group"""
         dupe_count = 2
@@ -154,6 +156,7 @@ class TestInventory(APITestCase):
         payload = json.loads(response.data)
         self.assertTrue(isinstance(payload['data']['hosts'], list))
 
+    @fake_ssh_client
     def test_remove_valid_host(self):
         """- remove a host from a group"""
         response = self.app.post('api/v1/groups/temphost')
@@ -177,7 +180,7 @@ class TestInventory(APITestCase):
         response = self.app.delete('/api/v1/hosts/notthere/groups/invalidhost')
         self.assertEqual(response.status_code,
                          400)
-
+    @fake_ssh_client
     def test_check_membership(self):
         """- show groups host is a member of"""
         response = self.app.post('api/v1/groups/groupone')
@@ -192,6 +195,7 @@ class TestInventory(APITestCase):
         payload = json.loads(response.data)
         self.assertIn("groupone", payload['data']['groups'])
 
+    @fake_ssh_client
     def test_show_group_members(self):
         """- show hosts that are members of a specific group"""
         response = self.app.post('api/v1/groups/grouptwo')
@@ -215,6 +219,7 @@ class TestInventory(APITestCase):
         self.assertEqual(response.status_code,
                          404)
 
+    @fake_ssh_client
     def test_add_host_multiple_groups(self):
         """- add a host to multiple groups"""
 
@@ -234,6 +239,7 @@ class TestInventory(APITestCase):
         self.assertEqual(response.status_code,
                          200)
 
+    @fake_ssh_client
     def test_hosts_with_invalid_parms(self):
         """- issue a host/group request with an invalid parameter"""
         response = self.app.post('api/v1/groups/parmcheck')  # noqa
@@ -243,6 +249,7 @@ class TestInventory(APITestCase):
         self.assertEqual(response.status_code,
                          400)
 
+    @fake_ssh_client
     def test_remove_host(self):
         """- remove a host from all groups"""
         response = self.app.post('api/v1/groups/removehost1')

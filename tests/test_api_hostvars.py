@@ -6,9 +6,8 @@ import yaml
 import unittest
 
 sys.path.extend(["../", "./"])
-from common import APITestCase  # noqa
+from common import APITestCase, fake_ssh_client  # noqa
 from runner_service.utils import fread      # noqa
-
 
 class TestHostVars(APITestCase):
 
@@ -78,7 +77,7 @@ class TestHostVars(APITestCase):
                                  content_type="text/html")
         self.assertEqual(response.status_code,
                          415)
-
+    @fake_ssh_client
     def test_add_hostvars_inventory(self):
         """- create hostvars (file), group and host valid"""
         response = self.app.post('api/v1/groups/tahi')
@@ -120,6 +119,7 @@ class TestHostVars(APITestCase):
         response = self.app.delete('api/v1/hostvars/deleteme/group/unknown')
         self.assertEqual(response.status_code, 404)
 
+    @fake_ssh_client
     def test_delete_hostvars(self):
         """- delete valid hostvars (inventory or file removed)"""
         response = self.app.post('api/v1/groups/tdh')
