@@ -94,6 +94,9 @@ install -m 0644 ./misc/nginx/uwsgi.ini %{buildroot}%{_sysconfdir}/ansible-runner
 
 
 %changelog
+* Tue Jul 13 2020 Martin Necas <mnecas@redhat.com> 1.0.4-1
+- No change in this RPM
+
 * Thu Jun 4 2020 Martin Necas <mnecas@redhat.com> 1.0.3-1
 - Add psutil to dependencies
 

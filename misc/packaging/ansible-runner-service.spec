@@ -75,6 +75,9 @@ install -m 0644 ./LICENSE.md %{buildroot}%{_docdir}/ansible-runner-service
 %{_docdir}/ansible-runner-service/*
 
 %changelog
+* Tue Jul 13 2020 Martin Necas <mnecas@redhat.com> 1.0.4-1
+- No change in this RPM
+
 * Thu Jun 4 2020 Martin Necas <mnecas@redhat.com> 1.0.3-1
 - No change in this RPM
 
