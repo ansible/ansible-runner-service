@@ -65,6 +65,9 @@ install -m 644 ./misc/packaging/logrotate/ansible-runner-service %{buildroot}%{_
 
 install -m 644 ./ansible_runner_service.py %{buildroot}%{python3_sitelib}/runner_service
 
+%post
+[[ -f /var/log/ovirt-engine/ansible-runner-service.log ]] && chcon -t httpd_log_t /var/log/ovirt-engine/ansible-runner-service.log
+
 %files -n %{srcname}
 %{_bindir}/ansible_runner_service
 %{python3_sitelib}/*
