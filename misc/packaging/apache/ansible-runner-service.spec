@@ -1,7 +1,7 @@
 %global srcname ansible-runner-service
 
 Name: %{srcname}
-Version: 1.0.4
+Version: 1.0.5
 Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
@@ -76,6 +76,10 @@ install -m 644 ./ansible_runner_service.py %{buildroot}%{python3_sitelib}/runner
 %doc README.md
 
 %changelog
+* Tue Jul 28 2020 Martin Necas <mnecas@redhat.com> 1.0.5-1
+- Change artifacts_remove_age for weekly cleanup
+- Fix ansible-runner-service.log permissions
+
 * Tue Jul 13 2020 Martin Necas <mnecas@redhat.com> 1.0.4-1
 - Fixes log rotation for Apache and Gunicorn based instances
 - Adds mocking of SSHClient in hostvars and inventory tests
