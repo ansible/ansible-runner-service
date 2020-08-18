@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Certificates data, password and placement are customizable in this file
 source ./certificates_data.custom
