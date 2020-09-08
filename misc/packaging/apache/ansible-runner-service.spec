@@ -6,6 +6,7 @@ Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
 Patch0:  ovirt_log.patch
+Patch1:  wsgi.patch
 Group:	 Applications/System
 License: ASL 2.0
 
@@ -44,6 +45,7 @@ In addition to the API endpoints, the daemon also provides a /metrics endpoint f
 %prep
 %setup -q -n %{name}-%{version}
 %patch0 -p1
+%patch1 -p1
 
 %build
 # Disable debuginfo packages
@@ -65,6 +67,9 @@ install -m 644 ./misc/packaging/logrotate/ansible-runner-service %{buildroot}%{_
 
 install -m 644 ./ansible_runner_service.py %{buildroot}%{python3_sitelib}/runner_service
 
+mkdir -p %{buildroot}%{_var}/www/runnner
+install -m 644 ./wsgi.py %{buildroot}%{_var}/www/runnner/runner.wsgi
+
 %post
 [[ -f /var/log/ovirt-engine/ansible-runner-service.log ]] && chcon -t httpd_log_t /var/log/ovirt-engine/ansible-runner-service.log
 
@@ -73,6 +78,7 @@ install -m 644 ./ansible_runner_service.py %{buildroot}%{python3_sitelib}/runner
 %{python3_sitelib}/*
 %{_sysconfdir}/logrotate.d/ansible-runner-service
 %config(noreplace) %{_sysconfdir}/ansible-runner-service/*
+%{_var}/www/runnner/runner.wsgi
 
 %license LICENSE.md
 
