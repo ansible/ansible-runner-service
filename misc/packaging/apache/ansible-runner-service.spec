@@ -89,7 +89,7 @@ install -m 644 ./wsgi.py %{buildroot}%{_var}/www/runnner/runner.wsgi
 - Change artifacts_remove_age for weekly cleanup
 - Fix ansible-runner-service.log permissions
 
-* Tue Jul 13 2020 Martin Necas <mnecas@redhat.com> 1.0.4-1
+* Mon Jul 13 2020 Martin Necas <mnecas@redhat.com> 1.0.4-1
 - Fixes log rotation for Apache and Gunicorn based instances
 - Adds mocking of SSHClient in hostvars and inventory tests
 
