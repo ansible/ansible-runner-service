@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import runner_service.configuration as configuration
 from runner_service.app import create_app
 from ansible_runner_service import setup_common_environment, remove_artifacts_init
