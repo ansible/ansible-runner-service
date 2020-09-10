@@ -1,24 +1,14 @@
 diff --git a/wsgi.py b/wsgi.py
-index 6407c08..f0991e4 100644
+index d66f9c5..86615de 100644
 --- a/wsgi.py
 +++ b/wsgi.py
-@@ -1,7 +1,8 @@
+@@ -1,6 +1,8 @@
 +#!/usr/bin/python
 +
  import runner_service.configuration as configuration
-+from runner_service.ansible_runner_service import setup_common_environment, remove_artifacts_init
  from runner_service.app import create_app
--from ansible_runner_service import setup_common_environment
--
+-from ansible_runner_service import setup_common_environment, remove_artifacts_init
++from runner_service.ansible_runner_service import setup_common_environment, remove_artifacts_init
+
 
  """
- WSGI config for Ansible Runner Service
-@@ -16,5 +17,8 @@ configuration.init(mode='prod')
- # Setup log and ssh and other things present in all the environments
- setup_common_environment()
-
-+# Setup remove of artifacts
-+remove_artifacts_init()
-+
- # The object to be managed by uwsgi
- application = create_app()
