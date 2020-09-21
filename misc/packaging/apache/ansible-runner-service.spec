@@ -66,8 +66,8 @@ install -m 644 ./misc/packaging/logrotate/ansible-runner-service %{buildroot}%{_
 install -m 644 ./ansible_runner_service.py %{buildroot}%{python3_sitelib}/runner_service
 
 %post
-semanage fcontext -a -t httpd_log_t /var/log/ovirt-engine/ansible-runner-service.log 2> /dev/null || semanage fcontext -m -t httpd_log_t /var/log/ovirt-engine/ansible-runner-service.log
-[[ -f /var/log/ovirt-engine/ansible-runner-service.log ]] && restorecon -r /var/log/ovirt-engine/ansible-runner-service.log
+semanage fcontext -a -t httpd_log_t -s system_u /var/log/ovirt-engine/ansible-runner-service.log 2> /dev/null || semanage fcontext -m -t httpd_log_t -s system_u /var/log/ovirt-engine/ansible-runner-service.log
+[[ -f /var/log/ovirt-engine/ansible-runner-service.log ]] && restorecon -rF /var/log/ovirt-engine/ansible-runner-service.log
 
 %files -n %{srcname}
 %{_bindir}/ansible_runner_service
