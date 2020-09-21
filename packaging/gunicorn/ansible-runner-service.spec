@@ -92,7 +92,7 @@ install -m 644 ./packaging/gunicorn/ansible-runner-service %{buildroot}%{_syscon
 * Tue Jul 28 2020 Martin Necas <mnecas@redhat.com> 1.0.5-1
 - Change artifacts_remove_age for weekly cleanup
 
-* Tue Jul 13 2020 Martin Necas <mnecas@redhat.com> 1.0.4-1
+* Mon Jul 13 2020 Martin Necas <mnecas@redhat.com> 1.0.4-1
 - Fixes log rotation for Apache and Gunicorn based instances
 - Adds mocking of SSHClient in hostvars and inventory tests
 
