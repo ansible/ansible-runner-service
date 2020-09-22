@@ -20,6 +20,7 @@ Requires: logrotate
 Requires: openssl
 Requires: openssh
 Requires: openssh-clients
+Requires: policycoreutils-python-utils
 Requires: python3
 Requires: python3-ansible-runner
 Requires: python3-pyOpenSSL
