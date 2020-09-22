@@ -97,7 +97,7 @@ install -m 0644 ./misc/nginx/uwsgi.ini %{buildroot}%{_sysconfdir}/ansible-runner
 * Tue Jul 28 2020 Martin Necas <mnecas@redhat.com> 1.0.5-1
 - Change artifacts_remove_age for weekly cleanup
 
-* Tue Jul 13 2020 Martin Necas <mnecas@redhat.com> 1.0.4-1
+* Mon Jul 13 2020 Martin Necas <mnecas@redhat.com> 1.0.4-1
 - No change in this RPM
 
 * Thu Jun 4 2020 Martin Necas <mnecas@redhat.com> 1.0.3-1
