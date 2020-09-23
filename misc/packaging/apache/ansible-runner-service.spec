@@ -21,6 +21,7 @@ Requires: logrotate
 Requires: openssl
 Requires: openssh
 Requires: openssh-clients
+Requires: policycoreutils-python-utils
 Requires: python3
 Requires: python3-ansible-runner
 Requires: python3-pyOpenSSL
@@ -71,7 +72,8 @@ mkdir -p %{buildroot}%{_var}/www/runnner
 install -m 644 ./wsgi.py %{buildroot}%{_var}/www/runnner/runner.wsgi
 
 %post
-[[ -f /var/log/ovirt-engine/ansible-runner-service.log ]] && chcon -t httpd_log_t /var/log/ovirt-engine/ansible-runner-service.log
+semanage fcontext -a -t httpd_log_t -s system_u /var/log/ovirt-engine/ansible-runner-service.log 2> /dev/null || semanage fcontext -m -t httpd_log_t -s system_u /var/log/ovirt-engine/ansible-runner-service.log
+[[ -f /var/log/ovirt-engine/ansible-runner-service.log ]] && restorecon -rF /var/log/ovirt-engine/ansible-runner-service.log
 
 %files -n %{srcname}
 %{_bindir}/ansible_runner_service
