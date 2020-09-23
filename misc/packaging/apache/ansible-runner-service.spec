@@ -1,7 +1,7 @@
 %global srcname ansible-runner-service
 
 Name: %{srcname}
-Version: 1.0.5
+Version: 1.0.6
 Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
@@ -87,6 +87,10 @@ semanage fcontext -a -t httpd_log_t -s system_u /var/log/ovirt-engine/ansible-ru
 %doc README.md
 
 %changelog
+* Wed Sep 23 2020 Martin Perina <mnecas@redhat.com> 1.0.6-1
+- Use permanent selinux label on logs
+- Add periodic artifacts removal to wsgi based invocations
+
 * Tue Jul 28 2020 Martin Necas <mnecas@redhat.com> 1.0.5-1
 - Change artifacts_remove_age for weekly cleanup
 - Fix ansible-runner-service.log permissions
