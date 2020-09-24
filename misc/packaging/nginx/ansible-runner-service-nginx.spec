@@ -4,7 +4,7 @@
 %endif
 
 Name: ansible-runner-service
-Version: 1.0.5
+Version: 1.0.6
 Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
@@ -94,6 +94,10 @@ install -m 0644 ./misc/nginx/uwsgi.ini %{buildroot}%{_sysconfdir}/ansible-runner
 
 
 %changelog
+* Wed Sep 23 2020 Martin Perina <mnecas@redhat.com> 1.0.6-1
+- Use permanent selinux label on logs
+- Add periodic artifacts removal to wsgi based invocations
+
 * Tue Jul 28 2020 Martin Necas <mnecas@redhat.com> 1.0.5-1
 - Change artifacts_remove_age for weekly cleanup
 
