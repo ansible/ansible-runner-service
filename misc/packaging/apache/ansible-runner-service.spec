@@ -87,6 +87,9 @@ semanage fcontext -a -t httpd_log_t -s system_u /var/log/ovirt-engine/ansible-ru
 %doc README.md
 
 %changelog
+* Thu Oct 01 2020 Martin Necas <mnecas@redhat.com> 1.0.6-2
+- Fix wsgi patch
+
 * Wed Sep 23 2020 Martin Perina <mnecas@redhat.com> 1.0.6-1
 - Use permanent selinux label on logs
 - Add periodic artifacts removal to wsgi based invocations
