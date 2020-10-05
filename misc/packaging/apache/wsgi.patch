@@ -1,5 +1,5 @@
 diff --git a/wsgi.py b/wsgi.py
-index d66f9c5..86615de 100644
+index d66f9c5..93fc875 100644
 --- a/wsgi.py
 +++ b/wsgi.py
 @@ -1,6 +1,8 @@
@@ -8,7 +8,16 @@ index d66f9c5..86615de 100644
  import runner_service.configuration as configuration
  from runner_service.app import create_app
 -from ansible_runner_service import setup_common_environment, remove_artifacts_init
-+from runner_service.ansible_runner_service import setup_common_environment, remove_artifacts_init
++from runner_service.ansible_runner_service import setup_logging, remove_artifacts_init
 
 
  """
+@@ -14,7 +16,7 @@ It exposes the WSGI callable as a module-level variable named ``application``.
+ configuration.init(mode='prod')
+
+ # Setup log and ssh and other things present in all the environments
+-setup_common_environment()
++setup_logging()
+
+ # Setup remove of artifacts
+ remove_artifacts_init()
