@@ -2,7 +2,7 @@
 
 Name: %{srcname}
 Version: 1.0.6
-Release: 1%{?dist}
+Release: 3%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
 Patch0:  ovirt_log.patch
@@ -72,8 +72,8 @@ mkdir -p %{buildroot}%{_var}/www/runnner
 install -m 644 ./wsgi.py %{buildroot}%{_var}/www/runnner/runner.wsgi
 
 %post
-semanage fcontext -a -t httpd_log_t -s system_u /var/log/ovirt-engine/ansible-runner-service.log 2> /dev/null || semanage fcontext -m -t httpd_log_t -s system_u /var/log/ovirt-engine/ansible-runner-service.log
-[[ -f /var/log/ovirt-engine/ansible-runner-service.log ]] && restorecon -rF /var/log/ovirt-engine/ansible-runner-service.log
+semanage fcontext -a -t httpd_log_t -s system_u /var/log/ovirt-engine/ansible-runner-service.log 2> /dev/null || semanage fcontext -m -t httpd_log_t -s system_u /var/log/ovirt-engine/ansible-runner-service.log || true
+[[ -f /var/log/ovirt-engine/ansible-runner-service.log ]] && restorecon -rF /var/log/ovirt-engine/ansible-runner-service.log || true
 
 %files -n %{srcname}
 %{_bindir}/ansible_runner_service
@@ -87,6 +87,9 @@ semanage fcontext -a -t httpd_log_t -s system_u /var/log/ovirt-engine/ansible-ru
 %doc README.md
 
 %changelog
+* Thu Oct 13 2020 Martin Necas <mnecas@redhat.com> 1.0.6-3
+- Fix post script error
+
 * Thu Oct 01 2020 Martin Necas <mnecas@redhat.com> 1.0.6-2
 - Fix wsgi patch
 
