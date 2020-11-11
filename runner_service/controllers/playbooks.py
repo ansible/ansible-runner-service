@@ -145,59 +145,62 @@ def _run_playbook(playbook_name, tags=None):
                           "Invalid content-type({}). Use application/" \
                           "json".format(request.content_type)
         return r
-
-    vars = request.get_json()
-    filter = request.args.to_dict()
-    if not all([_k in valid_filter for _k in filter.keys()]):
-        r.status, r.msg = "INVALID", "Bad request, supported " \
-                          "filters are: {}".format(','.join(valid_filter))
-        return r
-
-    if 'limit' in filter:
-
-        target_hosts = filter['limit'].split(',')
-        inv_hosts = AnsibleInventory().hosts
-        logger.debug("Checking host limit against the inventory")
-        if all([_h in inv_hosts for _h in target_hosts]):
-            logger.debug("hosts in the limit list match the inventory")
-
-        else:
-            logger.error("limit hosts don't match with the inventory")
-            # host(s) provided are not all in the inventory
-            r.status, r.msg = "INVALID", \
-                              "Host(s) provided not in Ansible inventory"
+    try:
+        vars = request.get_json()
+    except Exception as e:
+        logger.error("Failed to decode JSON object: {}".format(e))
+    else:
+        filter = request.args.to_dict()
+        if not all([_k in valid_filter for _k in filter.keys()]):
+            r.status, r.msg = "INVALID", "Bad request, supported " \
+                              "filters are: {}".format(','.join(valid_filter))
             return r
 
-    logger.info("Playbook run request for {}, from {}, "
-                "parameters: {}".format(playbook_name,
-                                        request.remote_addr,
-                                        vars))
+        if 'limit' in filter:
 
-    # does the playbook exist?
-    if not playbook_exists(playbook_name):
-        r.status, r.msg = "NOTFOUND", "playbook file not found"
-        return r
+            target_hosts = filter['limit'].split(',')
+            inv_hosts = AnsibleInventory().hosts
+            logger.debug("Checking host limit against the inventory")
+            if all([_h in inv_hosts for _h in target_hosts]):
+                logger.debug("hosts in the limit list match the inventory")
 
-    response = start_playbook(playbook_name, vars, filter, tags)
+            else:
+                logger.error("limit hosts don't match with the inventory")
+                # host(s) provided are not all in the inventory
+                r.status, r.msg = "INVALID", \
+                                  "Host(s) provided not in Ansible inventory"
+                return r
 
-    play_uuid = response.data.get('play_uuid', None)
-    status = response.data.get('status', None)
-    msg = ("Playbook {}, UUID={} initiated :"
-           " status={}".format(playbook_name,
-                               play_uuid,
-                               status))
+        logger.info("Playbook run request for {}, from {}, "
+                    "parameters: {}".format(playbook_name,
+                                            request.remote_addr,
+                                            vars))
 
-    if status in ['started', 'starting', 'running', 'successful']:
-        logger.info(msg)
-    else:
-        logger.error(msg)
+        # does the playbook exist?
+        if not playbook_exists(playbook_name):
+            r.status, r.msg = "NOTFOUND", "playbook file not found"
+            return r
 
-    if play_uuid:
-        r.status, r.msg, r.data = "STARTED", status, {"play_uuid": play_uuid}
-        return r
-    else:
-        r.status, r.msg = "FAILED", "Runner thread failed to start"
-        return r
+        response = start_playbook(playbook_name, vars, filter, tags)
+
+        play_uuid = response.data.get('play_uuid', None)
+        status = response.data.get('status', None)
+        msg = ("Playbook {}, UUID={} initiated :"
+               " status={}".format(playbook_name,
+                                   play_uuid,
+                                   status))
+
+        if status in ['started', 'starting', 'running', 'successful']:
+            logger.info(msg)
+        else:
+            logger.error(msg)
+
+        if play_uuid:
+            r.status, r.msg, r.data = "STARTED", status, {"play_uuid": play_uuid}
+            return r
+        else:
+            r.status, r.msg = "FAILED", "Runner thread failed to start"
+            return r
 
 
 class StartPlaybook(BaseResource):
