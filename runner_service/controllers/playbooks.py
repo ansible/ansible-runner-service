@@ -145,8 +145,12 @@ def _run_playbook(playbook_name, tags=None):
                           "Invalid content-type({}). Use application/" \
                           "json".format(request.content_type)
         return r
-
-    vars = request.get_json()
+    try:
+        vars = request.get_json()
+    except Exception as e:
+        r.status, r.msg = "INVALID", "Failed to decode JSON object: {}".format(e)
+        logger.error(r)
+        return r
     filter = request.args.to_dict()
     if not all([_k in valid_filter for _k in filter.keys()]):
         r.status, r.msg = "INVALID", "Bad request, supported " \
