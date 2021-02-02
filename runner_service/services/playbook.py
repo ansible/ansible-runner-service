@@ -129,13 +129,9 @@ def cb_playbook_finished(runner):
 def prune_runner_cache(current_runner):
     if len(runner_cache.keys()) >= configuration.settings.runner_cache_size:
         logger.debug("Maintaining runner_cache entries")
-        oldest = current_runner
-        for ident in runner_cache:
-            if runner_cache[ident]['start_epoc'] < runner_cache[oldest]['start_epoc']:  # noqa
-                oldest = ident
-        logger.info("Dropping oldest runner object for play uuid {} from "
-                    "runner_cache".format(oldest))
-        del runner_cache[oldest]
+        logger.info("Dropping finished runner object for play uuid {} from "
+                    "runner_cache".format(current_runner))
+        del runner_cache[current_runner]
 
 
 def cb_event_handler(event_data):
