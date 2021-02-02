@@ -30,7 +30,7 @@ ignored_events = [
 def get_event_info(event_path):
     event_fname = os.path.basename(event_path)
 
-    if event_fname.endswith("-partial.json"):
+    if event_fname.endswith("-partial.json") or event_fname.endswith("-partial.json.tmp"):
         logger.debug("Skipping partial event file: {}".format(event_fname))
         return None
 
