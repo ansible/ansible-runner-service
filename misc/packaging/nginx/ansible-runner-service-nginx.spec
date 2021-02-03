@@ -4,7 +4,7 @@
 %endif
 
 Name: ansible-runner-service
-Version: 1.0.6
+Version: 1.0.7
 Release: 1%{?dist}
 Summary: RESTful API for ansible/ansible_runner execution
 Source0: https://github.com/ansible/%{name}/archive/%{name}-%{version}.tar.gz
@@ -94,6 +94,14 @@ install -m 0644 ./misc/nginx/uwsgi.ini %{buildroot}%{_sysconfdir}/ansible-runner
 
 
 %changelog
+* Tue Feb 2 2021 Martin Perina <mperina@redhat.com> 1.0.7-1
+- Fix oVirt logging
+- UBI8 Image Rebase
+- Fix post script error in Apache
+- Add proper logging when decoding JSON has failed
+- Add ignore for partial.json.tmp
+- Remove finished task from cache instead of the last one
+
 * Wed Sep 23 2020 Martin Perina <mnecas@redhat.com> 1.0.6-1
 - Use permanent selinux label on logs
 - Add periodic artifacts removal to wsgi based invocations
