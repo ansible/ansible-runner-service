@@ -106,7 +106,7 @@ class Config(object):
 
         try:
             with open(self.config_file, "r") as _cfg:
-                local_config = yaml.load(_cfg.read())
+                local_config = yaml.load(_cfg.read(), Loader=yaml.SafeLoader)
         except yaml.YAMLError as exc:
             logger.critical("ERROR: YAML error in configuration "
                             "file: {}".format(exc))
